@@ -1,0 +1,106 @@
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="d3-import.html">
+<script src="js/gui/template/GraphItem.js"></script>
+<script src="js/gui/template/GraphLayout.js"></script>
+<script src="js/gui/template/GraphLink.js"></script>
+<script src="js/gui/template/GraphNode.js"></script>
+<script src="js/gui/template/GraphPort.js"></script>
+<script src="js/gui/template/GraphVariable.js"></script>
+<script src="js/gui/template/Reasoner.js"></script>
+<script src="js/gui/template/TemplateEvents.js"></script>
+<script src="js/gui/template/TemplateGraph.js"></script>
+<script src="js/gui/template/common.js"></script>
+<script src="js/gui/template/config/GraphItemConfig.js"></script>
+
+<dom-module id="wings-workflow">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+      .outer {
+        width:100%;
+        height:400px;
+        overflow:auto;
+      }
+      #canvas {
+        width:100%;
+        height:calc(100% - 4px);
+      }
+    </style>
+
+    <div class="outer">
+      <div id="canvas" />
+    </div>
+  </template>
+
+  <script>
+    /**
+     * @customElement
+     * @polymer
+     */
+    class WingsWorkflow extends Polymer.Element {
+      static get is() {
+        return 'wings-workflow';
+      }
+
+      static get properties() {
+        return {
+          data: {
+            type: Object
+          },
+          width: {
+            type: Number,
+            value: 1280
+          },
+          height: {
+            type: Number,
+            value: 800
+          },
+          selected: {
+            type: Array,
+            notify: true
+          }
+        };
+      }
+
+      static get observers() {
+        return [
+          // Observer method name, followed by a list of dependencies, in parenthesis
+          //'_variablesAddedOrRemoved(data.variables.splices)',
+          //'_linksAddedOrRemoved(data.links.splices)',
+          '_dataChanged(data)'
+        ]
+      }
+
+      ready() {
+        super.ready();
+        this.id = null;
+      }
+
+      _dataChanged(data, old) {
+        if (!data)
+          return;
+        var me = this;
+        this.id = data.wings_workflow.template.id;
+        this.template = new Template(this.id, this.data.wings_workflow.template, this);
+        this.template.events.dispatch.on("select", function(items) {
+          me.set("selected", Object.keys(items));
+        });
+        this.template.setEditable(false);
+        this.template.draw(this.$.canvas);
+        this.template.layout();
+      }
+
+      zoomIn() {
+        this.template.zoom(1.2);
+      }
+
+      zoomOut() {
+        this.template.zoom(1.0/1.2);
+      }
+    }
+
+    window.customElements.define(WingsWorkflow.is, WingsWorkflow);
+  </script>
+</dom-module>

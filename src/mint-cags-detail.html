@@ -1,0 +1,363 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/app-route/app-route.html">
+<link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../bower_components/google-map/google-map.html">
+<link rel="import" href="google-map-data-layer.html">
+<link rel="import" href="mint-button.html">
+<link rel="import" href="mint-common-styles.html">
+<link rel="import" href="mint-ajax.html">
+
+<link rel="import" href="variable-graph.html">
+<link rel="import" href="mint-workflows.html">
+
+<dom-module id="mint-cags-detail">
+
+  <template>
+
+    <style include="mint-button">
+
+      :host {
+        display: block;
+      }
+
+      .smooth {
+        transition: opacity 0.4s;
+        opacity: 0;
+      }
+
+      .smooth[has-content] {
+        opacity: 1;
+      }
+
+      h1 {
+        font-size: 24px;
+        font-weight: 500;
+        line-height: 28px;
+        margin: 0;
+      }
+
+      .description {
+        margin: 32px 0;
+      }
+
+      .description > h4 {
+        margin: 16px 0;
+      }
+
+      .description > p {
+        margin: 0;
+        color: var(--app-secondary-color);
+      }
+
+      .detail {
+        width: 90%;
+        max-width: 1440px;
+        margin:0 auto;
+        margin-bottom: 5px;
+      }
+
+      .leftfull {
+        width: 100%;
+      }
+      .rightnone {
+        width: 0px;
+        border-width: 0px;
+      }
+      .left {
+        width: 60%;
+      }
+      .right {
+        width: 40%;
+      }
+
+      #map {
+        width:200px;
+        height:150px;
+      }
+      .map {
+        width: 200px;
+        height: 150px;
+        border: 2px solid var(--app-primary-color);
+        border-radius: 4px;
+        margin: 5px 0px;
+      }
+      .description {
+        margin: 0px;
+        margin-left: 15px;
+        vertical-align: top;
+      }
+      .detail h2 {
+        margin: 5px 0px;
+      }
+
+      .content {
+        @apply(--layout-horizontal);
+      }
+
+      ul {
+        padding: 2px;
+        padding-left: 15px;
+        font-size: 9px;
+        margin: 0px;
+        line-height: 1.2em;
+      }
+
+      @media (max-width: 767px) {
+        .map {
+          width: 100%;
+          height: 150px;
+          margin-bottom: 10px;
+        }
+        #map {
+          width:100%;
+          height:150px;
+        }
+        .description {
+          margin-left: 0px;
+        }
+        .left, .right {
+          width: 100%;
+        }
+        .content {
+          @apply(--layout-vertical);
+          @apply(--layout-center);
+        }
+
+        .detail {
+          box-sizing: border-box;
+          margin: 8px 0;
+          padding: 0 24px;
+          width: 100%;
+          /*max-width: 600px;*/
+        }
+
+        h1 {
+          font-size: 20px;
+          line-height: 24px;
+        }
+
+      }
+
+    </style>
+
+    <!--
+      app-route provides the name of the category and the item.
+    -->
+    <app-route
+        route="[[route]]"
+        pattern="/:category/:item"
+        data="{{routeData}}"></app-route>
+
+    <iron-media-query query="max-width: 767px" query-matches="{{smallScreen}}"></iron-media-query>
+
+    <div class="detail" smooth has-content$="[[_isDefined(userid)]]">
+      <h2>[[category.title]]: [[item.title]]</h2>
+      <div class="content">
+        <!-- Map -->
+        <div class="map">
+          <google-map id="map"
+            api-key="AIzaSyAuaqVMFvr8yEr9WzFEDg0veeOQ2HDwoHU"
+            disable-default-ui
+            latitude="[[category.latitude]]"
+            longitude="[[category.longitude]]"
+            zoom="[[category.zoom]]"
+            styles="[[mapStyles]]">
+            <google-map-data-layer
+              url="[[_createGeoJsonURL(routeData.category)]]"></google-map-data-layer>
+          </google-map>
+        </div>
+
+        <!-- Description-->
+        <div class="description">
+          [[item.description]]
+        </div>
+      </div>
+    </div>
+
+    <div class="detail" smooth>
+      <!-- Variable Graph -->
+      <div class="content">
+        <div class="leftfull" id="graphdiv">
+          <mint-ajax result="{{graphData}}" auto
+            url="[[_createGraphURL(routeData.category, routeData.item)]]"></mint-ajax>
+
+          <iron-collapse id="main_graph" opened>
+            <variable-graph id="cag" editable auto-load
+              data="[[graphData]]" workflows="{{workflows}}"></variable-graph>
+          </iron-collapse>
+
+          <iron-collapse id="temporary_graph">
+            <variable-graph id="tmpcag" auto-layout data="[[selectedWorkflowGraph]]"></variable-graph>
+          </iron-collapse>
+
+          <ul>
+            <li>Double tap/click on the canvas to add a variable</li>
+            <li>Double tap/click a variable to edit the variable</li>
+            <li>Long press a variable to drag a link out of it</li>
+          </ul>
+        </div>
+
+        <div class="rightnone" id="workflowdiv">
+          <mint-workflows id="workflows"
+            workflows="{{workflows}}"
+            selected-workflow="{{workflow}}"
+            selected-graph="{{selectedWorkflowGraph}}"
+            selected-items="{{selectedWorkflowItems}}"
+            ></mint-workflows>
+        </div>
+
+      </div>
+    </div>
+
+    <!--div class="detail" has-content$="[[!_isDefined(userid)]]">
+        You need to be logged in to run analyses
+    </div-->
+
+  </template>
+
+  <script>
+    Polymer({
+
+      is: 'mint-cags-detail',
+
+      properties: {
+        categories: Array,
+        category: Object,
+        item: {
+          type: Object,
+          computed: '_computeItem(category.items, routeData.item)'
+        },
+
+        route: Object,
+        routeData: {
+          type: Object,
+          observer: '_routeChanged'
+        },
+
+        smallScreen: {
+          type: Boolean,
+          observer: '_resetSectionSizes'
+        },
+
+        workflows: {
+          type: Array,
+          observer: '_resetSectionSizes'
+        },
+
+        selectedWorkflowGraph: {
+          type: Object,
+          observer: '_temporaryGraphChanged'
+        },
+
+        selectedWorkflow: {
+          type: Object
+        },
+
+        selectedWorkflowItems: {
+          type: Array,
+          observer: '_onSelectedWorkflowItemsChanged'
+        },
+
+        mapStyles: {
+          type: String,
+          value:[{"featureType":"landscape","elementType":"labels","stylers":[{"visibility":"off"}]},{"featureType":"transit","elementType":"labels","stylers":[{"visibility":"off"}]},{"featureType":"poi","elementType":"labels","stylers":[{"visibility":"off"}]},{"featureType":"water","elementType":"labels","stylers":[{"visibility":"off"}]},{"featureType":"road","elementType":"labels.icon","stylers":[{"visibility":"off"}]},{"stylers":[{"hue":"#00aaff"},{"saturation":-100},{"gamma":2.15},{"lightness":12}]},{"featureType":"road","elementType":"labels.text.fill","stylers":[{"visibility":"on"},{"lightness":24}]},{"featureType":"road","elementType":"geometry","stylers":[{"lightness":57}]}]
+        }
+      },
+
+      _isDefined: function(item) {
+        return item != null;
+      },
+
+      _createGraphURL: function(cat, item) {
+        if(cat && item) {
+          var url = "/files/" + cat + "/" + item + ".json";
+          return url;
+        }
+        return null;
+      },
+
+      _createGeoJsonURL: function(cat) {
+        if(cat) {
+          var url = "/files/" + cat + "/geojson.json";
+          //console.log(url);
+          return url;
+        }
+        return null;
+      },
+
+      _computeItem(items, itemName) {
+        if(!items || !itemName) return null;
+        for (var i = 0, item; item = items[i]; ++i) {
+          if (item.name === itemName) {
+            //console.log(item);
+            return item;
+          }
+        }
+      },
+
+      _getCategoryItem(category, item) {
+        if(category)
+          return category[item];
+      },
+
+      _resetSectionSizes() {
+        var t0 = d3.select(this.$.graphdiv)
+        var t1 = d3.select(this.$.workflowdiv)
+        if(this.workflows && this.workflows.length) {
+          if(!this.smallScreen) {
+            t0.transition().style("width", "60%");
+            t1.transition().style("opacity", 1).style("width", "40%");
+          }
+          else {
+            t0.style("width", "100%");
+            t1.transition().style("opacity", 1).style("width", "100%");
+          }
+          t1.style("display", "");
+        }
+        else {
+          if(!this.smallScreen) {
+            t0.style("width", "100%");
+          }
+          t1.transition().style("width", "0px").style("opacity", 0);
+          t1.style("display", "none");
+        }
+      },
+
+      _temporaryGraphChanged(tmpgraph) {
+        if(tmpgraph) {
+          if(!this.$.temporary_graph.opened) {
+            this.$.temporary_graph.toggle();
+            this.$.main_graph.toggle();
+            this.$.tmpcag.loadGraph();
+          }
+        }
+        else {
+          if(!this.$.main_graph.opened) {
+            this.$.temporary_graph.toggle();
+            this.$.main_graph.toggle();
+          }
+        }
+      },
+
+      _onSelectedWorkflowItemsChanged(items) {
+        this.$.tmpcag.selectVariables(items);
+      },
+
+      _routeChanged() {
+        this.$.workflows._resetWorkflows();
+      }
+
+    });
+  </script>
+
+</dom-module>

@@ -1,0 +1,81 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="mint-results-list.html">
+<link rel="import" href="mint-results-detail.html">
+
+<dom-module id="mint-results">
+  <template>
+    <style>
+    </style>
+
+    <app-route
+        route="[[route]]"
+        pattern="/:page"
+        data="{{routeData}}"
+        tail="{{subroute}}"></app-route>
+
+    <iron-pages role="main" selected="[[page]]" attr-for-selected="name" selected-attribute="visible">
+      <!-- results list  -->
+      <mint-results-list name="list" server="[[server]]" userid="[[userid]]" domain="[[domain]]"
+        route="[[subroute]]" selectedrunid="{{selectedrunid}}"></mint-results-list>
+      <!-- detail view of one result -->
+      <mint-results-detail name="detail" server="[[server]]" userid="[[userid]]" domain="[[domain]]"
+        route="[[subroute]]"></mint-results-detail>
+    </iron-pages>
+  </template>
+
+  <script>
+
+    Polymer({
+
+      is: 'mint-results',
+
+      properties: {
+        server: String,
+        userid: String,
+        domain: String,
+        selectedrunid: {
+          type: String,
+          observer: '_selectedRunid'
+        },
+        page: {
+          type: String,
+          reflectToAttribute: true
+        },
+        route: Object,
+        routeData: Object
+      },
+
+      observers: [
+        '_routePageChanged(route.prefix, routeData.page)'
+      ],
+
+      _selectedRunid: function(runid) {
+        if(runid) {
+          var new_path = '/results/detail/' + runid;
+          window.history.pushState({}, null, new_path);
+          window.dispatchEvent(new CustomEvent('location-changed'));
+        }
+      },
+
+      _routePageChanged: function(prefix, page) {
+        if(prefix == "/results") {
+          this.page = page || 'list';
+          Polymer.AppLayout.scroll({ top: 0, behavior: 'silent' });
+        }
+      }
+
+    });
+
+  </script>
+
+</dom-module>

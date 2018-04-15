@@ -1,0 +1,234 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="mint-ajax.html">
+
+<dom-module id="mint-wings-login">
+  <template>
+    <style is="custom-style">
+      paper-button {
+        font-size: 14px;
+      }
+      paper-input {
+        font-size: 16px;
+        margin:0px;
+        --paper-input-container: {
+          padding: 2px 0px;
+        }
+      }
+      paper-dialog {
+        width:300px;
+        max-width: 80%;
+        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+        background-color: white;
+        border: 2px solid var(--app-accent-color);
+        border-radius: 4px;
+      }
+      .heading {
+        margin:0px;
+        padding-top:4px;
+        font-size:18px;
+        margin-bottom:8px;
+        background-color: var(--app-accent-color);
+        color:white;
+      }
+    </style>
+
+    <template is="dom-if" if="{{!loggedIn}}">
+      <paper-button on-tap="_openDialog">
+        <iron-icon icon="account-circle"></iron-icon>
+        &nbsp;
+        Login
+      </paper-button>
+    </template>
+    <template is="dom-if" if="{{loggedIn}}">
+      <paper-button on-tap="_logout">
+        Logout [[userid]]
+      </paper-button>
+    </template>
+
+    <paper-dialog id="logindialog" on-iron-overlay-opened="_clearDialog"
+        on-iron-overlay-closed="_checkAndLogin">
+      <div class="heading">LOGIN</div>
+      <paper-input label="Username" value="{{input_userid}}"></paper-input>
+      <paper-input label="Password" type="password" value="{{password}}"></paper-input>
+      <div class="buttons">
+        <paper-button dialog-dismiss>Cancel</paper-button>
+        <paper-button dialog-confirm autofocus>Login</paper-button>
+      </div>
+    </paper-dialog>
+  </template>
+
+  <script>
+    Polymer({
+
+      is: 'mint-wings-login',
+
+      properties: {
+        server: String,
+        input_userid: String,
+        userid: {
+          type: String,
+          notify: true
+        },
+        password: String,
+        loggedIn: {
+          type: Boolean,
+          value: false,
+          notify: true
+        },
+
+        failure: {
+          type: Boolean,
+          notify: true,
+          readOnly: true
+        }
+      },
+
+      /*observers: [
+        '_login(userid, password, server)'
+      ],*/
+
+      _clearDialog: function() {
+        this.input_userid = null;
+        this.password = null;
+      },
+
+      _openDialog: function() {
+        this.$.logindialog.open();
+      },
+
+      _checkAndLogin: function(e) {
+        if(e.detail.confirmed)
+          this._login();
+      },
+
+      _login: function() {
+        var me = this;
+        if(!me.server)
+          return;
+
+        // FIXME: Dummy login for now:
+        me.input_userid = "admin";
+        me.userid = me.input_userid;
+        me.loggedIn = true;
+        return;
+
+        this._getResource({
+          url: me.server + '/sparql',
+          onLoad: function(e) {
+            var txt = e.target.responseText;
+            if(txt.match(/j_security_check/)) {
+              if(!me.input_userid || !me.password)
+                return;
+              var data = "j_username=" + me.input_userid;
+              data += "&j_password=" + me.password;
+              me._postResource({
+                url: me.server + '/j_security_check',
+                onLoad: function(e2) {
+                  var txt2 = e2.target.responseText;
+                  if(txt2.match(/j_security_check/)) {
+                    console.log("Incorrect Login ?");
+                    this._setFailure(true);
+                  }
+                  else {
+                    // Success: Logged in
+                    me.userid = me.input_userid;
+                    me.loggedIn = true;
+                    console.log("Success !! Logged in");
+                  }
+                },
+                onError: function() {
+                  //console.log("Cannot login");
+                  this._getResource({
+                    url: me.server + '/sparql',
+                    onLoad: function(e2) {
+                      var match = /USER_ID\s*=\s*"(.+)"\s*;/.exec(e2.target.responseText);
+                      if(match) {
+                        me.userid = match[1];
+                        me.loggedIn = true;
+                        //console.log("Logged in as " + me.userid + " !");
+                      }
+                    },
+                    onError: function(){}
+                  });
+                  //this._setFailure(true);
+                }
+              }, data);
+            } else {
+              var match = /USER_ID\s*=\s*"(.+)"\s*;/.exec(txt);
+              if(match) {
+                me.userid = match[1];
+                me.loggedIn = true;
+                //console.log("Logged in as " + me.userid + " !");
+              }
+            }
+          },
+          onError: function(e) {
+            console.log("Cannot connect to wings");
+            this._setFailure(true);
+          }
+        });
+      },
+
+      _logout: function() {
+        var me = this;
+        if(!me.server)
+          return;
+
+        this._getResource({
+          url: me.server + '/jsp/login/logout.jsp',
+          onLoad: function(e) {
+            me.loggedIn = false;
+            me.userid = null;
+          },
+          onError: function(e) {
+            me.userid = null;
+            me.loggedIn = false;
+            //console.log("Could not logout !");
+          }
+        });
+      },
+
+      ready: function() {
+        this._login()
+      },
+
+      _getResource: function(rq) {
+        var xhr = new XMLHttpRequest();
+        xhr.addEventListener('load', rq.onLoad.bind(this));
+        xhr.addEventListener('error', rq.onError.bind(this));
+        xhr.withCredentials = true;
+        xhr.open('GET', rq.url);
+        xhr.send();
+      },
+
+      _postResource: function(rq, data) {
+        var xhr = new XMLHttpRequest();
+        xhr.addEventListener('load', rq.onLoad.bind(this));
+        xhr.addEventListener('error', rq.onError.bind(this));
+        xhr.withCredentials = true;
+        xhr.open('POST', rq.url, true);
+        xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        xhr.send(data);
+      },
+
+      _setFailure: function(val) {
+        this.failure = true;
+      }
+
+    });
+  </script>
+
+</dom-module>

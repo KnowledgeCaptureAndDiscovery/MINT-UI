@@ -1,0 +1,105 @@
+[
+  {
+    "id": "weather_simulator",
+    "name": "Weather-Simulator",
+    "category": "climate",
+    "inputs": [
+      "historical_weather"
+    ],
+    "outputs": [
+      "atmosphere_water__domain_time_integral_of_precipitation_leq-volume_flux",
+      "atmosphere_temperature",
+      "atomosphere_humidity"
+    ]
+  },
+  {
+    "id": "pihm_min_w",
+    "name": "PIHM-Min-W",
+    "category": "hydrology",
+    "inputs": [
+      "atmosphere_water__domain_time_integral_of_precipitation_leq-volume_flux",
+      "land_surface__albedo",
+      "elevation"
+    ],
+    "outputs": [
+      "soil_moisture"
+    ]
+  },
+  {
+    "id": "topoflow_min_w",
+    "name": "TopoFlow-Min-W",
+    "category": "hydrology",
+    "inputs": [
+      "atmosphere_water__domain_time_integral_of_precipitation_leq-volume_flux",
+      "land_surface__albedo"
+    ],
+    "outputs": [
+      "soil_moisture"
+    ]
+  },
+  {
+    "id": "cycles_min_w",
+    "name": "CYCLES-Min-W",
+    "category": "agronomy",
+    "inputs": [
+      "soil_moisture",
+      "soil_quality"
+    ],
+    "outputs": [
+      "yields"
+    ]
+  },
+  {
+    "id": "dssat_min_w",
+    "name": "DSSAT-Min-W",
+    "category": "agronomy",
+    "inputs": [
+      "soil_moisture",
+      "soil_quality",
+      "atmosphere_temperature"
+    ],
+    "outputs": [
+      "yields"
+    ]
+  },
+  {
+    "id": "crops_simple",
+    "name": "Crops-Simple",
+    "category": "economics",
+    "inputs": [
+      "yields",
+      "market_access",
+      "crop_prices"
+    ],
+    "outputs": [
+      "crop_production"
+    ]
+  },
+  {
+    "id": "land_use_simple",
+    "name": "LandUse-Simple",
+    "category": "economics",
+    "inputs": [
+      "crop_production",
+      "crop_prices",
+      "prices"
+    ],
+    "outputs": [
+      "land_use"
+    ]
+  },
+  {
+    "id": "land_use_advanced",
+    "name": "LandUse-Advanced",
+    "category": "economics",
+    "inputs": [
+      "crop_production",
+      "crop_prices",
+      "prices",
+      "property_rights"
+    ],
+    "outputs": [
+      "land_use"
+    ]
+  }
+]

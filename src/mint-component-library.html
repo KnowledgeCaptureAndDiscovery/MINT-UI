@@ -1,0 +1,459 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+
+<dom-module id="mint-component-library">
+
+  <script>
+    class MintComponentLibrary extends Polymer.Element {
+      static get is() {
+        return 'mint-component-library';
+      }
+
+      static get properties() {
+        return {
+          components: {
+            type: Array,
+            notify: true
+          },
+          data: {
+            type: Array,
+            notify: true
+          }
+        };
+      }
+
+      constructor() {
+        super();
+        this._fetchComponents();
+        this._fetchData();
+      }
+
+      _fetchComponents() {
+        var me = this
+        //console.log('fetching categories');
+        this._getResource({
+          url: '/files/components.json',
+          onLoad(e) {
+            me.set('components', JSON.parse(e.target.responseText));
+            //console.log(me.components);
+          },
+          onError(e) {
+          }
+        }, 1);
+      }
+
+      _fetchData() {
+        var me = this
+        //console.log('fetching categories');
+        this._getResource({
+          url: '/files/data.json',
+          onLoad(e) {
+            me.set('data', JSON.parse(e.target.responseText));
+            //console.log(me.data);
+          },
+          onError(e) {
+          }
+        }, 1);
+      }
+
+      _getResource(rq, attempts) {
+        var xhr = new XMLHttpRequest();
+        xhr.addEventListener('load', rq.onLoad.bind(this));
+        xhr.addEventListener('error', function(e) {
+          // Flaky connections might fail fetching resources
+          if (attempts > 1) {
+            this.debounce('_getResource', this._getResource.bind(this, rq, attempts - 1), 200);
+          } else {
+            rq.onError.call(this, e);
+          }
+        }.bind(this));
+
+        xhr.open('GET', rq.url);
+        xhr.send();
+      }
+
+      solve(graph) {
+        var workflows = [];
+
+        // Copy variables array
+        var variables = graph.variables.slice(0);
+
+        // Get databases that provide variables
+        var data_providers = Object.assign({}, this.data);
+
+        // Get components that provide variables
+        var comp_providers = {};
+        for (var i=0; i<this.components.length; i++) {
+          var c = this.components[i];
+          for (var j=0; j<c.outputs.length; j++) {
+            var v = c.outputs[j];
+            var prov = comp_providers[v];
+            if(!prov) prov = [];
+            prov.push(c);
+            comp_providers[v] = prov;
+          }
+        }
+
+        // Create solutions
+        var solution_queue = [new Solution(variables)];
+        while(solution_queue.length) {
+          var solution = solution_queue.shift();
+          //console.log("Expanding Solution---")
+          var varqueue = solution.variables.slice(0);
+          while(varqueue.length) {
+            var v = varqueue.shift();
+            //console.log("Checking variable " + v.name);
+            var stdname = v.standard_name;
+            // Skip if variable already resolved
+            if(v.resolved) {
+              //console.log(v.name + " already resolved. Continue.");
+              continue;
+            }
+
+            // Check data provider
+            if(stdname in data_providers) {
+              // Mark variable as resolved
+              v.resolved = true;
+              v.provider = {type: "data", item: data_providers[stdname]}
+              //console.log(v.name + " has a data provider. Variable resolved. Continue.");
+              continue;
+            }
+
+            // Check component provider
+            if(stdname in comp_providers) {
+              var comps = comp_providers[stdname];
+              //console.log(v.name + " has "+ comps.length+" component providers");
+
+              // If more than one component, create extra solutions
+              // from 2 onwards
+              for(var i=1; i<comps.length; i++) {
+                var newsolution = new Solution({});
+                newsolution.copy(solution);
+                newsolution.addComponent(comps[i]);
+                solution_queue.push(newsolution);
+                // Mark variable as resolved
+                var newv = newsolution.varhash[v.standard_name];
+                newv.resolved = true;
+                newv.provider = {type: "component", item: comps[i]};
+              }
+
+              // Use the first component to modify current solution
+              var comp = comps[0];
+              var newvars = solution.addComponent(comp)
+              for(var j=0; j<newvars.length; j++)
+                varqueue.push(newvars[j]);
+              // Mark variable as resolved
+              v.resolved = true;
+              v.provider = {type: "component", item: comp};
+            }
+          }
+          // Create workflow for solution
+          var workflow = solution.createWorkflow();
+          if(workflow)
+            workflows.push(workflow);
+        }
+        return workflows;
+      }
+    }
+
+    class Solution {
+      constructor(variables) {
+        this.variables = [];
+        this.components = [];
+        this.varhash = {};
+        for (var i=0; i<variables.length; i++) {
+          var v = Object.assign({}, variables[i]); // copy variable
+          this.varhash[v.standard_name] = v;
+          this.variables.push(v);
+        }
+      }
+
+      copy(solution) {
+        this.variables = [];
+        this.varhash = {};
+        for (var i=0; i<solution.variables.length; i++) {
+          var v = Object.assign({}, solution.variables[i]); // copy variable
+          this.varhash[v.standard_name] = v;
+          this.variables.push(v);
+        }
+        this.components = solution.components.slice(0);
+      }
+
+      addComponent(component) {
+        var c = Object.assign({}, component);
+        this.components.push(c);
+        var newvars = [];
+        for (var i=0; i<c.inputs.length; i++) {
+          var stdname = c.inputs[i];
+          if(stdname in this.varhash) {
+            // Nothing
+          }
+          else {
+            var v = this.createNewVariable(stdname);
+            newvars.push(v);
+          }
+        }
+        for (var i=0; i<c.outputs.length; i++) {
+          var stdname = c.outputs[i];
+          var v = this.varhash[stdname];
+          if(!v) {
+            v = this.createNewVariable(stdname);
+            newvars.push(v);
+          }
+          v.resolved = true;
+          v.provider = {type: "component", item: c};
+        }
+        //console.log(" - Adding "+component.name+" created "+newvars.length+" new variables");
+        //console.log(newvars);
+        for(var i=0; i<newvars.length; i++) {
+          this.varhash[newvars[i].standard_name] = newvars[i];
+          this.variables.push(newvars[i]);
+        }
+        return newvars;
+      }
+
+      createNewVariable(stdname) {
+        // Create new variable
+        var vid = 'v_' + Math.random().toString(36).substr(2, 9);
+        return {
+          id:vid,
+          standard_name: stdname,
+          name: stdname.replace(/_/g, " "),
+          position: {x: 100, y: 100} // Should be set a bit more intelligently
+        }
+      }
+
+      createWorkflow() {
+        var workflow = {
+          components: this.components,
+          variables: this.variables,
+          links: [],
+
+          wings_workflow: null,
+          graph: {}
+        };
+        var varlinks = {};
+        for(var i=0; i<this.components.length; i++) {
+          var c = this.components[i];
+          // Handle all component inputs
+          for(var j=0; j<c.inputs.length; j++) {
+            var v = this.varhash[c.inputs[j]];
+            if(!v || !v.resolved || !v.provider) {
+              //console.log("... problem with " + c.id);
+              return null;
+            }
+            workflow.links.push({
+              from: v.provider.item.id,
+              to: c.id,
+              variable: v.id,
+              type: v.provider.type
+            });
+            varlinks[v.id] = true;
+          }
+        }
+        // Check component outputs that aren't part of links. Add links
+        for(var i=0; i<this.components.length; i++) {
+          var c = this.components[i];
+          // Handle all component outputs
+          for(var j=0; j<c.outputs.length; j++) {
+            var v = this.varhash[c.outputs[j]];
+            if(v.id in varlinks) {
+              continue;
+            }
+            workflow.links.push({
+              from: c.id,
+              variable: v.id,
+              type: "output"
+            });
+            varlinks[v.id] = true;
+          }
+        }
+
+        workflow.wings_workflow = this.createWingsWorkflow(workflow);
+        workflow.graph = this.createGraph(workflow);
+        return workflow;
+      }
+
+      createGraph(wflow) {
+        if(wflow == null)
+          return null;
+        var graph = {
+          id: wflow.id,
+          name: wflow.id,
+          variables: [],
+          links: []
+        }
+        var varid_hash = {};
+        var stdname_hash = {};
+        for(var i=0; i<wflow.variables.length; i++) {
+          var v = wflow.variables[i];
+          if(!v.resolved)
+            continue;
+          var vcat = v.category ? v.category : v.provider.item.category;
+          var nv = {
+            id: v.id, name: v.name, category: vcat,
+            standard_name: v.standard_name, position: v.position
+          }
+          stdname_hash[nv.standard_name] = nv;
+          varid_hash[nv.id] = nv;
+          graph.variables.push(nv);
+        }
+
+        var compid_hash = {};
+        for(var i=0; i<wflow.components.length; i++) {
+          var c = wflow.components[i];
+          compid_hash[c.id] = c;
+        }
+
+        for(var i=0; i<wflow.links.length; i++) {
+          var l = wflow.links[i];
+          var v = varid_hash[l.variable];
+          if(l.from && l.type != "data") {
+            var c = compid_hash[l.from];
+            var fromvars = c.inputs;
+            for(var j=0; j<fromvars.length; j++) {
+              var fromvar = stdname_hash[fromvars[j]];
+              graph.links.push({from: fromvar.id, to: v.id});
+              if(!fromvar.category)
+                fromvar.category = c.category;
+            }
+            if(!v.category)
+              v.category = c.category;
+          }
+          if(l.to) {
+            var c = compid_hash[l.to]
+            var tovars = c.outputs;
+            for(var j=0; j<tovars.length; j++) {
+              var tovar = stdname_hash[tovars[j]];
+              graph.links.push({from: v.id, to: tovar.id});
+              if(!tovar.category)
+                tovar.category = c.category;
+            }
+            if(!v.category)
+              v.category = c.category;
+          }
+        }
+        return graph;
+
+      }
+
+      createWingsWorkflow(wflow) {
+        if(wflow == null)
+          return null;
+        var wingsw = {
+          template: {
+            version: 0,
+            Nodes: {},
+            Links: {},
+            Variables: {}
+          }
+        }
+        var tpl = wingsw.template;
+        var varid_hash = {};
+        var stdname_hash = {};
+        for(var i=0; i<wflow.variables.length; i++) {
+          var v = wflow.variables[i];
+          if(!v.resolved)
+            continue;
+          stdname_hash[v.standard_name] = v;
+          varid_hash[v.id] = v;
+          tpl.Variables[v.id] = {
+            id: v.id,
+            name: v.name,
+            type: 1 //FIXME: use category here
+          }
+        }
+        for(var i=0; i<wflow.components.length; i++) {
+          var c = wflow.components[i];
+          var nodeid = c.id;
+          var node = {
+            id: nodeid,
+            name: c.name,
+            inputPorts: {},
+            outputPorts: {},
+            componentVariable: {
+              binding: {
+                id: c.name,
+                type: "uri"
+              },
+              id: "component_" + c.id
+            }
+          }
+          for(var j=0; j<c.inputs.length; j++) {
+            var roleid = c.inputs[j]; // Standard name
+            var portid = "inport_" + roleid;
+            node.inputPorts[portid] = {
+              id: portid,
+              role: {
+                type: 1,
+                roleid: roleid
+              }
+            }
+          }
+          for(var j=0; j<c.outputs.length; j++) {
+            var roleid = c.outputs[j]; // Standard name
+            var portid = "outport_" + roleid;
+            node.outputPorts[portid] = {
+              id: portid,
+              role: {
+                type: 1,
+                roleid: roleid
+              }
+            }
+          }
+          tpl.Nodes[nodeid] = node;
+        }
+        for(var i=0; i<wflow.links.length; i++) {
+          var l = wflow.links[i];
+          var v = varid_hash[l.variable];
+          if(l.type == "data") {
+            var lid = l.to+"_"+v.standard_name;
+            var link = {
+              id: lid,
+              toNode: {id: l.to},
+              toPort: {id: "inport_" + v.standard_name},
+              variable: {id: v.id}
+            }
+            tpl.Links[lid] = link;
+          }
+          else if(l.type == "output") {
+            var lid = l.from+"_"+v.standard_name;
+            var link = {
+              id: lid,
+              fromNode: {id: l.from},
+              fromPort: {id: "outport_" + v.standard_name},
+              variable: {id: v.id}
+            }
+            tpl.Links[lid] = link;
+          }
+          else if(l.type == "component") {
+            var lid = l.from+"_"+l.to+"_"+v.standard_name;
+            var link = {
+              id: lid,
+              fromNode: {id: l.from},
+              fromPort: {id: "outport_" + v.standard_name},
+              toNode: {id: l.to},
+              toPort: {id: "inport_" + v.standard_name},
+              variable: {id: v.id}
+            }
+            tpl.Links[lid] = link;
+          }
+        }
+        return wingsw;
+      }
+    }
+
+
+    window.customElements.define(MintComponentLibrary.is, MintComponentLibrary);
+  </script>
+
+</dom-module>

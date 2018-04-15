@@ -1,0 +1,182 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="mint-button.html">
+<link rel="import" href="mint-image.html">
+<link rel="import" href="mint-cags-home.html">
+<link rel="import" href="mint-cags-list.html">
+<link rel="import" href="mint-cags-detail.html">
+<link rel="import" href="mint-category-data.html">
+
+<dom-module id="mint-cags">
+
+  <template>
+
+    <style include="mint-button">
+
+      .image-link {
+        outline: none;
+      }
+
+      .image-link > mint-image::after {
+        display: block;
+        content: '';
+        position: absolute;
+        transition-property: opacity;
+        transition-duration: 0s;
+        transition-delay: 90ms;
+        pointer-events: none;
+        opacity: 0;
+        top: 5px;
+        left: 5px;
+        right: 5px;
+        bottom: 5px;
+        outline: #2196F3 auto 5px;
+        outline: -moz-mac-focusring auto 5px;
+        outline: -webkit-focus-ring-color auto 5px;
+      }
+
+      .image-link:focus > mint-image::after {
+        opacity: 1;
+      }
+
+      .item {
+        display: block;
+        text-decoration: none;
+        text-align: center;
+        /*margin-bottom: 40px;*/
+      }
+
+      .item:nth-of-type(2),
+      .item:nth-of-type(3) {
+        display: inline-block;
+        width: 50%;
+      }
+
+      mint-image {
+        position: relative;
+        height: 240px;
+        overflow: hidden;
+        --mint-image-img: {
+          position: absolute;
+          top: 0;
+          bottom: 0;
+          left: -9999px;
+          right: -9999px;
+          max-width: none;
+        };
+      }
+
+      h2 {
+        font-size: 1.3em;
+        font-weight: 500;
+        margin: 32px 0;
+      }
+
+      .item:nth-of-type(2) > h2,
+      .item:nth-of-type(3) > h2 {
+        font-size: 1.1em;
+      }
+
+      @media (max-width: 767px) {
+        mint-image {
+          height: 240px;
+        }
+
+        h2 {
+          margin: 24px 0;
+        }
+
+        .item:nth-of-type(2) > mint-button > a,
+        .item:nth-of-type(3) > mint-button > a {
+          padding: 8px 24px;
+        }
+      }
+
+    </style>
+
+    <app-route
+        route="[[route]]"
+        pattern="/:page"
+        data="{{routeData}}"
+        tail="{{subroute}}"></app-route>
+
+    <!--
+      mint-category-data provides the list of categories.
+    -->
+    <mint-category-data auto categories="{{categories}}"></mint-category-data>
+
+    <iron-pages role="main" selected="[[page]]" attr-for-selected="name" selected-attribute="visible">
+      <!-- cags home  -->
+      <mint-cags-home name="home" categories="[[categories]]"></mint-cags-home>
+
+      <!-- list view of items in a category -->
+      <mint-cags-list name="list" categories="[[categories]]"
+        category="{{category}}"
+        route="[[subroute]]"></mint-cags-list>
+
+      <!-- detail view of one item -->
+      <mint-cags-detail name="detail" categories="[[categories]]" category="[[category]]"
+        route="[[subroute]]"></mint-cags-detail>
+    </iron-pages>
+  </template>
+
+  <script>
+
+    Polymer({
+
+      is: 'mint-cags',
+
+      properties: {
+        server: String,
+        userid: String,
+        domain: String,
+        page: {
+          type: String,
+          reflectToAttribute: true
+        },
+
+        numItems: {
+          type: Number,
+          value: 0
+        },
+
+        categories: {
+          type: Array
+        }
+
+      },
+
+      observers: [
+        '_routePageChanged(routeData.page)'
+      ],
+
+      listeners: {
+        'change-section': '_onChangeSection'
+      },
+
+      _routePageChanged: function(page) {
+        if(this.route.prefix == "/cags") {
+          this.page = page || 'home';
+          //Polymer.AppLayout.scroll({ top: 0, behavior: 'silent' });
+        }
+      },
+
+      _onChangeSection: function(event) {
+        var detail = event.detail;
+        this.categoryName = detail.category || '';
+      },
+
+    });
+
+  </script>
+
+</dom-module>

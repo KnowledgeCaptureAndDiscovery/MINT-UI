@@ -1,0 +1,345 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/app-route/app-route.html">
+<link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="mint-common-styles.html">
+
+<dom-module id="mint-results-detail">
+
+  <template>
+
+    <style include="mint-common-styles">
+
+      :host {
+        display: block;
+      }
+
+      #content {
+        @apply(--layout-horizontal);
+        @apply(--layout-center-justified);
+      }
+
+      h1 {
+        font-size: 24px;
+        font-weight: 500;
+        line-height: 28px;
+        margin: 0;
+      }
+
+      .grid {
+        @apply(--layout-horizontal);
+        @apply(--layout-wrap);
+        @apply(--layout-center);
+        display: flex;
+        flex-flow: row wrap;
+      }
+
+      .grid > a,
+      .grid > span {
+        -webkit-flex: 1 1;
+        flex: 1 1;
+        -webkit-flex-basis: calc(33.3333% - 11px);
+        flex-basis: calc(33.3333% - 11px);
+        max-width: calc(33.3333% - 11px);
+        padding-left: 5px;
+        height: 32px;
+        line-height:32px;
+        /*color: black;*/
+        text-decoration: none;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .grid > span {
+        color: var(--app-secondary-color);
+      }
+
+      .grid > a:hover {
+        background-color: #EEEEEE;
+        text-decoration: underline;
+      }
+
+      .section {
+        margin-bottom: 5px;
+      }
+
+      .section .head {
+        color: var(--app-secondary-color);
+        font-size: 12px;
+        height: 32px;
+        line-height:32px;
+        font-weight: 500;
+        padding: 0px 5px;
+        border-bottom: 1px solid #E3E3E3;
+      }
+
+      div.detail {
+        margin: 10px;
+        margin-top: 0px;
+        width: calc(100% - 20px);
+        opacity: 0;
+      }
+
+      @media (max-width: 767px) {
+        #content {
+          @apply(--layout-vertical);
+          @apply(--layout-center);
+        }
+
+        .detail {
+          box-sizing: border-box;
+          margin: 16px 0;
+          padding: 0 24px;
+          width: 100%;
+          max-width: 600px;
+        }
+
+        h1 {
+          font-size: 20px;
+          line-height: 24px;
+        }
+
+        .grid a,
+        .grid span {
+          -webkit-flex-basis: calc(50% - 11px);
+          flex-basis: calc(50% - 11px);
+          max-width: calc(50% - 11px);
+        }
+
+      }
+
+    </style>
+
+    <app-route
+        route="[[route]]"
+        pattern="/:runid"
+        data="{{routeData}}"></app-route>
+
+    <mint-ajax id="rundetailAjax" method="POST"
+      result="{{runDetail}}"></mint-ajax>
+
+    <div id="content" hidden$="[[!userid]]">
+      <div class="detail" has-content$="[[_isRunDefined(runDetail)]]">
+        <h1>Ran the CAG '[[_localName(runDetail.execution.originalTemplateId)]]'
+          [[_formatTime(runDetail.execution.runtimeInfo.startTime)]] ago</h1>
+        <!--h4>Run Id: [[runid]]</h4-->
+        <template is="dom-if" if="[[_isSuccessful(runDetail.execution.runtimeInfo.status)]]">
+          <h2>The CAG produced the following data:</h2>
+          <div class="section">
+            <template is="dom-repeat" items="[[_getVariableBindings(runDetail.variables.output)]]" as="varbinding">
+              <div class="head">[[varbinding.variable]]</div>
+              <div class="grid">
+                <template is="dom-repeat" items="[[varbinding.bindings]]" as="binding">
+                  <template is="dom-if" if="[[binding.value]]">
+                    <a>[[binding.value]]</a>
+                  </template>
+                  <template is="dom-if" if="[[binding.id]]">
+                    <a href="[[server]]/users/[[userid]]/[[domain]]/data/fetch?data_id=[[_escape(binding.id)]]">[[_localName(binding.id)]]</a>
+                  </template>
+                </template>
+              </div>
+            </template>
+          </div>
+        </template>
+        <template is="dom-if" if="[[_isFailed(runDetail.execution.runtimeInfo.status)]]">
+          <h2>The CAG did not complete</h2>
+        </template>
+        <template is="dom-if" if="[[_isRunning(runDetail.execution.runtimeInfo.status)]]">
+          <h2>The CAG is still running</h2>
+        </template>
+        <h2>The CAG used these inputs:</h2>
+        <div class="section">
+          <template is="dom-repeat" items="[[_getVariableBindings(runDetail.variables.input)]]" as="varbinding">
+            <div class="head">[[varbinding.variable]]</div>
+            <div class="grid">
+              <template is="dom-repeat" items="[[varbinding.bindings]]" as="binding">
+                <template is="dom-if" if="[[binding.value]]">
+                  <span>[[binding.value]]</span>
+                </template>
+                <template is="dom-if" if="[[binding.id]]">
+                  <a href="[[server]]/users/[[userid]]/[[domain]]/data/fetch?data_id=[[_escape(binding.id)]]">[[_localName(binding.id)]]</a>
+                </template>
+              </template>
+            </div>
+          </template>
+        </div>
+      </div>
+    </div>
+
+  </template>
+
+  <script>
+
+    Polymer({
+      is: 'mint-results-detail',
+
+      properties: {
+        server: String,
+        userid: String,
+        domain: String,
+        runid: String,
+        route: Object,
+        routeData: Object,
+        failure: Boolean,
+        runDetail: Object,
+        visible: {
+          type: Boolean,
+          observer: '_checkVisibility'
+        }
+      },
+
+      observers: [
+        '_fetchResults(server, userid, domain, runid)',
+        '_routePageChanged(route.prefix, routeData.runid)'
+      ],
+
+      _getVariableBindings: function(bindings) {
+        if(!bindings)
+          return bindings;
+
+        var bhash = {}
+        var regex = /.+_(\d{4})/;
+        for(var i=0; i<bindings.length; i++) {
+          var binding = bindings[i];
+          var varname = this._localName(binding.derivedFrom);
+          var tvarname = this._localName(binding.id);
+          if(matches = regex.exec(tvarname)) {
+            if(!bhash[varname])
+              bhash[varname] = [];
+            bhash[varname][parseInt(matches[1])-1] = binding.binding;
+          }
+          else {
+            bhash[varname] = [binding.binding];
+          }
+        }
+
+        var nbindings = [];
+        for(var varname in bhash) {
+          nbindings.push({
+            variable: varname,
+            bindings: bhash[varname]
+          })
+        }
+
+        nbindings.sort(function(a, b) {
+          if(b.bindings.length != a.bindings.length)
+            return b.bindings.length - a.bindings.length;
+          return b.bindings[0].id ? 1 : -1;
+        });
+        return nbindings;
+      },
+
+      _formatTime: function(ts) {
+        var date = new Date(ts*1000); //.toISOString().slice(0,19).replace('T', ' ');
+        var seconds = Math.floor((new Date() - date) / 1000);
+
+        var interval = Math.floor(seconds / 31536000);
+
+        if (interval > 1) {
+            return interval + " years";
+        }
+        interval = Math.floor(seconds / 2592000);
+        if (interval > 1) {
+            return interval + " months";
+        }
+        interval = Math.floor(seconds / 86400);
+        if (interval > 1) {
+            return interval + " days";
+        }
+        interval = Math.floor(seconds / 3600);
+        if (interval > 1) {
+            return interval + " hours";
+        }
+        interval = Math.floor(seconds / 60);
+        if (interval > 1) {
+            return interval + " minutes";
+        }
+        return Math.floor(seconds) + " seconds";
+      },
+
+      _localName: function(url) {
+        return url.replace(/^.*#/, '');
+      },
+
+      _routePageChanged: function(prefix, page) {
+        if(prefix == "/results/detail") {
+          this.runid = page;
+          Polymer.AppLayout.scroll({ top: 0, behavior: 'silent' });
+        }
+      },
+
+      _isSuccessful: function(status) {
+         return (status == 'SUCCESS');
+      },
+
+      _isFailed: function(status) {
+         return (status == 'FAILURE');
+      },
+
+      _isRunning: function(status) {
+         return (status == 'RUNNING');
+      },
+
+      _checkVisibility: function(visible) {
+        /*if (!visible)
+          this.runDetail = null;*/
+      },
+
+      _escape: function(url) {
+        return escape(url);
+      },
+
+      _fetchResults: function(server, userid, domain, runid) {
+        this.runDetail = null;
+        if(server && userid && domain && runid) {
+          var runurl = this._getExportUrl(server, userid, domain, runid);
+          this.$.rundetailAjax.data = "run_id=" + escape(runurl);
+          this.$.rundetailAjax.url= this._getRequestUrl(server, userid, domain) + "getRunDetails";
+          this.$.rundetailAjax.fetch();
+          this._setupReloadTimer();
+        }
+        else {
+          this.runDetail = {};
+        }
+      },
+
+      _setupReloadTimer: function() {
+        var me = this;
+        window.setTimeout(function() {
+          if(me.userid && me.visible &&
+              (!me.runDetail ||
+                (me.runDetail && me._isRunning(me.runDetail.execution.runtimeInfo.status))
+              )) {
+            //console.log("Refreshing run details");
+            me.$.rundetailAjax.refresh();
+            me._setupReloadTimer();
+          }
+        }, 30000);
+      },
+
+      _localName: function(url) {
+        if(url != null)
+          return url.replace(/^.*#/, '');
+      },
+
+      _isRunDefined: function(run) {
+        return run != null && run.execution.originalTemplateId != null;
+      },
+
+      _isDefined: function(item) {
+        return item != null;
+      },
+
+      _getRequestUrl: function(server, userid, domain) {
+        return server + "/users/" + userid +  "/" + domain + "/executions/";
+      },
+
+      _getExportUrl: function(server, userid, domain, runid) {
+        return server + "/export/users/" + userid +  "/" + domain + "/executions/"
+          + runid + ".owl#" + runid;
+      }
+
+    });
+
+  </script>
+
+</dom-module>

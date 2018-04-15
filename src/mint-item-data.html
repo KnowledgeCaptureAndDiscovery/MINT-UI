@@ -1,0 +1,117 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+
+<dom-module id="mint-item-data">
+
+  <script>
+    class MintItemData extends Polymer.Element {
+      static get is() {
+        return 'mint-item-data';
+      }
+
+      static get properties() {
+        return {
+          categories: {
+            type: Array,
+            value: null
+          },
+          categoryName: String,
+          itemName: String,
+
+          category: {
+            type: Object,
+            computed: '_computeCategory(categoryName, categories)',
+            notify: true
+          },
+
+          item: {
+            type: Object,
+            computed: '_computeItem(category.items, itemName)',
+            notify: true
+          },
+        };
+      }
+
+      _computeCategory(categoryName, categories) {
+        if(!categoryName || !categories)
+          return null;
+
+        // Fetch the items of the category. Note that the fetch is asynchronous,
+        // which means `category.items` may not be set initially (but that path
+        // will be notified when the fetch completes).
+        var categoryObj = this._getItemObject(categoryName);
+        this._fetchItems(categoryObj, 1);
+        return categoryObj;
+      }
+
+      _computeItem(items, itemName) {
+        if(!items) return null;
+        for (var i = 0, item; item = items[i]; ++i) {
+          if (item.name === itemName) {
+            return item;
+          }
+        }
+      }
+
+      _getItemObject(categoryName) {
+        for (var i = 0; i< this.categories.length; i++) {
+          var c = this.categories[i];
+          if (c.name === categoryName) {
+            return c;
+          }
+        }
+        return null;
+      }
+
+      _fetchItems(category, attempts) {
+        // Only fetch the items of a category if it has not been previously set.
+        if (!category || category.items) {
+          return;
+        }
+        this._getResource({
+          url: '/files/' + category.name + '/list.json',
+          onLoad(e) {
+            this.set('category.items', JSON.parse(e.target.responseText));
+          },
+          onError(e) {
+          }
+        }, attempts);
+      }
+
+      _getResource(rq, attempts) {
+        var xhr = new XMLHttpRequest();
+        xhr.addEventListener('load', rq.onLoad.bind(this));
+        xhr.addEventListener('error', function(e) {
+          // Flaky connections might fail fetching resources
+          if (attempts > 1) {
+            this.debounce('_getResource', this._getResource.bind(this, rq, attempts - 1), 200);
+          } else {
+            rq.onError.call(this, e);
+          }
+        }.bind(this));
+
+        xhr.open('GET', rq.url);
+        xhr.send();
+      }
+
+      refresh() {
+        if (this.categoryName) {
+          // Try at most 3 times to get the items.
+          this._fetchItems(this._getItemObject(this.categoryName), 3);
+        }
+      }
+    }
+
+    window.customElements.define(MintItemData.is, MintItemData);
+  </script>
+
+</dom-module>

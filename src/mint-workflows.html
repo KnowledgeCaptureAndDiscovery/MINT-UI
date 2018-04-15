@@ -1,0 +1,209 @@
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../bower_components/iron-collapse/iron-collapse.html">
+<link rel="import" href="d3-import.html">
+<link rel="import" href="wings-workflow.html">
+
+<dom-module id="mint-workflows">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+      .outer {
+        width:100%;
+        height: 400px;
+        overflow: auto;
+        border: 2px solid var(--app-accent-color);
+        border-width:0px 2px;
+      }
+      .toolbar {
+        color:white;
+        width:100%;
+        background-color: var(--app-accent-color);
+        border: 2px solid var(--app-accent-color);
+        border-radius: 4px 4px 0px 0px;
+        @apply --layout-horizontal;
+        @apply --layout-no-wrap;
+        @apply --layout-center-justified;
+      }
+      .horiz {
+        @apply --layout-horizontal;
+      }
+      .horiz div {
+        padding-right:5px;
+      }
+      .bottom {
+        border-radius: 0px 0px 4px 4px;
+      }
+      .toolbar paper-button {
+        min-width:32px;
+      }
+      #canvas {
+        width:100%;
+        height:100%;
+      }
+      paper-input, paper-dropdown-menu-light {
+        margin:0px;
+        width: calc(100% - 50px);
+        --paper-input-container: {
+          padding: 2px 0px;
+        }
+      }
+      paper-dialog {
+        width:400px;
+        max-width: 80%;
+        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+        background-color: white;
+        border: 2px solid var(--app-accent-color);
+        border-radius: 4px;
+      }
+      paper-item {
+        min-height: 32px;
+        padding-left:6px;
+      }
+      paper-button.delete {
+        float:left;
+        color: var(--paper-red-500);
+      }
+      paper-button.delete:hover {
+        background-color: var(--paper-red-400);
+        color:white;
+      }
+      paper-listbox {
+        display: inline;
+        cursor: pointer;
+      }
+      div.grow {
+        flex-grow:2;
+      }
+    </style>
+
+    <!-- Top toolbar -->
+    <div class="toolbar">
+      <template is="dom-if" if="[[_workflowDefined(selectedWorkflow)]]">
+        <paper-button on-click="_backToList">&lt;&lt;</paper-button>
+      </template>
+      <div class="grow">&nbsp;</div>
+      <paper-button>Workflows</paper-button>
+      <div class="grow">&nbsp;</div>
+      <paper-button on-click="_resetWorkflows">x</paper-button>
+    </div>
+
+    <!-- Variable Graph Canvas -->
+    <div class="outer">
+      <iron-collapse id="list_section" opened>
+        <paper-listbox id="workflow_listbox" on-selected-changed="_changedSelection">
+          <template is="dom-repeat" items="[[workflows]]" as="workflow" index-as="windex">
+            <paper-item>
+              <div class="horiz">
+                <div>[[_plusone(windex)]].</div>
+                <div>
+                  <template is="dom-repeat" items="[[_getWorkflowNodes(workflow)]]"
+                    as="node"><template is="dom-if"
+                      if="[[index]]">,
+                  </template>[[node.name]]</template>
+                </div>
+              </div>
+            </paper-item>
+          </template>
+        </paper-listbox>
+      </iron-collapse>
+      <iron-collapse id="workflow_section">
+        <wings-workflow id="workflow" data="[[selectedWorkflow]]" selected="{{selectedItems}}"></wings-workflow>
+      </iron-collapse>
+    </div>
+
+    <!-- Bottom toolbar -->
+    <div class="toolbar bottom">
+      <paper-button>&nbsp;</paper-button>
+      <template is="dom-if" if="[[_workflowDefined(selectedWorkflow)]]">
+        <paper-button on-click="zoomIn">+</paper-button>
+        <paper-button on-click="zoomOut">-</paper-button>
+      </template>
+    </div>
+  </template>
+
+  <script>
+    /**
+     * @customElement
+     * @polymer
+     */
+    class MintWorkflows extends Polymer.Element {
+      static get is() {
+        return 'mint-workflows';
+      }
+      static get properties() {
+        return {
+          workflows: {
+            type: Array,
+            notify: true
+          },
+          selectedWorkflow: {
+            type: Object,
+            notify: true
+          },
+          selectedGraph: {
+            type: Object,
+            notify: true
+          },
+          selectedItems: {
+            type: Array,
+            notify: true
+          }
+        }
+      }
+
+      _resetWorkflows() {
+        this.$.workflow_listbox.items = [];
+        this.$.workflow_listbox.selected = null;
+        this.$.list_section.show();
+        this.$.workflow_section.hide();
+        this.set("workflows", []);
+        this.set("selectedWorkflow", null);
+        this.set("selectedGraph", null);
+      }
+
+      _plusone(index) {
+        return index+1;
+      }
+
+      _changedSelection(e, item) {
+        if(item && item.value != null) {
+          this.$.list_section.toggle();
+          this.$.workflow_section.toggle();
+          this.set("selectedWorkflow", this.workflows[item.value]);
+          this.set("selectedGraph", this.selectedWorkflow.graph);
+        }
+      }
+
+      _backToList(e) {
+        this.$.list_section.toggle();
+        this.$.workflow_section.toggle();
+        this.set("selectedWorkflow", null);
+        this.set("selectedGraph", null);
+        this.$.workflow_listbox.selected = null;
+      }
+
+      _getWorkflowNodes(workflow) {
+        if(workflow)
+          return Object.values(workflow.wings_workflow.template.Nodes);
+      }
+
+      _workflowDefined(w) {
+        return (w != null && w != undefined);
+      }
+
+      zoomIn() {
+        this.$.workflow.zoomIn();
+      }
+
+      zoomOut() {
+        this.$.workflow.zoomOut();
+      }
+    }
+    window.customElements.define(MintWorkflows.is, MintWorkflows);
+
+  </script>
+</dom-module>

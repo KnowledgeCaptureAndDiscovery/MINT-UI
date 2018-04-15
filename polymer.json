@@ -1,0 +1,37 @@
+{
+  "entrypoint": "index.html",
+  "shell": "src/mint-app.html",
+  "fragments": [
+    "src/mint-data.html",
+    "src/mint-results.html",
+    "src/mint-cags.html",
+    "src/lazy-resources.html"
+  ],
+  "sources": [
+   "src/**/*",
+   "files/**/*",
+   "images/**/*",
+   "bower.json"
+  ],
+  "extraDependencies": [
+	"app.yaml",
+    "manifest.json",
+    "bower_components/webcomponentsjs/*"
+  ],
+  "lint": {
+    "rules": ["polymer-2-hybrid"]
+  },
+  "builds": [{
+    "name": "bundlemin",
+	"bundle": true,
+    "addServiceWorker": true,
+    "swPrecacheConfig": "sw-precache-config.js",
+    "css": { "minify": true },
+    "js": { 
+       "minify": {
+          "exclude": ["src/js/lib/*"]
+       }
+    },
+    "html": { "minify": true }
+  }]
+}
