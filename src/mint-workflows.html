@@ -1,7 +1,10 @@
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
 <link rel="import" href="../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../bower_components/iron-collapse/iron-collapse.html">
+<link rel="import" href="mint-icons.html">
 <link rel="import" href="d3-import.html">
 <link rel="import" href="wings-workflow.html">
 
@@ -62,6 +65,11 @@
       paper-item {
         min-height: 32px;
         padding-left:6px;
+        font-size: 13px;
+      }
+      .toolbar paper-button, .toolbar paper-icon-button {
+        max-height: 36px;
+        color: white;
       }
       paper-button.delete {
         float:left;
@@ -83,12 +91,12 @@
     <!-- Top toolbar -->
     <div class="toolbar">
       <template is="dom-if" if="[[_workflowDefined(selectedWorkflow)]]">
-        <paper-button on-click="_backToList">&lt;&lt;</paper-button>
+        <paper-icon-button icon="arrow-back" on-click="_backToList"></paper-icon-button>
       </template>
       <div class="grow">&nbsp;</div>
       <paper-button>Workflows</paper-button>
       <div class="grow">&nbsp;</div>
-      <paper-button on-click="_resetWorkflows">x</paper-button>
+      <paper-icon-button icon="close" on-click="_resetWorkflows"></paper-icon-button>      
     </div>
 
     <!-- Variable Graph Canvas -->

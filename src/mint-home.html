@@ -16,7 +16,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
   <template>
 
-    <style include="mint-common-styles mint-button">
+    <style include="mint-button">
 
       .item {
         display: block;
@@ -81,26 +81,25 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
   <script>
 
-    Polymer({
+    class MintHome extends Polymer.Element {
+      static get is() { return 'mint-home'; }
 
-      is: 'mint-home',
-
-      properties: {
-
+      static get properties() { return {
         visible: {
           type: Boolean,
           observer: '_visibleChanged'
         }
+      }}
 
-      },
-
-      _visibleChanged: function(visible) {
+      _visibleChanged(visible) {
         if (visible) {
-          this.fire('change-section', { title: 'Home' });
+          this.dispatchEvent(new CustomEvent('change-section', {
+            bubbles: true, composed: true, detail: {title: 'Home'}}));
         }
       }
+    }
 
-    });
+    customElements.define(MintHome.is, MintHome);
 
   </script>
 
