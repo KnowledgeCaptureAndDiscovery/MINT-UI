@@ -9,6 +9,7 @@
   ],
   "sources": [
    "src/**/*",
+   "js/**/*",
    "files/**/*",
    "images/**/*",
    "bower.json"
@@ -23,13 +24,15 @@
   },
   "builds": [{
     "name": "bundlemin",
-	"bundle": true,
+	"bundle": {
+		"inlineScripts": false
+	},
     "addServiceWorker": true,
     "swPrecacheConfig": "sw-precache-config.js",
     "css": { "minify": true },
     "js": { 
        "minify": {
-          "exclude": ["src/js/lib/*"]
+          "exclude": ["js/lib/*"]
        }
     },
     "html": { "minify": true }
