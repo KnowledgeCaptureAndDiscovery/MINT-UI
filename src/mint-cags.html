@@ -131,51 +131,54 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
   <script>
 
-    Polymer({
+    class MintCags extends Polymer.Element {
+      static get is() { return 'mint-cags'; }
 
-      is: 'mint-cags',
+      static get properties() {
+        return {
+          server: String,
+          userid: String,
+          domain: String,
+          page: {
+            type: String,
+            reflectToAttribute: true
+          },
+          numItems: {
+            type: Number,
+            value: 0
+          },
+          categories: {
+            type: Array
+          }
+        };
+      }
 
-      properties: {
-        server: String,
-        userid: String,
-        domain: String,
-        page: {
-          type: String,
-          reflectToAttribute: true
-        },
+      static get observers() {
+        return [
+          '_routePageChanged(routeData.page)'
+        ];
+      }
 
-        numItems: {
-          type: Number,
-          value: 0
-        },
+      ready() {
+        super.ready();
+        // listen for custom events
+        this.addEventListener('change-section', (e)=>this._onChangeSection(e));
+      }
 
-        categories: {
-          type: Array
-        }
-
-      },
-
-      observers: [
-        '_routePageChanged(routeData.page)'
-      ],
-
-      listeners: {
-        'change-section': '_onChangeSection'
-      },
-
-      _routePageChanged: function(page) {
-        if(this.route.prefix == "/cags") {
+      _routePageChanged(page) {
+        if(this.route.prefix.endsWith("/cags")) {
           this.page = page || 'home';
           //Polymer.AppLayout.scroll({ top: 0, behavior: 'silent' });
         }
-      },
+      }
 
-      _onChangeSection: function(event) {
+      _onChangeSection(event) {
         var detail = event.detail;
         this.categoryName = detail.category || '';
-      },
+      }
+    }
 
-    });
+    customElements.define(MintCags.is, MintCags);
 
   </script>
 

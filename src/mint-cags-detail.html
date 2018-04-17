@@ -19,6 +19,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <link rel="import" href="variable-graph.html">
 <link rel="import" href="mint-workflows.html">
+<link rel="import" href="mint-component-library.html">
 
 <dom-module id="mint-cags-detail">
 
@@ -160,6 +161,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     <iron-media-query query="max-width: 767px" query-matches="{{smallScreen}}"></iron-media-query>
 
+    <!-- Component Library -->
+    <mint-component-library component-library="{{library}}"></mint-component-library>
+
     <div class="detail" smooth has-content$="[[_isDefined(userid)]]">
       <h2>[[category.title]]: [[item.title]]</h2>
       <div class="content">
@@ -192,12 +196,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             url="[[_createGraphURL(routeData.category, routeData.item)]]"></mint-ajax>
 
           <iron-collapse id="main_graph" opened>
-            <variable-graph id="cag" editable auto-load
-              data="[[graphData]]" workflows="{{workflows}}"></variable-graph>
+            <variable-graph id="cag"
+              component-library="[[library]]"
+              data="[[graphData]]"
+              workflows="{{workflows}}"
+              editable auto-load></variable-graph>
           </iron-collapse>
 
           <iron-collapse id="temporary_graph">
-            <variable-graph id="tmpcag" auto-layout data="[[selectedWorkflowGraph]]"></variable-graph>
+            <variable-graph id="tmpcag" auto-layout
+              data="[[selectedWorkflowGraph]]"></variable-graph>
           </iron-collapse>
 
           <ul>
@@ -226,74 +234,80 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   </template>
 
   <script>
-    Polymer({
 
-      is: 'mint-cags-detail',
+    class MintCagsDetail extends Polymer.Element {
+      static get is() { return 'mint-cags-detail'; }
 
-      properties: {
-        categories: Array,
-        category: Object,
-        item: {
-          type: Object,
-          computed: '_computeItem(category.items, routeData.item)'
-        },
+      static get properties() {
+        return {
+          categories: Array,
+          category: Object,
+          item: {
+            type: Object,
+            computed: '_computeItem(category.items, routeData.item)'
+          },
 
-        route: Object,
-        routeData: {
-          type: Object,
-          observer: '_routeChanged'
-        },
+          route: Object,
+          routeData: {
+            type: Object,
+            observer: '_routeChanged'
+          },
 
-        smallScreen: {
-          type: Boolean,
-          observer: '_resetSectionSizes'
-        },
+          smallScreen: {
+            type: Boolean,
+            observer: '_resetSectionSizes'
+          },
 
-        workflows: {
-          type: Array,
-          observer: '_resetSectionSizes'
-        },
+          workflows: {
+            type: Array,
+            observer: '_resetSectionSizes'
+          },
 
-        selectedWorkflowGraph: {
-          type: Object,
-          observer: '_temporaryGraphChanged'
-        },
+          selectedWorkflowGraph: {
+            type: Object,
+            observer: '_temporaryGraphChanged'
+          },
 
-        selectedWorkflow: {
-          type: Object
-        },
+          selectedWorkflow: {
+            type: Object
+          },
 
-        selectedWorkflowItems: {
-          type: Array,
-          observer: '_onSelectedWorkflowItemsChanged'
-        },
+          selectedWorkflowItems: {
+            type: Array,
+            observer: '_onSelectedWorkflowItemsChanged'
+          },
 
-        mapStyles: {
-          type: String,
-          value:[{"featureType":"landscape","elementType":"labels","stylers":[{"visibility":"off"}]},{"featureType":"transit","elementType":"labels","stylers":[{"visibility":"off"}]},{"featureType":"poi","elementType":"labels","stylers":[{"visibility":"off"}]},{"featureType":"water","elementType":"labels","stylers":[{"visibility":"off"}]},{"featureType":"road","elementType":"labels.icon","stylers":[{"visibility":"off"}]},{"stylers":[{"hue":"#00aaff"},{"saturation":-100},{"gamma":2.15},{"lightness":12}]},{"featureType":"road","elementType":"labels.text.fill","stylers":[{"visibility":"on"},{"lightness":24}]},{"featureType":"road","elementType":"geometry","stylers":[{"lightness":57}]}]
-        }
-      },
+          mapStyles: {
+            type: String,
+            value:[{"featureType":"landscape","elementType":"labels","stylers":[{"visibility":"off"}]},{"featureType":"transit","elementType":"labels","stylers":[{"visibility":"off"}]},{"featureType":"poi","elementType":"labels","stylers":[{"visibility":"off"}]},{"featureType":"water","elementType":"labels","stylers":[{"visibility":"off"}]},{"featureType":"road","elementType":"labels.icon","stylers":[{"visibility":"off"}]},{"stylers":[{"hue":"#00aaff"},{"saturation":-100},{"gamma":2.15},{"lightness":12}]},{"featureType":"road","elementType":"labels.text.fill","stylers":[{"visibility":"on"},{"lightness":24}]},{"featureType":"road","elementType":"geometry","stylers":[{"lightness":57}]}]
+          }
+        };
+      }
 
-      _isDefined: function(item) {
+      constructor() {
+        super();
+      }
+
+      _isDefined(item) {
         return item != null;
-      },
+      }
 
-      _createGraphURL: function(cat, item) {
+      _createGraphURL(cat, item) {
         if(cat && item) {
-          var url = "/files/" + cat + "/" + item + ".json";
+          var url = "files/" + cat + "/" + item + ".json";
           return url;
         }
         return null;
-      },
+      }
 
-      _createGeoJsonURL: function(cat) {
+      _createGeoJsonURL(cat) {
         if(cat) {
-          var url = "/files/" + cat + "/geojson.json";
+          var url = "files/" + cat + "/geojson.json";
           //console.log(url);
           return url;
         }
         return null;
-      },
+      }
 
       _computeItem(items, itemName) {
         if(!items || !itemName) return null;
@@ -303,12 +317,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             return item;
           }
         }
-      },
+      }
 
       _getCategoryItem(category, item) {
         if(category)
           return category[item];
-      },
+      }
 
       _resetSectionSizes() {
         var t0 = d3.select(this.$.graphdiv)
@@ -331,7 +345,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           t1.transition().style("width", "0px").style("opacity", 0);
           t1.style("display", "none");
         }
-      },
+      }
 
       _temporaryGraphChanged(tmpgraph) {
         if(tmpgraph) {
@@ -347,17 +361,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             this.$.main_graph.toggle();
           }
         }
-      },
+      }
 
       _onSelectedWorkflowItemsChanged(items) {
         this.$.tmpcag.selectVariables(items);
-      },
+      }
 
       _routeChanged() {
         this.$.workflows._resetWorkflows();
       }
+    }
 
-    });
+    customElements.define(MintCagsDetail.is, MintCagsDetail);
   </script>
 
 </dom-module>

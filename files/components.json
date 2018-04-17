@@ -63,8 +63,8 @@
     ]
   },
   {
-    "id": "crops_simple",
-    "name": "Crops-Simple",
+    "id": "supply_simple",
+    "name": "Supply-Simple",
     "category": "economics",
     "inputs": [
       "yields",

@@ -62,6 +62,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       _fetchData: function(url, method, data, manual, info) {
+        if(!url)
+          return;
         if(!this.auto && !manual)
           return;
 

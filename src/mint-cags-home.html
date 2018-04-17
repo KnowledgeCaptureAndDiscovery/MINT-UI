@@ -121,11 +121,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     <template is="dom-repeat" items="[[categories]]" strip-whitespace>
       <div class="item">
-        <a class="image-link" href$="/cags/list/[[item.name]]">
+        <a class="image-link" href$="cags/list/[[item.name]]">
           <mint-image src="[[item.image]]" alt="[[item.title]]" placeholder-img="[[item.placeholder]]"></mint-image>
         </a>
         <mint-button>
-          <a aria-label$="[[item.title]] Browse CAGs" href$="/cags/list/[[item.name]]">[[item.title]]</a>
+          <a aria-label$="[[item.title]] Browse CAGs" href$="cags/list/[[item.name]]">[[item.title]]</a>
         </mint-button>
       </div>
     </template>
@@ -134,17 +134,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
   <script>
 
-    Polymer({
+    class MintCagsHome extends Polymer.Element {
+      static get is() { return 'mint-cags-home'; }
 
-      is: 'mint-cags-home',
-
-      properties: {
-        categories: {
-          type: Array
-        }
+      static get properties() {
+        return {
+          categories: {
+            type: Array
+          }
+        };
       }
-
-    });
+    }
+    customElements.define(MintCagsHome.is, MintCagsHome);
 
   </script>
 

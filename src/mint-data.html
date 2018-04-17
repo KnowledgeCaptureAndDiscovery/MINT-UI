@@ -145,36 +145,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     </style>
 
-    <mint-ajax id="datalistAjax" result="{{dataItems}}" auto
-      url="[[_getRequestUrl(server, userid, domain)]]"></mint-ajax>
-
-    <mint-ajax id="newdataAjax" raw on-mint-ajax-load="_setDataLocation"></mint-ajax>
-    <mint-ajax id="registerDataAjax" raw on-mint-ajax-load="_updateDataItems"></mint-ajax>
-
-    <div class="detail" has-content$="[[_isDefined(dataItems)]]">
-      <template is="dom-repeat" items="[[_hashKeys(dataItems)]]" as="typeid">
-        <div class="section">
-          <div class="head">[[_localName(typeid)]]</div>
-          <div class="upload">
-            <file-upload target="[[_getUploadUrl(server, userid, domain)]]" additional=[[uploadData]]
-              method="POST" with-credentials multi droppable data-type$="[[typeid]]"
-              on-success="_registerData">
-                <iron-icon icon="file-upload"></iron-icon>Upload
-            </file-upload>
-          </div>
-          <div class="grid">
-            <template is="dom-repeat" items="[[_dataForType(dataItems, typeid)]]" as="dataid">
-              <a href="[[server]]/users/[[userid]]/[[domain]]/data/fetch?data_id=[[_escape(dataid)]]">
-                [[_localName(dataid)]]</a>
-            </template>
-          </div>
-        </div>
-      </template>
-    </div>
-    <div class="detail" has-content$="[[!loggedIn]]">
-      You need to be logged in to see this section
-    </div>
-
   </template>
 
   <script>
@@ -190,16 +160,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           observer: '_checkLogin'
         },
         domain: String,
-        dataItems: Object,
-        uploadData: {
-          type: Object,
-          value: {'type': 'data'}
-        },
-        loggedIn: {
-          type: Boolean,
-          value: false,
-          computed: '_computeLoggedInStatus(userid)'
-        }
+        dataItems: Object
       },
 
       _computeLoggedInStatus: function(userid) {
@@ -218,68 +179,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       _checkLogin: function(userid) {
         if(!userid)
           this.dataItems = null;
-      },
-
-      _registerData: function(e) {
-        var detail = e.detail;
-        var response = JSON.parse(detail.xhr.response);
-        if(response.success) {
-          var datatype = e.target.getAttribute('data-type');
-          var dataloc = response.location;
-          var dataname = dataloc.replace(/.+\//, '');
-          var newdataname = this._getRDFId(dataname);
-          var dataid = this.server + "/export/users/" + this.userid +  "/" + this.domain + "/data/library.owl#" + newdataname;
-          var url = this.server + "/users/" + this.userid +  "/" + this.domain + "/data/addDataForType";
-          var postdata = "data_id=" + escape(dataid) + "&data_type=" + escape(datatype);
-          this.$.newdataAjax.url = url;
-          this.$.newdataAjax.data = postdata;
-          this.$.newdataAjax.fetch({location:dataloc, name:dataname, datatype:datatype, dataid:dataid});
-        }
-      },
-
-      _setDataLocation: function(e) {
-        var info = e.detail.info;
-        var url = this.server + "/users/" + this.userid +  "/" + this.domain + "/data/setDataLocation";
-        var postdata = "data_id=" + escape(info.dataid) + "&location=" + escape(info.location);
-        this.$.registerDataAjax.url = url;
-        this.$.registerDataAjax.data = postdata;
-        this.$.registerDataAjax.fetch({dataid: info.dataid, datatype:info.datatype});
-      },
-
-      _updateDataItems: function(e) {
-        var info = e.detail.info;
-        // To trigger a change
-        var items = JSON.parse(JSON.stringify(this.dataItems));
-        items[info.datatype].push(info.dataid);
-        this.dataItems = items;
-      },
-
-      _getRDFId: function(id) {
-        id = id.replace(/[^a-zA-Z0-9_\-\.]/g, '_');
-        if (id.match(/^([0-9]|\.|\-)/))
-          id = '_' + id;
-        return id;
-      },
-
-      _dataForType: function(hash, key) {
-        if(hash)
-          return hash[key];
-      },
-
-      _escape: function(url) {
-        return escape(url);
-      },
-
-      _localName: function(url) {
-        return url.replace(/^.*#/, '');
-      },
-
-      _getRequestUrl: function(server, userid, domain) {
-        return server + "/users/" + userid +  "/" + domain + "/data/getDataListJSON";
-      },
-
-      _getUploadUrl: function(server, userid, domain) {
-        return server + "/users/" + userid +  "/" + domain + "/upload";
       }
     });
 

@@ -35,6 +35,6 @@
           "exclude": ["js/lib/*"]
        }
     },
-    "html": { "minify": true }
+    "html": { "minify": false }
   }]
 }

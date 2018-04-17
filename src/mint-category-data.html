@@ -36,7 +36,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         var me = this
         //console.log('fetching categories');
         this._getResource({
-          url: '/files/categories.json',
+          url: 'files/categories.json',
           onLoad(e) {
             me.set('categories', JSON.parse(e.target.responseText));
             //console.log(me.categories);

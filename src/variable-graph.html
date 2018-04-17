@@ -8,7 +8,6 @@
 <link rel="import" href="../bower_components/paper-item/paper-item.html">
 <link rel="import" href="../bower_components/polymer/lib/utils/render-status.html">
 <link rel="import" href="d3-import.html">
-<link rel="import" href="mint-component-library.html">
 
 <script src="../js/gui/template/common.js"></script>
 <script src="../js/gui/vgraph/graph-variable.js"></script>
@@ -119,9 +118,6 @@
       <paper-toggle-button on-checked-changed="toggleView">STANDARD NAMES</paper-toggle-button>
     </div>
 
-    <!-- Component Library -->
-    <mint-component-library components="{{components}}" id="component_library"></mint-component-library>
-
     <!-- Edit/Add Variable Dialog -->
     <paper-dialog modal id="variable_editor" on-iron-overlay-closed="_editVariable">
       <div class='heading'>Edit Variable</div>
@@ -185,7 +181,7 @@
           },
           ed_item: Object,
           graph_json : String,
-          components: Array
+          componentLibrary: Object
         };
       }
 
@@ -231,8 +227,7 @@
       }
 
       analyze() {
-        var clib = this.$.component_library;
-        this.set("workflows", clib.solve(this.data));
+        this.set("workflows", this.componentLibrary.solve(this.data));
       }
 
       _dataChanged(data, old) {

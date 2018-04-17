@@ -20,6 +20,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       static get properties() {
         return {
+          componentLibrary: {
+            type: Object,
+            notify: true
+          },
           components: {
             type: Array,
             notify: true
@@ -35,13 +39,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         super();
         this._fetchComponents();
         this._fetchData();
+        this.set("componentLibrary", this);
       }
 
       _fetchComponents() {
         var me = this
         //console.log('fetching categories');
         this._getResource({
-          url: '/files/components.json',
+          url: 'files/components.json',
           onLoad(e) {
             me.set('components', JSON.parse(e.target.responseText));
             //console.log(me.components);
@@ -55,7 +60,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         var me = this
         //console.log('fetching categories');
         this._getResource({
-          url: '/files/data.json',
+          url: 'files/data.json',
           onLoad(e) {
             me.set('data', JSON.parse(e.target.responseText));
             //console.log(me.data);

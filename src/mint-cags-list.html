@@ -112,76 +112,84 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
   <script>
 
-    Polymer({
+    class MintCagsList extends Polymer.Element {
+      static get is() { return 'mint-cags-list'; }
 
-      is: 'mint-cags-list',
+      static get properties() {
+        return {
+          categories: Array,
+          category: {
+            type: Object,
+            notify: true
+          },
+          route: Object,
+          routeData: Object,
+          visible: Boolean,
+          offline: {
+            type: Boolean,
+            observer: '_offlineChanged'
+          },
+          failure: Boolean
+        };
+      }
 
-      properties: {
-        categories: Object,
-        category: {
-          type: Object,
-          notify: true
-        },
-        route: Object,
-        routeData: Object,
-        visible: Boolean,
-        offline: {
-          type: Boolean,
-          observer: '_offlineChanged'
-        },
+      static get observers() {
+        return [
+          '_categoryChanged(category, visible)'
+        ];
+      }
 
-        failure: Boolean
-
-      },
-
-      observers: [
-        '_categoryChanged(category, visible)'
-      ],
-
-      _getListItems: function(items) {
+      _getListItems(items) {
         // Return placeholder items when the items haven't loaded yet.
         return items || [];
-      },
+      }
 
-      _getItemHref: function(item) {
+      _getItemHref(item) {
         // By returning null when `itemId` is undefined, the href attribute won't be set and
         // the link will be disabled.
-        return item.name ? ['/cags/detail', this.category.name, item.name].join('/') : null;
-      },
+        return item.name ? ['cags/detail', this.category.name, item.name].join('/') : null;
+      }
 
-      _getPluralizedQuantity: function(quantity) {
+      _getPluralizedQuantity(quantity) {
         if (!quantity) {
           return '';
         }
         var pluralizedQ = quantity === 1 ? 'item' : 'items';
         return  '(' + quantity + ' ' + pluralizedQ + ')';
-      },
+      }
 
-      _categoryChanged: function(category, visible) {
-        //console.log(category);
-        if (visible && category) {
-          this.debounce('change-section', function() {
-            // Notify the category and the page's title
-            this.fire('change-section', {
-              category: category.name,
-              title: category.title
-            });
-          });
+      _categoryChanged(category, visible) {
+        if (!visible) {
+          return;
         }
-      },
+        this._changeSectionDebouncer = Polymer.Debouncer.debounce(this._changeSectionDebouncer,
+          Polymer.Async.microTask, () => {
+            if (category) {
+              // Notify the category and the page's title
+              this.dispatchEvent(new CustomEvent('change-section', {
+                bubbles: true, composed: true, detail: {
+                  category: category.name,
+                  title: category.title
+                }}));
+            } else {
+              this.dispatchEvent(new CustomEvent('show-invalid-url-warning', {
+                bubbles: true, composed: true}));
+            }
+          });
+      }
 
-      _tryReconnect: function() {
+      _tryReconnect() {
         this.$.itemData.refresh();
-      },
+      }
 
-      _offlineChanged: function(offline) {
+      _offlineChanged(offline) {
         if (!offline) {
           this._tryReconnect();
         }
       }
+    }
 
-    });
-
+    customElements.define(MintCagsList.is, MintCagsList);
   </script>
 
 </dom-module>

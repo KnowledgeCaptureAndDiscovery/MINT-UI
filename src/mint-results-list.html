@@ -41,16 +41,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         margin: 32px 0;
       }
 
-      vaadin-grid {
-        --vaadin-grid-row-height: 42px;
-        --vaadin-grid-header-row-height: 42px;
-        --vaadin-grid-row-cell: {
-          padding: 0px 10px 0px 10px !important;
-        }
-        margin:10px;
-        border: 1px solid #E3E3E3;
-      }
-
       @media (max-width: 767px) {
         h2 {
           margin: 24px 0;
@@ -62,37 +52,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     </style>
 
-    <mint-ajax id="runlistAjax"
-      url="[[_getRequestUrl(server, userid, domain)]]executions/getRunList"></mint-ajax>
-
     <template is="dom-if" if="[[!loggedIn]]">
       <div class="detail" has-content>
         You need to be logged in to see this section
       </div>
     </template>
-
-    <vaadin-grid id="results" items="[[runList]]" class="detail" has-content$="[[loggedIn]]">
-      <table>
-        <colgroup>
-          <col name="id" hidden />
-          <col name="runtimeInfo.status" width="40" />
-          <col name="template_id" resizable/>
-          <col name="runtimeInfo.startTime" resizable/>
-          <col name="runtimeInfo.endTime" resizable/>
-          <col name="percent_done" resizable/>
-        </colgroup>
-        <thead>
-          <tr>
-            <th>Run ID</th>
-            <th></th>
-            <th>CAG</th>
-            <th>Start time</th>
-            <th>End time</th>
-            <th>Progress</th>
-          </tr>
-        </thead>
-      </table>
-    </vaadin-grid>
 
   </template>
 
@@ -120,8 +84,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       observers: [
-        '_fetchResults(server, userid, domain, visible)',
-        '_checkVisibility(visible)'
+        //'_fetchResults(server, userid, domain, visible)',
+        //'_checkVisibility(visible)'
       ],
 
       _computeLoggedInStatus: function(userid) {
@@ -129,10 +93,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       ready: function() {
+        /*
         this._setupListeners();
         Polymer.RenderStatus.afterNextRender(this, function() {
           this._setupRenderers();
         });
+        */
       },
 
       _computeLoggedInStatus: function(userid) {
@@ -157,8 +123,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       _fetchResults: function(server, userid, domain, visible) {
         if(server && userid && domain && visible) {
-          this.$.runlistAjax.fetch();
-          this._setupReloadTimer();
         }
         else {
           this.runList = [];
@@ -236,19 +200,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       _setupListeners: function() {
-        var me = this;
-        var grid = this.$.results;
-        // Show details for the selected row
-        grid.addEventListener('selected-items-changed', function() {
-          grid.selection.selected(function(index) {
-            var row = me.runList[index];
-            me.selectedrunid = row.id.replace(/^.+#/,'');
-          });
-        });
-
-        this.$.runlistAjax.addEventListener('mint-ajax-load', function(e) {
-          me.runList = me._sortList(e.detail.response);
-        });
       }
 
     });

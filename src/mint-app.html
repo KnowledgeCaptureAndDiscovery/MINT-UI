@@ -206,7 +206,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <app-location route="{{route}}"></app-location>
     <app-route
         route="{{route}}"
-        pattern="/:page"
+        pattern="[[base]]:page"
         data="{{routeData}}"
         tail="{{subroute}}"></app-route>
 
@@ -219,7 +219,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           </paper-icon-button>
         </div>
 
-        <div main-title class="logo" title><a href="/" aria-label="MINT Home"><img height=50 src="/images/logo.png" /></a></div>
+        <div main-title class="logo" title><a href="" aria-label="MINT Home"><img height=50 src="images/logo.png" /></a></div>
 
         <mint-wings-login userid="{{userid}}" server="[[server]]"></mint-wings-login>
       </app-toolbar>
@@ -231,10 +231,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <mint-tabs
                 selected="[[page]]"
                 attr-for-selected="name">
-              <mint-tab name="home"><a href="/">Home</a></mint-tab>
-              <mint-tab name="cags"><a href="/cags/home">Analyses</a></mint-tab>
-              <mint-tab name="data"><a href="/data">Data</a></mint-tab>
-              <mint-tab name="results"><a href="/results/list">Results</a></mint-tab>
+              <mint-tab name="home"><a href="">Home</a></mint-tab>
+              <mint-tab name="cags"><a href="cags/home">Analyses</a></mint-tab>
+              <mint-tab name="data"><a href="data">Data</a></mint-tab>
+              <mint-tab name="results"><a href="results/list">Results</a></mint-tab>
             </mint-tabs>
           </template>
         </dom-if>
@@ -246,10 +246,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <!-- Two-way bind `drawerOpened` since app-drawer can update `opened` itself. -->
       <app-drawer opened="{{drawerOpened}}" swipe-open tabindex="0">
         <iron-selector role="navigation" class="drawer-list" selected="[[page]]" attr-for-selected="name">
-          <a name="home" href="/">Home</a>
-          <a name="cags" href="/cags/home">Analyses</a>
-          <a name="data" href="/data">Data</a>
-          <a name="results" href="/results/list">Results</a>
+          <a name="home" href="">Home</a>
+          <a name="cags" href="cags/home">Analyses</a>
+          <a name="data" href="data">Data</a>
+          <a name="results" href="results/list">Results</a>
         </iron-selector>
       </app-drawer>
     </template>
@@ -286,6 +286,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           userid: String,
           server: String,
           domain: String,
+          base: String,
           page: {
             type: String,
             reflectToAttribute: true,
@@ -370,7 +371,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             Polymer.importHref(this.resolveUrl('lazy-resources.html'), () => {
               // Register service worker if supported.
               if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('/service-worker.js');
+                navigator.serviceWorker.register('service-worker.js');
               }
               //this._notifyNetworkStatus();
               this.loadComplete = true;

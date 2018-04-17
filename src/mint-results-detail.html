@@ -114,9 +114,6 @@
         pattern="/:runid"
         data="{{routeData}}"></app-route>
 
-    <mint-ajax id="rundetailAjax" method="POST"
-      result="{{runDetail}}"></mint-ajax>
-
     <div id="content" hidden$="[[!userid]]">
       <div class="detail" has-content$="[[_isRunDefined(runDetail)]]">
         <h1>Ran the CAG '[[_localName(runDetail.execution.originalTemplateId)]]'
@@ -188,7 +185,7 @@
       },
 
       observers: [
-        '_fetchResults(server, userid, domain, runid)',
+        //'_fetchResults(server, userid, domain, runid)',
         '_routePageChanged(route.prefix, routeData.runid)'
       ],
 

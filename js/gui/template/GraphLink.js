@@ -42,9 +42,9 @@ var GraphLink = function(parent, id,
 };
 
 GraphLink.prototype.create = function() {
+  var baseUrl = window.location.href;
   this.item = this.parent.insert("g", "g").attr("id", this.id);
-
-  var arrowid = "url(#arrow_" + getLocalName(this.parent.id) + ")";
+  var arrowid = "url(" + baseUrl + "#arrow_" + getLocalName(this.parent.id) + ")";
   this.pathToVariable = this.item.append("path")
     .attr("stroke", this.config.strokecolor)
     .attr("fill", "none")

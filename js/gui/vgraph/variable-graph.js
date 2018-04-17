@@ -53,9 +53,10 @@ VGraph.prototype.isEditable = function() {
 };
 
 VGraph.prototype.setEditable = function(editable) {
+  var baseUrl = window.location.href;
   this.events.setEditable(editable);
   if(editable)
-    this.grid.attr("fill", "url(#grid)");
+    this.grid.attr("fill", "url("+baseUrl+"#grid)");
 };
 
 VGraph.prototype.resizePanel = function(animate) {
@@ -371,6 +372,8 @@ VGraph.prototype.getImage = function() {
 };
 
 VGraph.prototype.createGrid = function() {
+  var baseUrl = window.location.href;
+
   this.defs.append("svg:pattern").attr("id", "smallGrid")
     .attr("width", 8).attr("height", 8)
     .attr("patternUnits", "userSpaceOnUse")
@@ -383,7 +386,7 @@ VGraph.prototype.createGrid = function() {
     .attr("width", 80).attr("height", 80)
     .attr("patternUnits", "userSpaceOnUse")
   gridpattern.append("rect")
-    .attr("width", 80).attr("height", 80).attr("fill", "url(#smallGrid)")
+    .attr("width", 80).attr("height", 80).attr("fill", "url("+baseUrl+"#smallGrid)")
   gridpattern.append("svg:path")
     .attr("d", "M 80 0 L 0 0 0 80")
     .attr("fill", "none").attr("stroke", "#BBB")
