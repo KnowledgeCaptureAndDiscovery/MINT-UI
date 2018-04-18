@@ -26,6 +26,12 @@
         background-color: var(--loading-screen-background-color, #FFF);
       }
 
+      .text {
+        color: var(--loading-screen-color, "#999");
+        font-weight: bold;
+        padding-bottom:5px;
+      }
+
       paper-spinner-lite {
         --paper-spinner-color: var(--loading-screen-color, #999);
       }
@@ -33,7 +39,8 @@
     </style>
 
     <div class="screen" hidden$="[[!active]]">
-      <paper-spinner-lite alt="[[alt]]" active="[[loading]]"></paper-spinne-lite>
+      <div class="text">Loading</div>
+      <paper-spinner-lite alt="[[alt]]" active="[[loading]]"></paper-spinner-lite>
     </div>
 
   </template>

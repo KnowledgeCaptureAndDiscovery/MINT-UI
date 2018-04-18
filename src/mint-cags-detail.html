@@ -328,6 +328,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         var t0 = d3.select(this.$.graphdiv)
         var t1 = d3.select(this.$.workflowdiv)
         if(this.workflows && this.workflows.length) {
+          t1.style("display", "");
           if(!this.smallScreen) {
             t0.transition().style("width", "60%");
             t1.transition().style("opacity", 1).style("width", "40%");
@@ -335,8 +336,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           else {
             t0.style("width", "100%");
             t1.transition().style("opacity", 1).style("width", "100%");
+            var top = t1.node().offsetTop;
+            Polymer.AppLayout.scroll({top: top});
           }
-          t1.style("display", "");
         }
         else {
           if(!this.smallScreen) {
