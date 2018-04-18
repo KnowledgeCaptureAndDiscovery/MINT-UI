@@ -46,7 +46,7 @@ VGraphVariable.prototype.configure = function() {
     .style("font-family", this.config.getFont())
     .style("font-weight", this.config.getFontweight())
     .style("fill", this.config.getTextcolor())
-    .style("stroke", this.config.getStrokecolor())
+    //.style("stroke", this.config.getStrokecolor())
     .attr("paint-order", "stroke")
     .attr("stroke-width", 0.8)
 

@@ -159,9 +159,9 @@ Template.prototype.setData = function(store) {
   //FIXME: this.forwardSweep();
 };
 
-Template.prototype.layout = function(animate) {
+Template.prototype.layout = function(animate, loader) {
   var layout = new GraphLayout();
-  layout.layoutVizDot(null, this, animate);
+  layout.layoutVizDot(loader, this, animate);
 };
 
 Template.prototype.drawLinks = function(animate) {

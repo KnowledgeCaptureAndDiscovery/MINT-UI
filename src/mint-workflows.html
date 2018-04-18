@@ -111,7 +111,7 @@
 
     <!-- Variable Graph Canvas -->
     <div class="outer">
-      <iron-collapse id="list_section" opened>
+      <iron-collapse id="list_section" opened no-animation>
         <paper-listbox id="workflow_listbox" on-selected-changed="_changedSelection">
           <template is="dom-repeat" items="[[workflows]]" as="workflow" index-as="windex">
             <paper-item>
@@ -128,7 +128,7 @@
           </template>
         </paper-listbox>
       </iron-collapse>
-      <iron-collapse id="workflow_section">
+      <iron-collapse id="workflow_section" no-animation>
         <wings-workflow id="workflow" data="[[selectedWorkflow]]" selected="{{selectedItems}}"></wings-workflow>
       </iron-collapse>
     </div>
@@ -199,9 +199,9 @@
       _backToList(e) {
         this.$.list_section.toggle();
         this.$.workflow_section.toggle();
+        this.$.workflow_listbox.selected = null;
         this.set("selectedWorkflow", null);
         this.set("selectedGraph", null);
-        this.$.workflow_listbox.selected = null;
       }
 
       _getWorkflowNodes(workflow) {

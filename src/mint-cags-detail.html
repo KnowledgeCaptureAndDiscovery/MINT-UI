@@ -195,7 +195,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <mint-ajax result="{{graphData}}" auto
             url="[[_createGraphURL(routeData.category, routeData.item)]]"></mint-ajax>
 
-          <iron-collapse id="main_graph" opened>
+          <iron-collapse id="main_graph" opened no-animation>
             <variable-graph id="cag"
               component-library="[[library]]"
               data="[[graphData]]"
@@ -203,7 +203,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               editable auto-load></variable-graph>
           </iron-collapse>
 
-          <iron-collapse id="temporary_graph">
+          <iron-collapse id="temporary_graph" no-animation>
             <variable-graph id="tmpcag" auto-layout
               data="[[selectedWorkflowGraph]]"></variable-graph>
           </iron-collapse>

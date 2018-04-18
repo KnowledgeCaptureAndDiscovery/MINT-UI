@@ -22,55 +22,9 @@
 var GraphLayout = function() {
   this.graph = null;
 };
-var layoutWorker = undefined;
+GraphLayout.layoutWorker = undefined;
 
-GraphLayout.prototype.layoutDot = function(msgTarget, graph, animate, domnode, op_url) {
-  this.graph = graph;
-  var data = this.graph.getData();
-
-  var me = this;
-
-  var url = op_url + "/layoutTemplate";
-  // Gzipped Request
-  Ext.Ajax.requestGZ({
-    url: url,
-    rawData: Ext.encode(data),
-    success: function(response) {
-      msgTarget.unmask();
-      // Copy over xy positions from new store
-      var nstore = Ext.decode(response.responseText);
-      for (var i in nstore.template.Nodes) {
-        var node = nstore.template.Nodes[i];
-        var n = me.graph.nodes[node.id];
-        if (n) {
-          var pos = me.graph.getItemCoordinates(node);
-          n.setCoords(pos, animate);
-        }
-      }
-      for (var i in nstore.template.Variables) {
-        var vr = nstore.template.Variables[i];
-        var v = me.graph.variables[vr.id];
-        if (v) {
-          var pos = me.graph.getItemCoordinates(vr);
-          v.setCoords(pos, animate);
-        }
-      }
-      if (domnode)
-        me.graph.draw(domnode);
-      else {
-        // Redraw links
-        me.graph.drawLinks(animate);
-        me.graph.resizeViewport(false, true);
-      }
-    },
-    failure: function(response) {
-      if (window.console)
-        window.console.log(response);
-    }
-  });
-};
-
-GraphLayout.prototype.layoutVizDot = function(msgTarget, graph, animate, domnode) {
+GraphLayout.prototype.layoutVizDot = function(loader, graph, animate, domnode) {
   this.graph = graph;
   var DPI = 72;
   var MAX_LINKS = 500;
@@ -155,64 +109,65 @@ GraphLayout.prototype.layoutVizDot = function(msgTarget, graph, animate, domnode
     }
   }
   dotstr += nl + "}";
-  //console.log(dotstr);
-
-  /*
-  if (layoutWorker == undefined) {
-    layoutWorker = new Worker(CONTEXT_ROOT + "/js/workers/layout.js");
-    //console.log("creating new worker");
-  }
-  */
-  var layout = Viz(dotstr, { engine: "dot", format: "plain" });
 
   var me = this;
+  if(GraphLayout.layoutWorker == undefined)
+    GraphLayout.layoutWorker = new Worker("/js/lib/layout-worker.js");
 
-  //console.log(layout);
-  var lines = layout.split(/\n/);
+  GraphLayout.layoutWorker.postMessage([dotstr, "dot"]);
+  GraphLayout.layoutWorker.onmessage = function(e) {
+    if(loader)
+      loader.loading = false;
 
-  var graph = lines[0].split(/\s+/);
-  var gw = parseFloat(graph[2]);
-  var gh = parseFloat(graph[3]);
-  var curline = "";
-  for (var i = 1; i < lines.length; i++) {
-    var line = lines[i];
-    if (line.match(/\\$/)) {
-      curline += line.substring(0, line.length - 1);
-      continue;
+    var layout = e.data;
+
+    //console.log(layout);
+    var lines = layout.split(/\n/);
+
+    var graph = lines[0].split(/\s+/);
+    var gw = parseFloat(graph[2]);
+    var gh = parseFloat(graph[3]);
+    var curline = "";
+    for (var i = 1; i < lines.length; i++) {
+      var line = lines[i];
+      if (line.match(/\\$/)) {
+        curline += line.substring(0, line.length - 1);
+        continue;
+      }
+      if (curline) {
+        line = curline + line;
+        curline = "";
+      }
+      var tmp = line.split(/\s+/);
+      if (tmp.length < 4)
+        continue;
+      if (tmp[0] != "node")
+        continue;
+      var id = tmp[1];
+      if (idmap[id]) {
+        var item = idmap[id];
+        var w = parseFloat(tmp[4]);
+        var h = parseFloat(tmp[5]);
+        var x = parseFloat(tmp[2]) * 1.1;
+        var y = (gh - h / 2 - parseFloat(tmp[3])) / 1.5;
+        //console.log("x="+x+", y="+y+", w="+w+", h="+h);
+        var itemx = 10 + DPI * x; // - (item.bounds.width - item.textbounds.width)/2;
+        var itemy = 30 + DPI * y;
+        //console.log(line);
+        //console.log(itemx + "," + itemy);
+        item.setCoords({
+          x: itemx,
+          y: itemy
+        }, animate);
+      }
     }
-    if (curline) {
-      line = curline + line;
-      curline = "";
+    if (domnode)
+      me.graph.draw(domnode);
+    else {
+      // Redraw links
+      me.graph.drawLinks(animate);
+      me.graph.resizeViewport(true, animate);
     }
-    var tmp = line.split(/\s+/);
-    if (tmp.length < 4)
-      continue;
-    if (tmp[0] != "node")
-      continue;
-    var id = tmp[1];
-    if (idmap[id]) {
-      var item = idmap[id];
-      var w = parseFloat(tmp[4]);
-      var h = parseFloat(tmp[5]);
-      var x = parseFloat(tmp[2]) * 1.1;
-      var y = (gh - h / 2 - parseFloat(tmp[3])) / 1.5;
-      //console.log("x="+x+", y="+y+", w="+w+", h="+h);
-      var itemx = 10 + DPI * x; // - (item.bounds.width - item.textbounds.width)/2;
-      var itemy = 30 + DPI * y;
-      //console.log(line);
-      //console.log(itemx + "," + itemy);
-      item.setCoords({
-        x: itemx,
-        y: itemy
-      }, animate);
-    }
-  }
-  if (domnode)
-    me.graph.draw(domnode);
-  else {
-    // Redraw links
-    me.graph.drawLinks(animate);
-    me.graph.resizeViewport(true, animate);
   }
 };
 

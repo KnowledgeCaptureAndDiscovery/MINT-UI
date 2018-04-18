@@ -22,8 +22,9 @@
 var VGraphLayout = function() {
   this.graph = null;
 };
+VGraphLayout.layoutWorker = undefined;
 
-VGraphLayout.prototype.layout = function(graph, animate, domnode) {
+VGraphLayout.prototype.layout = function(graph, animate, loader) {
   this.graph = graph;
   var DPI = 72;
   var MAX_LINKS = 500;
@@ -76,54 +77,60 @@ VGraphLayout.prototype.layout = function(graph, animate, domnode) {
   }
   dotstr += nl + "}";
 
-  var layout = Viz(dotstr, { engine: "neato", format: "plain" });
+  var me = this;
+  if(VGraphLayout.layoutWorker == undefined)
+    VGraphLayout.layoutWorker = new Worker("/js/lib/layout-worker.js");
 
-  var lines = layout.split(/\n/);
+  VGraphLayout.layoutWorker.postMessage([dotstr, "neato"]);
+  VGraphLayout.layoutWorker.onmessage = function(e) {
+    if(loader)
+      loader.loading = false;
 
-  var graph = lines[0].split(/\s+/);
-  var gw = parseFloat(graph[2]);
-  var gh = parseFloat(graph[3]);
-  var curline = "";
-  for (var i = 1; i < lines.length; i++) {
-    var line = lines[i];
-    if (line.match(/\\$/)) {
-      curline += line.substring(0, line.length - 1);
-      continue;
-    }
-    if (curline) {
-      line = curline + line;
-      curline = "";
-    }
-    var tmp = line.split(/\s+/);
-    if (tmp.length < 4)
-      continue;
-    if (tmp[0] != "node")
-      continue;
-    var id = tmp[1];
-    if (idmap[id]) {
-      var item = idmap[id];
-      var w = parseFloat(tmp[4]);
-      var h = parseFloat(tmp[5]);
-      var x = parseFloat(tmp[2]) * 1.1;
-      var y = (gh - h / 2 - parseFloat(tmp[3])) / 1.5;
-      //console.log("x="+x+", y="+y+", w="+w+", h="+h);
-      var itemx = 10 + DPI * x; // - (item.bounds.width - item.textbounds.width)/2;
-      var itemy = 30 + DPI * y;
-      //console.log(line);
-      //console.log(itemx + "," + itemy);
-      item.setCoords({
-        x: itemx,
-        y: itemy
-      }, animate);
-    }
-  }
+    var layout = e.data;
 
-  if (domnode)
-    this.graph.draw(domnode);
-  else {
+    var lines = layout.split(/\n/);
+
+    var graph = lines[0].split(/\s+/);
+    var gw = parseFloat(graph[2]);
+    var gh = parseFloat(graph[3]);
+    var curline = "";
+    for (var i = 1; i < lines.length; i++) {
+      var line = lines[i];
+      if (line.match(/\\$/)) {
+        curline += line.substring(0, line.length - 1);
+        continue;
+      }
+      if (curline) {
+        line = curline + line;
+        curline = "";
+      }
+      var tmp = line.split(/\s+/);
+      if (tmp.length < 4)
+        continue;
+      if (tmp[0] != "node")
+        continue;
+      var id = tmp[1];
+      if (idmap[id]) {
+        var item = idmap[id];
+        var w = parseFloat(tmp[4]);
+        var h = parseFloat(tmp[5]);
+        var x = parseFloat(tmp[2]) * 1.1;
+        var y = (gh - h / 2 - parseFloat(tmp[3])) / 1.5;
+        //console.log("x="+x+", y="+y+", w="+w+", h="+h);
+        var itemx = 10 + DPI * x; // - (item.bounds.width - item.textbounds.width)/2;
+        var itemy = 30 + DPI * y;
+        //console.log(line);
+        //console.log(itemx + "," + itemy);
+        item.setCoords({
+          x: itemx,
+          y: itemy
+        }, animate);
+      }
+    }
+
     // Redraw links
-    this.graph.drawLinks(animate);
-    this.graph.resizeViewport(true, animate);
+    me.graph.drawLinks(animate);
+    me.graph.resizeViewport(true, animate);
   }
 };
 

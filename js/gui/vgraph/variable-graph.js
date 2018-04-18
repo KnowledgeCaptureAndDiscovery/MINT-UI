@@ -396,10 +396,10 @@ VGraph.prototype.createGrid = function() {
     .attr("width", "100%").attr("height", "100%").attr("fill", "white");
 };
 
-VGraph.prototype.layout = function(animate) {
+VGraph.prototype.layout = function(animate, loader) {
   // Convert graph to dot
   var gviz = new VGraphLayout();
-  gviz.layout(this, animate);
+  gviz.layout(this, animate, loader);
 };
 
 VGraph.prototype.showTooltip = function(message, x, y) {

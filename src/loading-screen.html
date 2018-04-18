@@ -1,0 +1,75 @@
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/paper-spinner/paper-spinner-lite.html">
+<link rel="import" href="d3-import.html">
+
+<dom-module id="loading-screen">
+  <template>
+    <style is="custom-style">
+      :host {
+        display: none;
+        opacity: 0;
+        height: 100%;
+        width: 100%;
+      }
+
+      .screen {
+        position: absolute;
+        top: 0px;
+        bottom: 0px;
+        left: 0px;
+        right: 0px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        opacity: var(--loading-screen-opacity, 1);
+        background-color: var(--loading-screen-background-color, #FFF);
+      }
+
+      paper-spinner-lite {
+        --paper-spinner-color: var(--loading-screen-color, #999);
+      }
+
+    </style>
+
+    <div class="screen" hidden$="[[!active]]">
+      <paper-spinner-lite alt="[[alt]]" active="[[loading]]"></paper-spinne-lite>
+    </div>
+
+  </template>
+
+  <script>
+    class LoadingScreen extends Polymer.Element {
+
+      static get is() { return 'loading-screen'; }
+
+      static get properties() {
+        return {
+          loading: {
+            type: Boolean,
+            value: false,
+            notify: true,
+            observer: '_loadingChanged'
+          },
+          alt: {
+            type: String,
+            value: 'loading'
+          }
+        }
+      }
+
+      _loadingChanged(loading) {
+        if (!loading) {
+          d3.select(this).transition().style("opacity", 0).
+            transition().style("display", "none");
+        }
+        else {
+          this.style.display = "block";
+          this.style.opacity = "1"
+        }
+      }
+    }
+
+    customElements.define(LoadingScreen.is, LoadingScreen);
+  </script>
+</dom-module>
