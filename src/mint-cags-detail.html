@@ -337,7 +337,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             t0.style("width", "100%");
             t1.transition().style("opacity", 1).style("width", "100%");
             var top = t1.node().offsetTop;
-            Polymer.AppLayout.scroll({top: top});
+            Polymer.AppLayout.scroll({top: top, behavior: 'smooth'});
           }
         }
         else {
