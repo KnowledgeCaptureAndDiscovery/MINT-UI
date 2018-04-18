@@ -25,9 +25,7 @@
   },
   "builds": [{
     "name": "bundlemin",
-	"bundle": {
-		"inlineScripts": false
-	},
+	"bundle": true,
     "addServiceWorker": true,
     "swPrecacheConfig": "sw-precache-config.js",
     "css": { "minify": true },
