@@ -129,8 +129,9 @@ VGraphLayout.prototype.layout = function(graph, animate, loader) {
     }
 
     // Redraw links
-    me.graph.drawLinks(animate);
-    me.graph.resizeViewport(true, animate);
+    me.graph.drawLinks(false);
+    me.graph.resizeViewport(true, false);
+    me.graph.zoom(1);
   }
 };
 

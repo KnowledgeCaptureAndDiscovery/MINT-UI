@@ -9,7 +9,7 @@ function VGraphVariable(graph, v, config) {
 
   this.binding = null;
   this.dimensionality = 0;
-  this.inactive = false;
+  this.newitem = false;
 
   this.textbounds = {
     x: 0, y: 0,
@@ -72,7 +72,7 @@ VGraphVariable.prototype.drawBackgroundItem = function(bgitem, bounds) {
 
 //** OVERRIDE in Subclases **
 VGraphVariable.prototype.setDefaultColors = function() {
-  this.config = new VGraphVariableConfig(this.config.category);
+  this.config = new VGraphVariableConfig(this.config.category, this.config.newitem);
 };
 
 VGraphVariable.prototype.calculateBoundingBox = function() {
@@ -244,6 +244,6 @@ VGraphVariable.prototype.setConfig = function(config) {
   this.config = config;
 };
 
-VGraphVariable.prototype.setInactive = function(inactive) {
-  this.inactive = inactive;
+VGraphVariable.prototype.setNewItem = function(newitem) {
+  this.newitem = newitem;
 };

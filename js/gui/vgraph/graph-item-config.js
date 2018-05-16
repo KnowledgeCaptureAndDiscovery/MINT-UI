@@ -1,13 +1,24 @@
-function VGraphLinkConfig() {
+function VGraphLinkConfig(newitem) {
   this.strokecolor = "rgba(30,30,30,1)";
   this.strokewidth = 0.8
   this.strokeopacity = 0.6;
   this.intersectionpad = 15;
   this.linkstartpad = 15;
   this.interpolation = d3.curveBundle.beta(1);
+  this.setNewItem(newitem);
 };
 
-function VGraphVariableConfig(category) {
+VGraphLinkConfig.prototype.setNewItem = function(newitem) {
+  this.newitem = newitem;
+  if(this.newitem) {
+    this.strokecolor = "orange";
+  }
+  else {
+    this.strokecolor = "rgba(30,30,30,1)";
+  }
+};
+
+function VGraphVariableConfig(category, newitem) {
   // Configuration
   // TODO: Get from config file
   this.xpad = 8;
@@ -17,10 +28,11 @@ function VGraphVariableConfig(category) {
   this.bgcolor = "rgba(125,125,125,1)";
   this.textcolor = "rgba(245,245,245,1)";
   this.strokecolor = "rgba(0,0,0,0.7)";
-  this.strokewidth = 0.5
+  this.strokewidth = 0.5;
   this.fontweight = "normal";
   this.radius = 16;
   this.setCategory(category);
+  this.setNewItem(newitem);
 };
 
 VGraphVariableConfig.prototype.setCategory = function(category) {
@@ -41,6 +53,18 @@ VGraphVariableConfig.prototype.setCategory = function(category) {
   else if(this.category=="economics") {
     this.bgcolor = "rgba(190,96,51,1)";
     //this.strokecolor = this.bgcolor;
+  }
+};
+
+VGraphVariableConfig.prototype.setNewItem = function(newitem) {
+  this.newitem = newitem;
+  if(this.newitem) {
+    this.strokecolor = "orange";
+    this.strokewidth = 3;
+  }
+  else {
+    this.strokecolor = "rgba(0,0,0,0.7)";
+    this.strokewidth = 0.5;
   }
 };
 

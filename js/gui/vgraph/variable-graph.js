@@ -45,7 +45,6 @@ function VGraph(id, store, editor) {
   this.DBG = 0;
 
   this.setData(store);
-  this.setResizeEvent();
 };
 
 VGraph.prototype.isEditable = function() {
@@ -108,7 +107,7 @@ VGraph.prototype.resizeSVG = function(animate) {
 VGraph.prototype.addVariable = function(vardata, animate) {
   var gvar = this.variables[vardata.id];
   if(!gvar) {
-    var gvar = new VGraphVariable(this, vardata, new VGraphVariableConfig(vardata.category));
+    var gvar = new VGraphVariable(this, vardata, new VGraphVariableConfig(vardata.category, vardata.new));
     this.variables[vardata.id] = gvar;
     this.events.enableEventsForItem(gvar);
   }
@@ -129,7 +128,7 @@ VGraph.prototype.addLink = function(linkdata) {
   var linkid = fromVariable.id + "_to_" + toVariable.id;
   var glink = this.links[linkid];
   if(!glink) {
-    glink = new VGraphLink(this.graph, this.id, linkid, fromVariable, toVariable, this.graphItems, new VGraphLinkConfig());
+    glink = new VGraphLink(this.graph, this.id, linkid, fromVariable, toVariable, this.graphItems, new VGraphLinkConfig(linkdata.new));
     this.links[linkid] = glink;
   }
   glink.draw();
@@ -172,7 +171,7 @@ VGraph.prototype.setData = function(store) {
   for (var i=0; i<store.variables.length; i++) {
     var vardata = store.variables[i];
     var varid = vardata.id;
-    var gvar = new VGraphVariable(this, vardata, new VGraphVariableConfig(vardata.category));
+    var gvar = new VGraphVariable(this, vardata, new VGraphVariableConfig(vardata.category, vardata.new));
     gvar.setCoords(this.getItemCoordinates(vardata));
     this.variables[varid] = gvar;
   }
@@ -184,7 +183,7 @@ VGraph.prototype.setData = function(store) {
     var fromVariable = this.variables[linkdata.from];
     var toVariable = this.variables[linkdata.to];
     var linkid = fromVariable.id + "_to_" + toVariable.id;
-    var glink = new VGraphLink(this.graph, this.id, linkid, fromVariable, toVariable, this.graphItems, new VGraphLinkConfig());
+    var glink = new VGraphLink(this.graph, this.id, linkid, fromVariable, toVariable, this.graphItems, new VGraphLinkConfig(linkdata.new));
     this.links[linkid] = glink;
   }
 };
@@ -212,9 +211,10 @@ VGraph.prototype.draw = function(domnode) {
     domnode.innerHTML = '';
     domnode.appendChild(this.svg.node());
     this.panelsize = {
-      width: this.domnode.offsetWidth,
-      height: this.domnode.offsetHeight
+      width: domnode.offsetWidth,
+      height: domnode.offsetHeight
     };
+    this.setResizeEvent(this.domnode);
   }
 
   // Draw variables
@@ -357,7 +357,7 @@ VGraph.prototype.initDrawingSurface = function() {
   this.tooltip = d3.select("body").append("div")
     .attr("class", "tooltip")
     .style("opacity", 0);
-}
+};
 
 VGraph.prototype.zoom = function(value, animate) {
   this.setScale(this.scale * value, animate);

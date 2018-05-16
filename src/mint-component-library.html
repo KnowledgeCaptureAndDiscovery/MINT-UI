@@ -162,7 +162,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             }
           }
           // Create workflow for solution
-          var workflow = solution.createWorkflow();
+          var workflow = solution.createWorkflow(graph);
           if(workflow)
             workflows.push(workflow);
         }
@@ -237,7 +237,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       }
 
-      createWorkflow() {
+      createWorkflow(graph) {
+        this.variables.reverse();
         var workflow = {
           components: this.components,
           variables: this.variables,
@@ -285,7 +286,35 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         workflow.wings_workflow = this.createWingsWorkflow(workflow);
         workflow.graph = this.createGraph(workflow);
+        workflow.graph = this.diffGraph(workflow.graph, graph);
+
+        // Do a diff between original graph and new graph
         return workflow;
+      }
+
+      diffGraph(newgraph, oldgraph) {
+        var linkhash = {};
+        var varhash = {};
+        for(var i=0; i<oldgraph.variables.length; i++) {
+          var v = oldgraph.variables[i];
+          varhash[v.id] = true;
+        }
+        for(var i=0; i<oldgraph.links.length; i++) {
+          var l = oldgraph.links[i];
+          linkhash[l.from + "-" + l.to] = true;
+        }
+        // Annotate new graph
+        for(var i=0; i<newgraph.variables.length; i++) {
+          var v = newgraph.variables[i];
+          if(!varhash[v.id])
+            newgraph.variables[i].new = true;
+        }
+        for(var i=0; i<newgraph.links.length; i++) {
+          var l = newgraph.links[i];
+          if(!linkhash[l.from + "-" + l.to])
+            newgraph.links[i].new = true;
+        }
+        return newgraph;
       }
 
       createGraph(wflow) {

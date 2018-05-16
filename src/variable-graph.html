@@ -27,7 +27,7 @@
       .outer {
         position: relative;
         width:100%;
-        height: 400px;
+        height: 500px;
         overflow: auto;
         border: 2px solid var(--app-accent-color);
         border-width:0px 2px;
@@ -219,6 +219,8 @@
       }
 
       resetSize() {
+        if(this.graph)
+          this.graph.resizePanel();
       }
 
       save() {
@@ -253,7 +255,8 @@
         this.set("workflows", []);
         if(this.autoLayout)
           this.layout(false, loader);
-        this.graph.zoom(1);
+        else
+          this.graph.zoom(1);
       }
 
       selectVariables(items) {

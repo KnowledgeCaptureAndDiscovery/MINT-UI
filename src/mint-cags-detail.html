@@ -343,6 +343,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         else {
           if(!this.smallScreen) {
             t0.style("width", "100%");
+            var mycag = this.$.cag;
+            window.setTimeout(function() {
+              mycag.resetSize();
+            }, 100);
           }
           t1.transition().style("width", "0px").style("opacity", 0);
           t1.style("display", "none");
@@ -361,6 +365,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           if(!this.$.main_graph.opened) {
             this.$.temporary_graph.toggle();
             this.$.main_graph.toggle();
+            var mycag = this.$.cag;            
+            window.setTimeout(function() {
+              mycag.resetSize();
+            }, 100);
           }
         }
       }

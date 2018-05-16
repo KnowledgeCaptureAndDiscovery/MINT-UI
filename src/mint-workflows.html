@@ -16,7 +16,7 @@
       }
       .outer {
         width:100%;
-        height: 400px;
+        height: 500px;
         overflow: auto;
         border: 2px solid var(--app-accent-color);
         border-width:0px 2px;
@@ -104,7 +104,7 @@
         <paper-icon-button icon="arrow-back" on-click="_backToList"></paper-icon-button>
       </template>
       <div class="grow">&nbsp;</div>
-      <paper-button>Workflows</paper-button>
+      <paper-button>Model Graphs</paper-button>
       <div class="grow">&nbsp;</div>
       <paper-icon-button icon="close" on-click="_resetWorkflows"></paper-icon-button>
     </div>
@@ -120,7 +120,7 @@
                 <div>
                   <template is="dom-repeat" items="[[_getWorkflowNodes(workflow)]]"
                     as="node"><template is="dom-if"
-                      if="[[index]]">,
+                      if="[[index]]"> /
                   </template>[[node.name]]</template>
                 </div>
               </div>
