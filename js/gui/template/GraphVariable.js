@@ -8,6 +8,7 @@ function GraphVariable(parent, vardata, config) {
   this.autofill = false;
   this.unknown = false;
   this.breakpoint = false;
+  this.extra = vardata.extra;
 
   this.variableLinks = [];
 
@@ -132,6 +133,7 @@ GraphVariable.prototype.setDefaultColors = function() {
       }
     }
   }
+  this.config.setCategory(this.config.category);
   this.config.setStrokecolor(this.config.getBgcolor());
 };
 

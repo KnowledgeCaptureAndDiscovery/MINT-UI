@@ -186,6 +186,8 @@ TemplateEvents.prototype.enableEventsForItem = function(gitem) {
     var links = {};
     for (var id in me.selections) {
       var selitem = me.selections[id];
+      if(!selitem.dragstart)
+        return;
       selitem.setCoords({
         x: selitem.dragstart.x + dx,
         y: selitem.dragstart.y + dy

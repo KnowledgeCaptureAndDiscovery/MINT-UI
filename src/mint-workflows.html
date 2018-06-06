@@ -1,5 +1,6 @@
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../bower_components/paper-toggle-button/paper-toggle-button.html">
 <link rel="import" href="../bower_components/paper-item/paper-item.html">
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
@@ -16,7 +17,7 @@
       }
       .outer {
         width:100%;
-        height: 500px;
+        height: 700px;
         overflow: auto;
         border: 2px solid var(--app-accent-color);
         border-width:0px 2px;
@@ -62,6 +63,11 @@
         border: 2px solid var(--app-accent-color);
         border-radius: 4px;
       }
+      paper-toggle-button {
+        --paper-toggle-button-checked-button-color:  white;
+        --paper-toggle-button-unchecked-button-color:  var(--app-accent-color);
+        --paper-toggle-button-label-color:  white;
+      }
       paper-item {
         min-height: 32px;
         padding-left:6px;
@@ -94,6 +100,9 @@
         .bottom {
           border-radius: 0px 0px 4px 4px;
         }
+        .outer {
+          height: 450px;
+        }
       }
 
     </style>
@@ -104,7 +113,7 @@
         <paper-icon-button icon="arrow-back" on-click="_backToList"></paper-icon-button>
       </template>
       <div class="grow">&nbsp;</div>
-      <paper-button>Model Graphs</paper-button>
+      <paper-button>Workflows</paper-button>
       <div class="grow">&nbsp;</div>
       <paper-icon-button icon="close" on-click="_resetWorkflows"></paper-icon-button>
     </div>
@@ -120,7 +129,7 @@
                 <div>
                   <template is="dom-repeat" items="[[_getWorkflowNodes(workflow)]]"
                     as="node"><template is="dom-if"
-                      if="[[index]]"> /
+                      if="[[index]]">&nbsp;/&nbsp;
                   </template>[[node.name]]</template>
                 </div>
               </div>
@@ -129,7 +138,7 @@
         </paper-listbox>
       </iron-collapse>
       <iron-collapse id="workflow_section" no-animation>
-        <wings-workflow id="workflow" data="[[selectedWorkflow]]" selected="{{selectedItems}}"></wings-workflow>
+        <wings-workflow id="workflow" data="[[selectedWorkflow.wings_workflow]]" selected="{{selectedItems}}"></wings-workflow>
       </iron-collapse>
     </div>
 
@@ -139,6 +148,7 @@
       <template is="dom-if" if="[[_workflowDefined(selectedWorkflow)]]">
         <paper-button on-click="zoomIn">+</paper-button>
         <paper-button on-click="zoomOut">-</paper-button>
+        <paper-toggle-button on-checked-changed="toggleView">MODEL GRAPH</paper-toggle-button>
       </template>
     </div>
   </template>
@@ -206,7 +216,7 @@
 
       _getWorkflowNodes(workflow) {
         if(workflow)
-          return Object.values(workflow.wings_workflow.template.Nodes);
+          return Object.values(workflow.model_graph.template.Nodes);
       }
 
       _workflowDefined(w) {
@@ -219,6 +229,13 @@
 
       zoomOut() {
         this.$.workflow.zoomOut();
+      }
+
+      toggleView(d) {
+        if(d.detail.value)
+          this.$.workflow.set("data", this.selectedWorkflow.model_graph);
+        else
+          this.$.workflow.set("data", this.selectedWorkflow.wings_workflow);
       }
     }
     window.customElements.define(MintWorkflows.is, MintWorkflows);

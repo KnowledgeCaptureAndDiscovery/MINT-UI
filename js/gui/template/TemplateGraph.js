@@ -23,7 +23,7 @@ function Template(id, store, editor) {
 
   // D3 items
   this.svg = null;
-  this.defs = null
+  this.defs = null;
   this.graph = null;
   this.tooltip = null;
 
@@ -104,14 +104,16 @@ Template.prototype.setData = function(store) {
   // Create nodes
   for (var nodeid in store.Nodes) {
     var nodedata = store.Nodes[nodeid];
-    var gnode = new GraphNode(this.graph, nodedata, new GraphNodeConfig());
+    var gnode = new GraphNode(this.graph, nodedata,
+      new GraphNodeConfig(nodedata.category));
     gnode.setCoords(this.getItemCoordinates(nodedata));
     this.nodes[nodeid] = gnode;
   }
   // Create variables
   for (var varid in store.Variables) {
     var vardata = store.Variables[varid];
-    var gvar = new GraphVariable(this.graph, vardata, new GraphVariableConfig());
+    var gvar = new GraphVariable(this.graph, vardata,
+      new GraphVariableConfig(vardata.category));
     gvar.setCoords(this.getItemCoordinates(vardata));
     this.variables[varid] = gvar;
   }
@@ -137,7 +139,7 @@ Template.prototype.setData = function(store) {
     var glink = new GraphLink(this.graph, linkdata.id,
       fromNode, fromPort, toNode, toPort, variable,
       this.graphItems, new GraphLinkConfig());
-
+    //console.log(linkdata);
     glink.setInactive(linkdata.inactive);
 
     if (fromNode) {

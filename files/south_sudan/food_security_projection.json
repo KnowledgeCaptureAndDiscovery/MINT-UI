@@ -5,7 +5,6 @@
     {
       "id": "precipitation",
       "name": "Precipitation",
-      "category": "climate",
       "standard_name": "atmosphere_water__domain_time_integral_of_precipitation_leq-volume_flux",
       "position": {
         "x": 397.61272,
@@ -15,7 +14,6 @@
     {
       "id": "soil_moisture",
       "name": "Soil moisture",
-      "category": "hydrology",
       "standard_name": "soil_moisture",
       "position": {
         "x": 226.18432,
@@ -24,7 +22,6 @@
     },
     {
       "id": "yields",
-      "category": "agronomy",
       "name": "Crop/forest yields",
       "standard_name": "yields",
       "position": {
@@ -35,7 +32,6 @@
     {
       "id": "v_kr65klms1",
       "name": "Soil quality",
-      "category": "agronomy",
       "standard_name": "soil_quality",
       "position": {
         "x": 65.580184,
@@ -45,7 +41,6 @@
     {
       "id": "v_7slagq1g3",
       "name": "Albedo",
-      "category": "hydrology",
       "standard_name": "land_surface__albedo",
       "position": {
         "x": 546.1919200000001,
@@ -55,7 +50,6 @@
     {
       "id": "v_456ysqpus",
       "name": "Land use",
-      "category": "economics",
       "standard_name": "land_use",
       "position": {
         "x": 403.8616,
@@ -65,7 +59,6 @@
     {
       "id": "v_pfccz2xyg",
       "name": "Property rights",
-      "category": "economics",
       "standard_name": "property_rights",
       "position": {
         "x": 226.1764,
@@ -75,7 +68,6 @@
     {
       "id": "v_i1ee2was5",
       "name": "Commodity prices",
-      "category": "economics",
       "standard_name": "prices",
       "position": {
         "x": 354.31408000000005,
@@ -85,7 +77,6 @@
     {
       "id": "v_i8jbj3gco",
       "name": "Market access",
-      "category": "economics",
       "standard_name": "market_access",
       "position": {
         "x": 395.11792,
@@ -125,8 +116,8 @@
       "to": "v_kr65klms1"
     },
     {
-      "from": "yields",
-      "to": "v_kr65klms1"
+      "to": "yields",
+      "from": "v_kr65klms1"
     },
     {
       "from": "v_i1ee2was5",

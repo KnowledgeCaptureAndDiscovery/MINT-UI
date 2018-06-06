@@ -4,12 +4,39 @@
     "name": "Weather-Simulator",
     "category": "climate",
     "inputs": [
-      "historical_weather"
+      {
+        "id": "historical_weather",
+        "variables": [
+          {
+            "standard_name": "historical_weather"
+          }
+        ]
+      }
     ],
     "outputs": [
-      "atmosphere_water__domain_time_integral_of_precipitation_leq-volume_flux",
-      "atmosphere_temperature",
-      "atomosphere_humidity"
+      {
+        "id": "sim_netcdf",
+        "variables": [
+          {
+            "standard_name": "atmosphere_temperature",
+            "metadata": {
+              "units": "celsius"
+            }
+          },
+          {
+            "standard_name": "atmosphere_water__domain_time_integral_of_precipitation_leq-volume_flux",
+            "metadata": {
+              "units": "cm"
+            }
+          },
+          {
+            "standard_name": "atomosphere_humidity",
+            "metadata": {
+              "units": "percentage"
+            }
+          }
+        ]
+      }
     ]
   },
   {
@@ -17,12 +44,49 @@
     "name": "PIHM-Min-W",
     "category": "hydrology",
     "inputs": [
-      "atmosphere_water__domain_time_integral_of_precipitation_leq-volume_flux",
-      "land_surface__albedo",
-      "elevation"
+      {
+        "id": "pihm_precipitation",
+        "variables": [
+          {
+            "standard_name": "atmosphere_water__domain_time_integral_of_precipitation_leq-volume_flux",
+            "metadata": {
+              "units": "m"
+            }
+          }
+        ]
+      },
+      {
+        "id": "pihm_albedo",
+        "variables": [
+          {
+            "standard_name": "land_surface__albedo"
+          }
+        ]
+      },
+      {
+        "id": "pihm_elevation",
+        "variables": [
+          {
+            "standard_name": "elevation",
+            "metadata": {
+              "units": "m"
+            }
+          }
+        ]
+      }
     ],
     "outputs": [
-      "soil_moisture"
+      {
+        "id": "pihm_soil_moisture",
+        "variables": [
+          {
+            "standard_name": "soil_moisture",
+            "metadata": {
+              "units": "m"
+            }
+          }
+        ]
+      }
     ]
   },
   {
@@ -30,11 +94,38 @@
     "name": "TopoFlow-Min-W",
     "category": "hydrology",
     "inputs": [
-      "atmosphere_water__domain_time_integral_of_precipitation_leq-volume_flux",
-      "land_surface__albedo"
+      {
+        "id": "topoflow_precipitation",
+        "variables": [
+          {
+            "standard_name": "atmosphere_water__domain_time_integral_of_precipitation_leq-volume_flux",
+            "metadata": {
+              "units": "m"
+            }
+          }
+        ]
+      },
+      {
+        "id": "topoflow_albedo",
+        "variables": [
+          {
+            "standard_name": "land_surface__albedo"
+          }
+        ]
+      }
     ],
     "outputs": [
-      "soil_moisture"
+      {
+        "id": "topoflow_soil_moisture",
+        "variables": [
+          {
+            "standard_name": "soil_moisture",
+            "metadata": {
+              "units": "m"
+            }
+          }
+        ]
+      }
     ]
   },
   {
@@ -42,11 +133,35 @@
     "name": "CYCLES-Min-W",
     "category": "agronomy",
     "inputs": [
-      "soil_moisture",
-      "soil_quality"
+      {
+        "id": "cycles_soil_moisture",
+        "variables": [
+          {
+            "standard_name": "soil_moisture",
+            "metadata": {
+              "units": "cm"
+            }
+          }
+        ]
+      },
+      {
+        "id": "cycles_soil_quality",
+        "variables": [
+          {
+            "standard_name": "soil_quality"
+          }
+        ]
+      }
     ],
     "outputs": [
-      "yields"
+      {
+        "id": "cycles_yields",
+        "variables": [
+          {
+            "standard_name": "yields"
+          }
+        ]
+      }
     ]
   },
   {
@@ -54,12 +169,46 @@
     "name": "DSSAT-Min-W",
     "category": "agronomy",
     "inputs": [
-      "soil_moisture",
-      "soil_quality",
-      "atmosphere_temperature"
+      {
+        "id": "dssat_soil_moisture",
+        "variables": [
+          {
+            "standard_name": "soil_moisture",
+            "metadata": {
+              "units": "m"
+            }
+          }
+        ]
+      },
+      {
+        "id": "dssat_soil_quality",
+        "variables": [
+          {
+            "standard_name": "soil_quality"
+          }
+        ]
+      },
+      {
+        "id": "dssat_atmosphere_temperature",
+        "variables": [
+          {
+            "standard_name": "atmosphere_temperature",
+            "metadata": {
+              "units": "celsius"
+            }
+          }
+        ]
+      }
     ],
     "outputs": [
-      "yields"
+      {
+        "id": "dssat_yields",
+        "variables": [
+          {
+            "standard_name": "yields"
+          }
+        ]
+      }
     ]
   },
   {
@@ -67,12 +216,40 @@
     "name": "Supply-Simple",
     "category": "economics",
     "inputs": [
-      "yields",
-      "market_access",
-      "crop_prices"
+      {
+        "id": "ss_yields",
+        "variables": [
+          {
+            "standard_name": "yields"
+          }
+        ]
+      },
+      {
+        "id": "ss_market_access",
+        "variables": [
+          {
+            "standard_name": "market_access"
+          }
+        ]
+      },
+      {
+        "id": "ss_crop_prices",
+        "variables": [
+          {
+            "standard_name": "crop_prices"
+          }
+        ]
+      }
     ],
     "outputs": [
-      "crop_production"
+      {
+        "id": "ss_crop_production",
+        "variables": [
+          {
+            "standard_name": "crop_production"
+          }
+        ]
+      }
     ]
   },
   {
@@ -80,12 +257,40 @@
     "name": "LandUse-Simple",
     "category": "economics",
     "inputs": [
-      "crop_production",
-      "crop_prices",
-      "prices"
+      {
+        "id": "lus_crop_production",
+        "variables": [
+          {
+            "standard_name": "crop_production"
+          }
+        ]
+      },
+      {
+        "id": "lus_crop_prices",
+        "variables": [
+          {
+            "standard_name": "crop_prices"
+          }
+        ]
+      },
+      {
+        "id": "lus_prices",
+        "variables": [
+          {
+            "standard_name": "prices"
+          }
+        ]
+      }
     ],
     "outputs": [
-      "land_use"
+      {
+        "id": "lus_land_use",
+        "variables": [
+          {
+            "standard_name": "land_use"
+          }
+        ]
+      }
     ]
   },
   {
@@ -93,13 +298,48 @@
     "name": "LandUse-Advanced",
     "category": "economics",
     "inputs": [
-      "crop_production",
-      "crop_prices",
-      "prices",
-      "property_rights"
+      {
+        "id": "lua_crop_production",
+        "variables": [
+          {
+            "standard_name": "crop_production"
+          }
+        ]
+      },
+      {
+        "id": "lua_crop_prices",
+        "variables": [
+          {
+            "standard_name": "crop_prices"
+          }
+        ]
+      },
+      {
+        "id": "lua_prices",
+        "variables": [
+          {
+            "standard_name": "prices"
+          }
+        ]
+      },
+      {
+        "id": "lua_property_rights",
+        "variables": [
+          {
+            "standard_name": "property_rights"
+          }
+        ]
+      }
     ],
     "outputs": [
-      "land_use"
+      {
+        "id": "lua_land_use",
+        "variables": [
+          {
+            "standard_name": "land_use"
+          }
+        ]
+      }
     ]
   }
 ]

@@ -23,7 +23,7 @@
       .outer {
         position: relative;
         width:100%;
-        height:500px;
+        height:700px;
         overflow:auto;
       }
       #canvas {
@@ -32,6 +32,11 @@
       }
       loading-screen#loader {
         --loading-screen-color: var(--app-accent-color);
+      }
+      @media (max-width: 767px) {
+        .outer {
+          height: 450px;
+        }
       }
     </style>
 
@@ -91,10 +96,19 @@
         this.$.loader.loading = true;
 
         var me = this;
-        this.id = data.wings_workflow.template.id;
-        this.template = new Template(this.id, this.data.wings_workflow.template, this);
+        this.id = data.template.id;
+        this.template = new Template(this.id, this.data.template, this);
         this.template.events.dispatch.on("select", function(items) {
-          me.set("selected", Object.keys(items));
+          var graph_variables = [];
+          for(var itemid in items) {
+            if(items[itemid].extra) {
+              graph_variables = graph_variables.concat(items[itemid].extra.graph_variables);
+            }
+            else {
+              graph_variables.push(itemid);
+            }
+          }
+          me.set("selected", graph_variables);
         });
         this.template.setEditable(false);
         this.template.draw(this.$.canvas);

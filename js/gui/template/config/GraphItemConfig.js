@@ -18,24 +18,51 @@ function GraphItemConfig() {
 	this.autofillopacity = 0.5;
 };
 
-function GraphNodeConfig() {
+GraphItemConfig.prototype.setCategory = function(category) {
+  this.category = category;
+  if(this.category=="climate") {
+    this.bgcolor = "rgba(144,177,219,1)";
+		this.textcolor = "white";
+  }
+  else if(this.category=="hydrology") {
+    this.bgcolor = "rgba(70,116,190,1)";
+    this.textcolor = "white";
+  }
+  else if(this.category=="agronomy") {
+    this.bgcolor = "rgba(85,129,57,1)";
+    this.textcolor = "white";
+  }
+  else if(this.category=="economics") {
+    this.bgcolor = "rgba(190,96,51,1)";
+    this.textcolor = "white";
+  }
+	else {
+		this.fontsize = 10;
+		this.bgcolor = "rgba(200,200,200,1)";
+		this.textcolor = "rgba(72,42,3,1)";
+	}
+};
+
+function GraphNodeConfig(category) {
 	GraphItemConfig.call(this);
 	this.xpad = 8;
 	this.bgcolor = "rgba(255,204,153,1)";
 	this.stackcolor = this.bgcolor;
 	this.strokewidth = 0.7;
 	this.xshift = 8;
+	this.setCategory(category);
 };
 GraphNodeConfig.prototype = Object.create(GraphItemConfig.prototype);
 GraphNodeConfig.prototype.constructor = GraphNodeConfig;
 
-function GraphVariableConfig() {
+function GraphVariableConfig(category) {
 	GraphItemConfig.call(this);
 	this.bgcolor = "rgba(0,51,102,1)";
 	this.textcolor = "rgba(220,220,255,1)";
-	this.strokecolor = this.bgcolor;
+	//this.strokecolor = this.bgcolor;
 	this.fontweight = "normal";
 	this.radius = 6;
+	this.setCategory(category);
 };
 GraphVariableConfig.prototype = Object.create(GraphItemConfig.prototype);
 GraphVariableConfig.prototype.constructor = GraphVariableConfig;
@@ -165,4 +192,3 @@ GraphItemConfig.prototype.getBgcolor = function() {
 GraphItemConfig.prototype.setBgcolor = function(bgcolor) {
 	this.bgcolor = bgcolor;
 };
-

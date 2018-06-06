@@ -31,6 +31,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           data: {
             type: Array,
             notify: true
+          },
+          workflow_fragments: {
+            type: Array,
+            notify: true
           }
         };
       }
@@ -39,6 +43,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         super();
         this._fetchComponents();
         this._fetchData();
+        this._fetchWorkflowFragments();
         this.set("componentLibrary", this);
       }
 
@@ -64,6 +69,37 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           onLoad(e) {
             me.set('data', JSON.parse(e.target.responseText));
             //console.log(me.data);
+          },
+          onError(e) {
+          }
+        }, 1);
+      }
+
+      _fetchWorkflowFragments() {
+        var me = this
+        //console.log('fetching categories');
+        this._getResource({
+          url: 'files/workflows/list.json',
+          onLoad(e) {
+            me.set('workflow_fragments', JSON.parse(e.target.responseText));
+            for(var i=0; i<me.workflow_fragments.length; i++) {
+              var wfrag = me.workflow_fragments[i];
+              me._fetchWorkflowFragment(i, wfrag.workflow);
+            }
+          },
+          onError(e) {
+          }
+        }, 1);
+      }
+
+      _fetchWorkflowFragment(index, path) {
+        var me = this
+        //console.log('fetching categories');
+        this._getResource({
+          url: path,
+          onLoad(e) {
+            var wflow = JSON.parse(e.target.responseText);
+            me.workflow_fragments[index].workflow = wflow;
           },
           onError(e) {
           }
@@ -100,11 +136,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         for (var i=0; i<this.components.length; i++) {
           var c = this.components[i];
           for (var j=0; j<c.outputs.length; j++) {
-            var v = c.outputs[j];
-            var prov = comp_providers[v];
-            if(!prov) prov = [];
-            prov.push(c);
-            comp_providers[v] = prov;
+            var op = c.outputs[j];
+            for(var k=0; k<op.variables.length; k++) {
+              var v = op.variables[k].standard_name;
+              var prov = comp_providers[v];
+              if(!prov) prov = [];
+              prov.push(c);
+              comp_providers[v] = prov;
+            }
           }
         }
 
@@ -112,15 +151,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         var solution_queue = [new Solution(variables)];
         while(solution_queue.length) {
           var solution = solution_queue.shift();
-          //console.log("Expanding Solution---")
+          // console.log("Expanding Solution---")
           var varqueue = solution.variables.slice(0);
           while(varqueue.length) {
             var v = varqueue.shift();
-            //console.log("Checking variable " + v.name);
+            // console.log("Checking variable " + v.name);
             var stdname = v.standard_name;
             // Skip if variable already resolved
             if(v.resolved) {
-              //console.log(v.name + " already resolved. Continue.");
+              // console.log(v.name + " already resolved. Continue.");
               continue;
             }
 
@@ -128,15 +167,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             if(stdname in data_providers) {
               // Mark variable as resolved
               v.resolved = true;
-              v.provider = {type: "data", item: data_providers[stdname]}
-              //console.log(v.name + " has a data provider. Variable resolved. Continue.");
+              v.provider = {
+                type: "data",
+                item: data_providers[stdname]
+              }
+              // console.log(v.name + " has a data provider. Variable resolved. Continue.");
               continue;
             }
 
             // Check component provider
             if(stdname in comp_providers) {
               var comps = comp_providers[stdname];
-              //console.log(v.name + " has "+ comps.length+" component providers");
+              // console.log(v.name + " has "+ comps.length+" component providers");
 
               // If more than one component, create extra solutions
               // from 2 onwards
@@ -146,9 +188,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 newsolution.addComponent(comps[i]);
                 solution_queue.push(newsolution);
                 // Mark variable as resolved
-                var newv = newsolution.varhash[v.standard_name];
+                var varhash = v.standard_name;
+                var newv = newsolution.varhash[varhash];
                 newv.resolved = true;
-                newv.provider = {type: "component", item: comps[i]};
+                newv.provider = {
+                  type: "component",
+                  item: {
+                    id: comps[i].id,
+                    category: comps[i].category
+                  }
+                };
               }
 
               // Use the first component to modify current solution
@@ -158,11 +207,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 varqueue.push(newvars[j]);
               // Mark variable as resolved
               v.resolved = true;
-              v.provider = {type: "component", item: comp};
+              v.provider = {
+                type: "component",
+                item: {
+                  id: comp.id,
+                  category: comp.category
+                }
+              };
             }
           }
           // Create workflow for solution
-          var workflow = solution.createWorkflow(graph);
+          var workflow = solution.createWorkflow(graph, this);
           if(workflow)
             workflows.push(workflow);
         }
@@ -171,12 +226,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     }
 
     class Solution {
+
       constructor(variables) {
         this.variables = [];
         this.components = [];
         this.varhash = {};
         for (var i=0; i<variables.length; i++) {
-          var v = Object.assign({}, variables[i]); // copy variable
+          // Copy graph variable
+          var v = Object.assign({}, variables[i]);
+          v.provenance = {};
           this.varhash[v.standard_name] = v;
           this.variables.push(v);
         }
@@ -186,7 +244,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.variables = [];
         this.varhash = {};
         for (var i=0; i<solution.variables.length; i++) {
-          var v = Object.assign({}, solution.variables[i]); // copy variable
+          // Deep copy solution variable
+          var v = JSON.parse(JSON.stringify(solution.variables[i]));
           this.varhash[v.standard_name] = v;
           this.variables.push(v);
         }
@@ -198,46 +257,68 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.components.push(c);
         var newvars = [];
         for (var i=0; i<c.inputs.length; i++) {
-          var stdname = c.inputs[i];
-          if(stdname in this.varhash) {
-            // Nothing
-          }
-          else {
-            var v = this.createNewVariable(stdname);
-            newvars.push(v);
+          var ip = c.inputs[i];
+          for(var k=0; k<ip.variables.length; k++) {
+            var v = ip.variables[k];
+            var hashid = v.standard_name
+            if(hashid in this.varhash) {
+              var prov = new VariableProvenance(c.id, ip.id, v.metadata, true);
+              this.varhash[hashid].provenance[c.id] = prov;
+            }
+            else {
+              var newv = this.createNewVariable(v, c, ip, true);
+              newvars.push(newv);
+            }
           }
         }
         for (var i=0; i<c.outputs.length; i++) {
-          var stdname = c.outputs[i];
-          var v = this.varhash[stdname];
-          if(!v) {
-            v = this.createNewVariable(stdname);
-            newvars.push(v);
+          var op = c.outputs[i];
+          for(var k=0; k<op.variables.length; k++) {
+            var v = op.variables[k];
+            var hashid = v.standard_name;
+            if(hashid in this.varhash) {
+              var prov = new VariableProvenance(c.id, op.id, v.metadata, false);
+              this.varhash[hashid].provenance[c.id] = prov;
+            }
+            else {
+              v = this.createNewVariable(v, c, op, false);
+              newvars.push(v);
+            }
+            v.resolved = true;
+            v.provider = {
+              type: "component",
+              item: {
+                id: c.id,
+                category: c.category
+              }
+            };
           }
-          v.resolved = true;
-          v.provider = {type: "component", item: c};
         }
-        //console.log(" - Adding "+component.name+" created "+newvars.length+" new variables");
-        //console.log(newvars);
+        // console.log(" - Adding "+c.id+" created "+newvars.length+" new variables");
+        // console.log(newvars);
         for(var i=0; i<newvars.length; i++) {
-          this.varhash[newvars[i].standard_name] = newvars[i];
+          var hashid = newvars[i].standard_name;
+          this.varhash[hashid] = newvars[i];
           this.variables.push(newvars[i]);
         }
         return newvars;
       }
 
-      createNewVariable(stdname) {
+      createNewVariable(v, c, f, isinput) {
         // Create new variable
         var vid = 'v_' + Math.random().toString(36).substr(2, 9);
+        var provenance = {};
+        provenance[c.id] = new VariableProvenance(c.id, f.id, v.metadata, isinput);
         return {
           id:vid,
-          standard_name: stdname,
-          name: stdname.replace(/_/g, " "),
+          standard_name: v.standard_name,
+          provenance: provenance,
+          name: v.standard_name.replace(/_/g, " "),
           position: {x: 100, y: 100} // Should be set a bit more intelligently
         }
       }
 
-      createWorkflow(graph) {
+      createWorkflow(graph, clib) {
         this.variables.reverse();
         var workflow = {
           components: this.components,
@@ -252,18 +333,22 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           var c = this.components[i];
           // Handle all component inputs
           for(var j=0; j<c.inputs.length; j++) {
-            var v = this.varhash[c.inputs[j]];
-            if(!v || !v.resolved || !v.provider) {
-              //console.log("... problem with " + c.id);
-              return null;
+            var ip = c.inputs[j];
+            for(var k=0; k<ip.variables.length; k++) {
+              var hashid = ip.variables[k].standard_name;
+              var v = this.varhash[hashid];
+              if(!v || !v.resolved || !v.provider) {
+                //console.log("... problem with " + c.id);
+                return null;
+              }
+              workflow.links.push({
+                from: v.provider.item.id,
+                to: c.id,
+                variable: v.id,
+                type: v.provider.type
+              });
+              varlinks[v.id] = true;
             }
-            workflow.links.push({
-              from: v.provider.item.id,
-              to: c.id,
-              variable: v.id,
-              type: v.provider.type
-            });
-            varlinks[v.id] = true;
           }
         }
         // Check component outputs that aren't part of links. Add links
@@ -271,20 +356,25 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           var c = this.components[i];
           // Handle all component outputs
           for(var j=0; j<c.outputs.length; j++) {
-            var v = this.varhash[c.outputs[j]];
-            if(v.id in varlinks) {
-              continue;
+            var op = c.outputs[j];
+            for(var k=0; k<op.variables.length; k++) {
+              var hashid = op.variables[k].standard_name;
+              var v = this.varhash[hashid];
+              if(v.id in varlinks) {
+                continue;
+              }
+              workflow.links.push({
+                from: c.id,
+                variable: v.id,
+                type: "output"
+              });
+              varlinks[v.id] = true;
             }
-            workflow.links.push({
-              from: c.id,
-              variable: v.id,
-              type: "output"
-            });
-            varlinks[v.id] = true;
           }
         }
 
-        workflow.wings_workflow = this.createWingsWorkflow(workflow);
+        workflow.model_graph = this.createModelGraph(workflow);
+        workflow.wings_workflow = this.createWingsWorkflow(workflow, clib);
         workflow.graph = this.createGraph(workflow);
         workflow.graph = this.diffGraph(workflow.graph, graph);
 
@@ -353,34 +443,38 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           var v = varid_hash[l.variable];
           if(l.from && l.type != "data") {
             var c = compid_hash[l.from];
-            var fromvars = c.inputs;
-            for(var j=0; j<fromvars.length; j++) {
-              var fromvar = stdname_hash[fromvars[j]];
-              graph.links.push({from: fromvar.id, to: v.id});
-              if(!fromvar.category)
-                fromvar.category = c.category;
+            for(var j=0; j<c.inputs.length; j++) {
+              var ip = c.inputs[j];
+              for(var k=0; k<ip.variables.length; k++) {
+                var fromvar = stdname_hash[ip.variables[k].standard_name];
+                graph.links.push({from: fromvar.id, to: v.id});
+                if(!fromvar.category)
+                  fromvar.category = c.category;
+              }
             }
             if(!v.category)
               v.category = c.category;
           }
           if(l.to) {
-            var c = compid_hash[l.to]
-            var tovars = c.outputs;
-            for(var j=0; j<tovars.length; j++) {
-              var tovar = stdname_hash[tovars[j]];
-              graph.links.push({from: v.id, to: tovar.id});
-              if(!tovar.category)
-                tovar.category = c.category;
+            var c = compid_hash[l.to];
+            for(var j=0; j<c.outputs.length; j++) {
+              var op = c.outputs[j];
+              for(var k=0; k<op.variables.length; k++) {
+                var vname = op.variables[k].standard_name;
+                var tovar = stdname_hash[vname];
+                graph.links.push({from: v.id, to: tovar.id});
+                if(!tovar.category)
+                  tovar.category = c.category;
+              }
             }
             if(!v.category)
               v.category = c.category;
           }
         }
         return graph;
-
       }
 
-      createWingsWorkflow(wflow) {
+      createModelGraph(wflow) {
         if(wflow == null)
           return null;
         var wingsw = {
@@ -414,6 +508,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             name: c.name,
             inputPorts: {},
             outputPorts: {},
+            category: c.category,
             componentVariable: {
               binding: {
                 id: c.name,
@@ -423,24 +518,30 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             }
           }
           for(var j=0; j<c.inputs.length; j++) {
-            var roleid = c.inputs[j]; // Standard name
-            var portid = "inport_" + roleid;
-            node.inputPorts[portid] = {
-              id: portid,
-              role: {
-                type: 1,
-                roleid: roleid
+            var ip = c.inputs[j];
+            for(var k=0; k<ip.variables.length; k++) {
+              var roleid = ip.variables[k].standard_name; // Standard name
+              var portid = "inport_" + roleid;
+              node.inputPorts[portid] = {
+                id: portid,
+                role: {
+                  type: 1,
+                  roleid: roleid
+                }
               }
             }
           }
           for(var j=0; j<c.outputs.length; j++) {
-            var roleid = c.outputs[j]; // Standard name
-            var portid = "outport_" + roleid;
-            node.outputPorts[portid] = {
-              id: portid,
-              role: {
-                type: 1,
-                roleid: roleid
+            var op = c.outputs[j];
+            for(var k=0; k<op.variables.length; k++) {
+              var roleid = op.variables[k].standard_name; // Standard name
+              var portid = "outport_" + roleid;
+              node.outputPorts[portid] = {
+                id: portid,
+                role: {
+                  type: 1,
+                  roleid: roleid
+                }
               }
             }
           }
@@ -457,6 +558,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               toPort: {id: "inport_" + v.standard_name},
               variable: {id: v.id}
             }
+            tpl.Variables[v.id].category = tpl.Nodes[l.to].category;
             tpl.Links[lid] = link;
           }
           else if(l.type == "output") {
@@ -467,6 +569,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               fromPort: {id: "outport_" + v.standard_name},
               variable: {id: v.id}
             }
+            tpl.Variables[v.id].category = tpl.Nodes[l.from].category;
             tpl.Links[lid] = link;
           }
           else if(l.type == "component") {
@@ -479,13 +582,220 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               toPort: {id: "inport_" + v.standard_name},
               variable: {id: v.id}
             }
+            tpl.Variables[v.id].category = tpl.Nodes[l.from].category;
             tpl.Links[lid] = link;
+          }
+        }
+        return wingsw;
+      }
+
+      createWingsWorkflow(wflow, clib) {
+        if(wflow == null)
+          return null;
+        var wingsw = {
+          template: {
+            version: 0,
+            Nodes: {},
+            Links: {},
+            Variables: {}
+          }
+        }
+        var tpl = wingsw.template;
+
+        // Create Workflow Nodes & Ports
+        for(var i=0; i<wflow.components.length; i++) {
+          var c = wflow.components[i];
+          var nodeid = c.id;
+          var node = {
+            id: nodeid,
+            name: c.name,
+            inputPorts: {},
+            outputPorts: {},
+            category: c.category,
+            componentVariable: {
+              binding: {
+                id: c.name,
+                type: "uri"
+              },
+              id: "component_" + c.id
+            }
+          }
+          for(var j=0; j<c.inputs.length; j++) {
+            var ip = c.inputs[j];
+            var roleid = ip.id;
+            var portid = "inport_" + roleid;
+            node.inputPorts[portid] = {
+              id: portid,
+              role: {
+                type: 1,
+                roleid: roleid
+              }
+            }
+          }
+          for(var j=0; j<c.outputs.length; j++) {
+            var op = c.outputs[j];
+            var roleid = op.id;
+            var portid = "outport_" + roleid;
+            node.outputPorts[portid] = {
+              id: portid,
+              role: {
+                type: 1,
+                roleid: roleid
+              }
+            }
+          }
+          tpl.Nodes[nodeid] = node;
+        }
+        // Workflow Variables
+        var varid_hash = {};
+        var filevars = {};
+        for(var i=0; i<wflow.variables.length; i++) {
+          var v = wflow.variables[i];
+          if(!v.resolved)
+            continue;
+          // Create a hash of variable id to variable object
+          varid_hash[v.id] = v;
+          var fid = null;
+          // Create a mapping of file ids to variables it contains
+          for(var cid in v.provenance) {
+            var fid = v.provenance[cid].file_id;
+            if(!(fid in filevars))
+              filevars[fid] = [];
+            filevars[fid].push(v.id);
+            tpl.Variables[fid] = {
+              id: fid,
+              name: fid,
+              extra: {
+                graph_variables: filevars[fid]
+              },
+              type: 1 //FIXME: use category here
+            }
+          }
+        }
+
+        // Create Workflow Links
+        var vars_done = {};
+        for(var i=0; i<wflow.links.length; i++) {
+          var l = wflow.links[i];
+          if(l.variable in vars_done)
+            continue;
+
+          var v = varid_hash[l.variable];
+          var from = v.provenance[l.from];
+          var to = v.provenance[l.to];
+
+          if(l.type == "data") {
+            var lid = l.to+"_"+to.file_id;
+            var link = {
+              id: lid,
+              toNode: {id: l.to},
+              toPort: {id: "inport_" + to.file_id},
+              variable: {id: to.file_id}
+            };
+            tpl.Variables[to.file_id].category = tpl.Nodes[l.to].category;
+            tpl.Links[lid] = link;
+          }
+          else if(l.type == "output") {
+            var lid = l.from+"_"+from.file_id;
+            var link = {
+              id: lid,
+              fromNode: {id: l.from},
+              fromPort: {id: "outport_" + from.file_id},
+              variable: {id: from.file_id}
+            };
+            tpl.Variables[from.file_id].category = tpl.Nodes[l.from].category;
+            tpl.Links[lid] = link;
+          }
+          else if(l.type == "component") {
+            // TODO:
+            // Check from.metadata with to.metadata
+            // If not same, then add conversion fragment if possible
+            var frommeta = JSON.stringify(from.metadata);
+            var tometa = JSON.stringify(to.metadata);
+            if(frommeta != tometa) {
+              for(var j=0; j<clib.workflow_fragments.length; j++) {
+                var wfrag = clib.workflow_fragments[j];
+                if(wfrag.variable == v.standard_name) {
+                  var wfrommeta = JSON.stringify(wfrag.from.metadata);
+                  var wtometa = JSON.stringify(wfrag.to.metadata);
+                  if(frommeta == wfrommeta && tometa == wtometa) {
+                    // Found a Conversion worklfow match
+                    /*
+                    console.log("Adding conversion workflow " + wfrag.name + " for "+v.standard_name
+                    +" from "+frommeta+" to "+tometa);
+                    */
+                    var wtpl = JSON.parse(JSON.stringify(wfrag.workflow.template));
+                    tpl.Nodes = Object.assign({}, tpl.Nodes, wtpl.Nodes);
+                    // FIXME: Remove I/O variables from.workflow_variable
+                    tpl.Variables = Object.assign({}, tpl.Variables, wtpl.Variables);
+                    delete tpl.Variables[wfrag.from.workflow_variable];
+                    delete tpl.Variables[wfrag.to.workflow_variable];
+                    // FIXME: Modify I/O links
+                    tpl.Links = Object.assign({}, tpl.Links, wtpl.Links);
+                    for(var lid in tpl.Links) {
+                      var wl = tpl.Links[lid];
+                      if(wl.variable.id == wfrag.from.workflow_variable) {
+                        wl.variable.id = from.file_id;
+                        wl.fromNode = {id: l.from};
+                        wl.fromPort = {id: "outport_" + from.file_id};
+                      }
+                      else if(wl.variable.id == wfrag.to.workflow_variable) {
+                        wl.variable.id = to.file_id;
+                        wl.toNode = {id: l.to};
+                        wl.toPort = {id: "inport_" + to.file_id};
+                      }
+                      tpl.Links[lid] = wl;
+                    }
+                    tpl.Variables[from.file_id].category = tpl.Nodes[l.from].category;
+                    tpl.Variables[to.file_id].category = tpl.Nodes[l.to].category;
+                    break;
+                  }
+                }
+              }
+              continue;
+            }
+
+            var lid = l.from+"_"+l.to+"_"+from.file_id;
+            var link = {
+              id: lid,
+              fromNode: {id: l.from},
+              fromPort: {id: "outport_" + from.file_id},
+              toNode: {id: l.to},
+              toPort: {id: "inport_" + to.file_id},
+              variable: {id: from.file_id}
+            }
+            tpl.Variables[from.file_id].category = tpl.Nodes[l.from].category;
+            tpl.Links[lid] = link;
+            // Since we are combining 2 variables into 1 here as they are compatible
+            // Delete one of them
+            delete tpl.Variables[to.file_id];
+          }
+
+          if(from) {
+            for(var j=0; j<filevars[from.file_id]; j++) {
+              var vid = filevars[from.file_id][j];
+              vars_done[vid] = true;
+            }
+          }
+          if(to) {
+            for(var j=0; j<filevars[to.file_id]; j++) {
+              var vid = filevars[to.file_id][j];
+              vars_done[vid] = true;
+            }
           }
         }
         return wingsw;
       }
     }
 
+    class VariableProvenance {
+      constructor(cid, fid, metadata, isinput) {
+        this.component = cid;
+        this.file_id = fid;
+        this.metadata = metadata;
+        this.isinput = isinput;
+      }
+    }
 
     window.customElements.define(MintComponentLibrary.is, MintComponentLibrary);
   </script>

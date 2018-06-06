@@ -161,6 +161,7 @@ GraphNode.prototype.setDefaultColors = function() {
   else
     this.config.setTextcolor("rgba(72,42,3,1)");
 
+  this.config.setCategory(this.config.category);
   this.config.stackcolor = this.config.getBgcolor();
 };
 
