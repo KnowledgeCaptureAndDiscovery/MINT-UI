@@ -162,7 +162,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <iron-media-query query="max-width: 767px" query-matches="{{smallScreen}}"></iron-media-query>
 
     <!-- Component Library -->
-    <mint-component-library component-library="{{library}}"></mint-component-library>
+    <mint-component-library
+      server="[[server]]" userid="[[userid]]" domain="[[domain]]"
+      component-library="{{library}}"
+    ></mint-component-library>
 
     <div class="detail" smooth has-content$="[[_isDefined(userid)]]">
       <h2>[[category.title]]: [[item.title]]</h2>
@@ -221,6 +224,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             selected-workflow="{{workflow}}"
             selected-graph="{{selectedWorkflowGraph}}"
             selected-items="{{selectedWorkflowItems}}"
+            server="[[server]]" userid="[[userid]]" domain="[[domain]]"
             ></mint-workflows>
         </div>
 
@@ -240,6 +244,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       static get properties() {
         return {
+          server: String,
+          userid: String,
+          domain: String,
           categories: Array,
           category: Object,
           item: {

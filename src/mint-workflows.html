@@ -113,7 +113,12 @@
         <paper-icon-button icon="arrow-back" on-click="_backToList"></paper-icon-button>
       </template>
       <div class="grow">&nbsp;</div>
-      <paper-button>Workflows</paper-button>
+      <template is="dom-if" if="[[!_workflowDefined(selectedWorkflow)]]">
+        <paper-button>Workflows</paper-button>
+      </template>
+      <template is="dom-if" if="[[_workflowDefined(selectedWorkflow)]]">
+        <paper-button raised on-click="runWorkflow">Run Workflow</paper-button>
+      </template>
       <div class="grow">&nbsp;</div>
       <paper-icon-button icon="close" on-click="_resetWorkflows"></paper-icon-button>
     </div>
@@ -164,6 +169,9 @@
       }
       static get properties() {
         return {
+          server: String,
+          userid: String,
+          domain: String,
           workflows: {
             type: Array,
             notify: true
@@ -231,12 +239,66 @@
         this.$.workflow.zoomOut();
       }
 
+      runWorkflow() {
+        var tpl = this.selectedWorkflow.wings_workflow.template;
+        var gtpl = this.$.workflow.template;
+
+        // Add coordinates to Nodes and Variables
+        for(var nid in tpl.Nodes) {
+          var coords = gtpl.nodes[nid].getCoords();
+          tpl.Nodes[nid].comment = "center:x="+coords.x+",y="+coords.y;
+        }
+        for(var vid in tpl.Variables) {
+          var coords = gtpl.variables[vid].getCoords();
+          tpl.Variables[vid].comment = "center:x="+coords.x+",y="+coords.y;
+        }
+
+        // Get url prefix for operations
+        var purl = this.server + "/users/" + this.userid + "/" + this.domain;
+
+        // First save the template
+        var data = "template_id=" + tpl.id;
+        data += "&constraints_json=[]";
+        data += "&json=" + encodeURIComponent(JSON.stringify(tpl));
+        console.log(tpl);
+
+        this._postResource({
+          url: purl + "/workflows/saveTemplateJSON",
+          onLoad: function(e) {
+            console.log(e.target.responseText);
+          },
+          onError: function() {
+            console.log("Cannot save");
+          }
+        }, data);
+      }
+
       toggleView(d) {
         if(d.detail.value)
           this.$.workflow.set("data", this.selectedWorkflow.model_graph);
         else
           this.$.workflow.set("data", this.selectedWorkflow.wings_workflow);
       }
+
+      _getResource(rq) {
+        var xhr = new XMLHttpRequest();
+        xhr.addEventListener('load', rq.onLoad.bind(this));
+        xhr.addEventListener('error', rq.onError.bind(this));
+        xhr.withCredentials = true;
+        xhr.open('GET', rq.url);
+        xhr.send();
+      }
+
+      _postResource(rq, data) {
+        var xhr = new XMLHttpRequest();
+        xhr.addEventListener('load', rq.onLoad.bind(this));
+        xhr.addEventListener('error', rq.onError.bind(this));
+        xhr.withCredentials = true;
+        xhr.open('POST', rq.url, true);
+        xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        xhr.send(data);
+      }
+
     }
     window.customElements.define(MintWorkflows.is, MintWorkflows);
 

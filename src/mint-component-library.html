@@ -20,6 +20,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       static get properties() {
         return {
+          server: String,
+          userid: String,
+          domain: String,
           componentLibrary: {
             type: Object,
             notify: true
@@ -321,6 +324,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       createWorkflow(graph, clib) {
         this.variables.reverse();
         var workflow = {
+          name: graph.id,
           components: this.components,
           variables: this.variables,
           links: [],
@@ -592,12 +596,61 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       createWingsWorkflow(wflow, clib) {
         if(wflow == null)
           return null;
+
+        // FIXME: This is currently hardcoded. Should be configurable
+        clib.storage = "/home/varun/.wings/storage";
+        var dotpath = "/usr/bin/dot";
+        var ontpfx = "http://www.wings-workflows.org/ontology";
+
+        var tname = wflow.name + "_" + Math.random().toString(36).substr(2, 9);
+        var usfx = "/users/" + clib.userid + "/" + clib.domain;
+        var pfx = clib.server + "/export" + usfx;
+        var tns = pfx + "/workflows/" + tname + ".owl#";
+        var tid = tns + tname;
+
+        var clibns = pfx + "/components/library.owl#";
+        var purl = clib.server + usfx;
+        var pdir = clib.storage + usfx;
+
         var wingsw = {
           template: {
-            version: 0,
+            id: tid,
             Nodes: {},
             Links: {},
-            Variables: {}
+            Variables: {},
+            inputRoles: {},
+            outputRoles: {},
+            onturl: ontpfx + "/workflow.owl",
+            wflowns: ontpfx + "/workflow.owl#",
+            version: 0,
+            subtemplates: {},
+            metadata: {},
+            rules: {},
+            props: {
+              "lib.concrete.url": pfx + "/components/library.owl",
+              "lib.domain.execution.url": pfx + "/executions/library.owl",
+              "lib.domain.code.storage": pdir + "/code/library",
+              "domain.workflows.dir.url": pfx + "/workflows",
+              "user.id": clib.userid,
+              "tdb.repository.dir": clib.storage + "/TDB",
+              "viewer.id": clib.userid,
+              "domain.executions.dir.url": pfx + "/executions",
+              "lib.domain.data.url": pfx + "/data/library.owl",
+              "ont.domain.data.url": pfx + "/data/ontology.owl",
+              "lib.abstract.url": pfx + "/components/abstract.owl",
+              "lib.provenance.url": clib.server + "/export/common/provenance/library.owl",
+              "ont.data.url": ontpfx + "/data.owl",
+              "lib.domain.data.storage": pdir + "/data",
+              "lib.domain.workflow.url": pfx + "/workflows/library.owl",
+              "lib.resource.url": clib.server + "/export/common/resource/library.owl",
+              "ont.component.url": ontpfx + "/component.owl",
+              "ont.workflow.url": ontpfx + "/workflow.owl",
+              "ont.dir.url": ontpfx,
+              "dot.path": dotpath,
+              "ont.domain.component.ns": clibns,
+              "ont.execution.url": ontpfx + "/execution.owl",
+              "ont.resource.url": ontpfx + "/resource.owl"
+            }
           }
         }
         var tpl = wingsw.template;
@@ -605,7 +658,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         // Create Workflow Nodes & Ports
         for(var i=0; i<wflow.components.length; i++) {
           var c = wflow.components[i];
-          var nodeid = c.id;
+          var nodeid = tns + c.id + "_node";
           var node = {
             id: nodeid,
             name: c.name,
@@ -614,33 +667,37 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             category: c.category,
             componentVariable: {
               binding: {
-                id: c.name,
+                id: clibns + c.name,
                 type: "uri"
               },
-              id: "component_" + c.id
+              id: nodeid + "_component"
             }
           }
           for(var j=0; j<c.inputs.length; j++) {
             var ip = c.inputs[j];
             var roleid = ip.id;
-            var portid = "inport_" + roleid;
+            var portid = tns + roleid + "_inport";
             node.inputPorts[portid] = {
               id: portid,
               role: {
                 type: 1,
-                roleid: roleid
+                roleid: roleid,
+                dimensionality: 0,
+                id: portid + "_role"
               }
             }
           }
           for(var j=0; j<c.outputs.length; j++) {
             var op = c.outputs[j];
             var roleid = op.id;
-            var portid = "outport_" + roleid;
+            var portid = tns + roleid + "_outport";
             node.outputPorts[portid] = {
               id: portid,
               role: {
                 type: 1,
-                roleid: roleid
+                roleid: roleid,
+                dimensionality: 0,
+                id: portid + "_role"
               }
             }
           }
@@ -658,13 +715,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           var fid = null;
           // Create a mapping of file ids to variables it contains
           for(var cid in v.provenance) {
-            var fid = v.provenance[cid].file_id;
+            var fname = v.provenance[cid].file_id;
+            var fid = tns + fname;
             if(!(fid in filevars))
               filevars[fid] = [];
             filevars[fid].push(v.id);
             tpl.Variables[fid] = {
               id: fid,
-              name: fid,
+              name: fname,
               extra: {
                 graph_variables: filevars[fid]
               },
@@ -684,26 +742,34 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           var from = v.provenance[l.from];
           var to = v.provenance[l.to];
 
+          // Create fully qualified uris for use in wings template
+          l.from_uri = tns + l.from + "_node";
+          l.to_uri = tns + l.to + "_node";
+          if(from)
+            from.file_uri = tns + from.file_id;
+          if(to)
+            to.file_uri = tns + to.file_id;
+
           if(l.type == "data") {
-            var lid = l.to+"_"+to.file_id;
+            var lid = l.to_uri+"_"+to.file_id;
             var link = {
               id: lid,
-              toNode: {id: l.to},
-              toPort: {id: "inport_" + to.file_id},
-              variable: {id: to.file_id}
+              toNode: {id: l.to_uri},
+              toPort: {id: to.file_uri + "_inport"},
+              variable: {id: to.file_uri}
             };
-            tpl.Variables[to.file_id].category = tpl.Nodes[l.to].category;
+            tpl.Variables[to.file_uri].category = tpl.Nodes[l.to_uri].category;
             tpl.Links[lid] = link;
           }
           else if(l.type == "output") {
-            var lid = l.from+"_"+from.file_id;
+            var lid = l.from_uri+"_"+from.file_id;
             var link = {
               id: lid,
-              fromNode: {id: l.from},
-              fromPort: {id: "outport_" + from.file_id},
-              variable: {id: from.file_id}
+              fromNode: {id: l.from_uri},
+              fromPort: {id: from.file_uri + "_outport"},
+              variable: {id: from.file_uri}
             };
-            tpl.Variables[from.file_id].category = tpl.Nodes[l.from].category;
+            tpl.Variables[from.file_uri].category = tpl.Nodes[l.from_uri].category;
             tpl.Links[lid] = link;
           }
           else if(l.type == "component") {
@@ -724,30 +790,41 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     console.log("Adding conversion workflow " + wfrag.name + " for "+v.standard_name
                     +" from "+frommeta+" to "+tometa);
                     */
-                    var wtpl = JSON.parse(JSON.stringify(wfrag.workflow.template));
+                    var wtplstr = JSON.stringify(wfrag.workflow.template);
+
+                    // Convert ids to fully qualified uris
+                    wtplstr = wtplstr.replace(/\[wflowns\]#/g, tns);
+                    wtplstr = wtplstr.replace(/\[clibns\]#/g, clibns);
+                    var wtpl = JSON.parse(wtplstr);
+
+                    wfrag.from.workflow_variable_uri = tns + wfrag.from.workflow_variable;
+                    wfrag.to.workflow_variable_uri = tns + wfrag.to.workflow_variable;
+
+                    // Copy fragment nodes and variables
                     tpl.Nodes = Object.assign({}, tpl.Nodes, wtpl.Nodes);
-                    // FIXME: Remove I/O variables from.workflow_variable
                     tpl.Variables = Object.assign({}, tpl.Variables, wtpl.Variables);
-                    delete tpl.Variables[wfrag.from.workflow_variable];
-                    delete tpl.Variables[wfrag.to.workflow_variable];
-                    // FIXME: Modify I/O links
+
+                    // Replace I/O variables with variables from parent template
+                    delete tpl.Variables[wfrag.from.workflow_variable_uri];
+                    delete tpl.Variables[wfrag.to.workflow_variable_uri];
+
                     tpl.Links = Object.assign({}, tpl.Links, wtpl.Links);
                     for(var lid in tpl.Links) {
                       var wl = tpl.Links[lid];
-                      if(wl.variable.id == wfrag.from.workflow_variable) {
-                        wl.variable.id = from.file_id;
-                        wl.fromNode = {id: l.from};
-                        wl.fromPort = {id: "outport_" + from.file_id};
+                      if(wl.variable.id == wfrag.from.workflow_variable_uri) {
+                        wl.variable.id = from.file_uri;
+                        wl.fromNode = {id: l.from_uri};
+                        wl.fromPort = {id: from.file_uri + "_outport"};
                       }
-                      else if(wl.variable.id == wfrag.to.workflow_variable) {
-                        wl.variable.id = to.file_id;
-                        wl.toNode = {id: l.to};
-                        wl.toPort = {id: "inport_" + to.file_id};
+                      else if(wl.variable.id == wfrag.to.workflow_variable_uri) {
+                        wl.variable.id = to.file_uri;
+                        wl.toNode = {id: l.to_uri};
+                        wl.toPort = {id: to.file_uri + "_inport"};
                       }
                       tpl.Links[lid] = wl;
                     }
-                    tpl.Variables[from.file_id].category = tpl.Nodes[l.from].category;
-                    tpl.Variables[to.file_id].category = tpl.Nodes[l.to].category;
+                    tpl.Variables[from.file_uri].category = tpl.Nodes[l.from_uri].category;
+                    tpl.Variables[to.file_uri].category = tpl.Nodes[l.to_uri].category;
                     break;
                   }
                 }
@@ -755,32 +832,54 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               continue;
             }
 
-            var lid = l.from+"_"+l.to+"_"+from.file_id;
+            var lid = l.from_uri+"_"+l.to+"_"+from.file_id;
             var link = {
               id: lid,
-              fromNode: {id: l.from},
-              fromPort: {id: "outport_" + from.file_id},
-              toNode: {id: l.to},
-              toPort: {id: "inport_" + to.file_id},
-              variable: {id: from.file_id}
+              fromNode: {id: l.from_uri},
+              fromPort: {id: from.file_uri + "_outport"},
+              toNode: {id: l.to_uri},
+              toPort: {id: to.file_uri + "_inport"},
+              variable: {id: from.file_uri}
             }
-            tpl.Variables[from.file_id].category = tpl.Nodes[l.from].category;
+            tpl.Variables[from.file_uri].category = tpl.Nodes[l.from_uri].category;
             tpl.Links[lid] = link;
             // Since we are combining 2 variables into 1 here as they are compatible
             // Delete one of them
-            delete tpl.Variables[to.file_id];
+            delete tpl.Variables[to.file_uri];
           }
 
           if(from) {
-            for(var j=0; j<filevars[from.file_id]; j++) {
-              var vid = filevars[from.file_id][j];
+            for(var j=0; j<filevars[from.file_uri]; j++) {
+              var vid = filevars[from.file_uri][j];
               vars_done[vid] = true;
             }
           }
           if(to) {
-            for(var j=0; j<filevars[to.file_id]; j++) {
-              var vid = filevars[to.file_id][j];
+            for(var j=0; j<filevars[to.file_uri]; j++) {
+              var vid = filevars[to.file_uri][j];
               vars_done[vid] = true;
+            }
+          }
+        }
+
+        // Create Input and Output roles
+        for(var lid in tpl.Links) {
+          var link = tpl.Links[lid];
+          var v = tpl.Variables[link.variable.id];
+          if(!link.fromNode) {
+            tpl.inputRoles[v.id] = {
+              type: v.type,
+              roleid: getLocalName(v.id),
+              dimensionality: 0,
+              id: v.id + "_irole"
+            }
+          }
+          if(!link.toNode) {
+            tpl.outputRoles[v.id] = {
+              type: v.type,
+              roleid: getLocalName(v.id),
+              dimensionality: 0,
+              id: v.id + "_orole"
             }
           }
         }
