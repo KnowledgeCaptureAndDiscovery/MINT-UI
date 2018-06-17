@@ -63,6 +63,14 @@
         border: 2px solid var(--app-accent-color);
         border-radius: 4px;
       }
+      .heading {
+        margin:0px;
+        padding-top:4px;
+        font-size:18px;
+        margin-bottom:8px;
+        background-color: var(--app-accent-color);
+        color:white;
+      }
       paper-toggle-button {
         --paper-toggle-button-checked-button-color:  white;
         --paper-toggle-button-unchecked-button-color:  var(--app-accent-color);
@@ -156,6 +164,12 @@
         <paper-toggle-button on-checked-changed="toggleView">MODEL GRAPH</paper-toggle-button>
       </template>
     </div>
+
+    <!-- Workflow Run Status dialog -->
+    <paper-dialog id="runwindow">
+      <div class="heading">Workflow Run</div>
+      <div id="runstatus"></div>
+    </paper-dialog>
   </template>
 
   <script>
@@ -253,24 +267,16 @@
           tpl.Variables[vid].comment = "center:x="+coords.x+",y="+coords.y;
         }
 
-        // Get url prefix for operations
-        var purl = this.server + "/users/" + this.userid + "/" + this.domain;
+        this.$.runwindow.open();
 
-        // First save the template
-        var data = "template_id=" + tpl.id;
-        data += "&constraints_json=[]";
-        data += "&json=" + encodeURIComponent(JSON.stringify(tpl));
-        console.log(tpl);
-
-        this._postResource({
-          url: purl + "/workflows/saveTemplateJSON",
-          onLoad: function(e) {
-            console.log(e.target.responseText);
-          },
-          onError: function() {
-            console.log("Cannot save");
-          }
-        }, data);
+        var me = this;
+        // Save all components from workflow that aren't present
+        me._addUnknownComponents(tpl, function() {
+          // Save Template
+          me._saveTemplate(tpl, function() {
+            me._openTemplateInWings(tpl);
+          });
+        });
       }
 
       toggleView(d) {
@@ -278,6 +284,196 @@
           this.$.workflow.set("data", this.selectedWorkflow.model_graph);
         else
           this.$.workflow.set("data", this.selectedWorkflow.wings_workflow);
+      }
+
+      _addUnknownComponents(tpl, fn) {
+        var tpl_comps = {};
+        // FIXME: Using the top dataobject as the role type here
+        var topdata = tpl.props["ont.data.url"] + "#DataObject";
+        var xsdns = "http://www.w3.org/2001/XMLSchema#";
+
+        // Convert Template Nodes to Wings components
+        for(var nid in tpl.Nodes) {
+          var node = tpl.Nodes[nid];
+          var cid = node.componentVariable.binding.id;
+          var c = {
+            id: cid,
+            type: 1,
+            inputs: [],
+            outputs: [],
+            rules: [],
+            inheritedRules: [],
+            requirement: {
+              storageGB: 0,
+              memoryGB: 0,
+              needs64bit: false,
+              softwareIds: []
+            }
+          };
+          var i=1;
+          var p=1;
+          for(var pid in node.inputPorts) {
+            var port = node.inputPorts[pid];
+            var role = {
+              id: cid + "_" + port.role.roleid,
+              dimensionality: port.role.dimensionality,
+              role: port.role.roleid
+            };
+            if(port.role.type == 2) {
+              // Parameter
+              role.prefix = "-p" + p++;
+              role.isParam = true;
+              //FIXME: Using xsd string as roleytpe here
+              role.type = xsdns + "string";
+            }
+            else {
+              // Data
+              role.prefix = "-i" + i++;
+              role.isParam = false;
+              // FIXME: Using topdata as roletype here
+              role.type = topdata;
+            }
+            c.inputs.push(role);
+          }
+          var o=1;
+          for(var pid in node.outputPorts) {
+            var port = node.outputPorts[pid];
+            c.outputs.push({
+              id: cid + "_" + port.role.roleid,
+              dimensionality: port.role.dimensionality,
+              role: port.role.roleid,
+              prefix: "-o" + o++,
+              isParam: false,
+              // FIXME: Using topdata as roletype here
+              type: topdata
+            });
+          }
+          tpl_comps[cid] = c;
+        }
+
+        // Save components that aren't in Wings
+        var me = this;
+        this._getComponents(function(cmap, ctop) {
+          for (var cid in cmap) {
+            if(cid in tpl_comps)
+              delete tpl_comps[cid];
+          }
+          // If all already accounted for, call callback
+          var numleft = Object.keys(tpl_comps).length;
+          if(numleft == 0)
+            fn();
+
+          for(cid in tpl_comps) {
+            var c = tpl_comps[cid];
+
+            // Add component and save component description (I/O etc)
+            me._addComponent(c, ctop, function(comp) {
+              me._saveComponentJSON(comp, function(comp2) {
+                delete tpl_comps[comp2.id];
+                var numleft = Object.keys(tpl_comps).length;
+                // If all saved, then call callback
+                if(numleft == 0)
+                  fn();
+              });
+            });
+          }
+        })
+      }
+
+      _getComponents(fn) {
+        // Get url prefix for operations
+        var purl = this.server + "/users/" + this.userid + "/" + this.domain;
+        this._getResource({
+          url: purl + "/components/getComponentHierarchyJSON",
+          onLoad: function(e) {
+            var ctree = JSON.parse(e.target.responseText);
+            var ctop = ctree.cls.id;
+            var cmap = this._getComponentMap(ctree, {});
+            fn(cmap, ctop);
+          },
+          onError: function() {
+            console.log("Cannot fetch components");
+          }
+        })
+      }
+
+      _getComponentMap(node, map) {
+        var comp = node.cls.component;
+        if(comp) {
+          map[comp.id] = comp;
+        }
+        for(var i=0; i<node.children.length; i++) {
+          map = this._getComponentMap(node.children[i], map);
+        }
+        return map;
+      }
+
+      _addComponent(c, ctop, fn) {
+        // Get url prefix for operations
+        var purl = this.server + "/users/" + this.userid + "/" + this.domain;
+        var data = "cid=" + encodeURIComponent(c.id);
+        data += "&parent_cid=";
+        data += "&parent_type=" + encodeURIComponent(ctop);
+        Polymer.dom(this.$.runstatus).innerHTML = "Adding component "+c.id;
+
+        // fn();
+        this._postResource({
+          url: purl + "/components/type/addComponent",
+          onLoad: function(e) {
+            if(e.target.responseText == "OK")
+              fn(c);
+          },
+          onError: function() {
+            console.log("Cannot save");
+          }
+        }, data);
+      }
+
+      _saveComponentJSON(c, fn) {
+        // Get url prefix for operations
+        var purl = this.server + "/users/" + this.userid + "/" + this.domain;
+        var data = "cid=" + encodeURIComponent(c.id);
+        data += "&component_json=" + encodeURIComponent(JSON.stringify(c));
+        // fn();
+        this._postResource({
+          url: purl + "/components/type/saveComponentJSON",
+          onLoad: function(e) {
+            if(e.target.responseText == "OK")
+              fn(c);
+          },
+          onError: function() {
+            console.log("Cannot save");
+          }
+        }, data);
+      }
+
+      _saveTemplate(tpl, fn) {
+        //TODO: Get a MD5 Hash for template to check if it is already saved.
+        // - To avoid cluttering up template library
+
+        // Get url prefix for operations
+        var purl = this.server + "/users/" + this.userid + "/" + this.domain;
+        var data = "template_id=" + encodeURIComponent(tpl.id);
+        data += "&constraints_json=[]";
+        data += "&json=" + encodeURIComponent(JSON.stringify(tpl));
+        Polymer.dom(this.$.runstatus).innerHTML = "Saving Template in Wings";
+        // fn();
+        this._postResource({
+          url: purl + "/workflows/saveTemplateJSON",
+          onLoad: function(e) {
+            fn();
+          },
+          onError: function() {
+            console.log("Cannot save");
+          }
+        }, data);
+      }
+
+      _openTemplateInWings(tpl) {
+        var url = tpl.id.replace("/export", "");
+        Polymer.dom(this.$.runstatus).innerHTML = "Workflow Saved<br />" +
+          "<a target='_blank' href='" + url +
+          "'>Run workflow in Wings</a>";
       }
 
       _getResource(rq) {
