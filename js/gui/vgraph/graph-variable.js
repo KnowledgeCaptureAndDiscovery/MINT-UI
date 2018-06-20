@@ -186,6 +186,9 @@ VGraphVariable.prototype.getCoords = function() {
 }
 
 VGraphVariable.prototype.setCoords = function(coords, animate) {
+  if(!coords) {
+    return;
+  }
   if (coords.legacy)
     return this.setLegacyCoords(coords);
 

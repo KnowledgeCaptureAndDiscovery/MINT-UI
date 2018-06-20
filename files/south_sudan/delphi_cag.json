@@ -1,0 +1,68 @@
+{
+  "variables": [
+    {
+      "standard_name": "conflict",
+      "id": "conflict",
+      "name": "conflict",
+      "position": {
+        "x": 171.99568,
+        "y": 157.23839999999998
+      }
+    },
+    {
+      "standard_name": "intervention",
+      "id": "intervention",
+      "name": "intervention",
+      "position": {
+        "x": 265.37248,
+        "y": 191.20368
+      }
+    },
+    {
+      "standard_name": "crop_technology",
+      "id": "crop_technology",
+      "name": "crop technology",
+      "position": {
+        "x": 82.917064,
+        "y": 195.1584
+      }
+    },
+    {
+      "standard_name": "food_insecurity",
+      "id": "food_insecurity",
+      "name": "food insecurity",
+      "position": {
+        "x": 167.67136,
+        "y": 92.12639999999999
+      }
+    },
+    {
+      "standard_name": "atmosphere_water__domain_time_integral_of_precipitation_leq-volume_flux",
+      "id": "precipitation",
+      "name": "precipitation",
+      "position": {
+        "x": 168.51880000000003,
+        "y": 30
+      }
+    }
+  ],
+  "name": "Dynamic Bayes Net Model",
+  "links": [
+    {
+      "to": "intervention",
+      "from": "conflict"
+    },
+    {
+      "to": "crop_technology",
+      "from": "conflict"
+    },
+    {
+      "to": "food_insecurity",
+      "from": "conflict"
+    },
+    {
+      "to": "food_insecurity",
+      "from": "precipitation"
+    }
+  ]
+}

@@ -1,0 +1,115 @@
+{
+  "name": "Dynamic Bayes Net Model",
+  "dateCreated": "2018-06-17 18:32:20.749831",
+  "variables": [
+    {
+      "name": "conflict",
+      "units": "units",
+      "dtype": "real",
+      "arguments": [],
+      "indicators": [
+        {
+          "name": "Political stability and absence of violence/terrorism (index), Value",
+          "source": "WB",
+          "initial_value": -1.2
+        }
+      ]
+    },
+    {
+      "name": "intervention",
+      "units": "units",
+      "dtype": "real",
+      "arguments": [
+        "conflict"
+      ],
+      "indicators": null
+    },
+    {
+      "name": "crop technology",
+      "units": "units",
+      "dtype": "real",
+      "arguments": [
+        "conflict"
+      ],
+      "indicators": null
+    },
+    {
+      "name": "food insecurity",
+      "units": "units",
+      "dtype": "real",
+      "arguments": [
+        "conflict",
+        "precipitation"
+      ],
+      "indicators": [
+        {
+          "name": "average dietary energy supply adequacy",
+          "source": "FAO",
+          "initial_value": 47679730.5815153
+        },
+        {
+          "name": "average value of food production",
+          "source": "FAO",
+          "initial_value": 3.42114229481308
+        },
+        {
+          "name": "Share of dietary energy supply derived from cereals, roots and tubers",
+          "source": "FAO",
+          "initial_value": 95000.0
+        },
+        {
+          "name": "Rail lines density",
+          "source": "WB",
+          "initial_value": 1.9791885016055801
+        },
+        {
+          "name": "Gross domestic product per capita (in purchasing power equivalent)",
+          "source": "WB",
+          "initial_value": 884.5936849999997
+        },
+        {
+          "name": "Percentage of arable land equipped for irrigation",
+          "source": "FAO",
+          "initial_value": 38.1
+        },
+        {
+          "name": "Value of food imports over total merchandise exports",
+          "source": "FAO",
+          "initial_value": 0.0
+        },
+        {
+          "name": "Political stability and absence of violence/terrorism",
+          "source": "WB/WWGI",
+          "initial_value": -1.2
+        },
+        {
+          "name": "Per capita food production variability",
+          "source": "FAO",
+          "initial_value": 884.5936849999997
+        },
+        {
+          "name": "Per capita food supply variability",
+          "source": "FAO",
+          "initial_value": 507.0
+        },
+        {
+          "name": "Access to improved water sources",
+          "source": "WHO/UNICEF",
+          "initial_value": 58.7
+        },
+        {
+          "name": "Access to improved sanitation facilities",
+          "source": "WHO/UNICEF",
+          "initial_value": 6.6
+        }
+      ]
+    },
+    {
+      "name": "precipitation",
+      "units": "units",
+      "dtype": "real",
+      "arguments": [],
+      "indicators": null
+    }
+  ]
+}

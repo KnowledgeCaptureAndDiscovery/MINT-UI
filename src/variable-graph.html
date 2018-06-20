@@ -109,10 +109,15 @@
 
     <!-- Top Toolbar -->
     <div class="toolbar">
-      <paper-button on-click="save">Save</paper-button>
-      <paper-button on-click="layout">Layout</paper-button>
-      <template is="dom-if" if="[[editable]]">
-        <paper-button on-click="analyze">Analyze</paper-button>
+      <template is="dom-if" if="[[!noToolbar]]">
+        <paper-button on-click="save">Save</paper-button>
+        <paper-button on-click="layout">Layout</paper-button>
+        <template is="dom-if" if="[[editable]]">
+          <paper-button on-click="analyze">Analyze</paper-button>
+        </template>
+      </template>
+      <template is="dom-if" if="[[noToolbar]]">
+        <paper-button>VARIABLE GRAPH</paper-button>
       </template>
     </div>
 
@@ -182,6 +187,10 @@
           editable: Boolean,
           autoLayout: Boolean,
           autoLoad: Boolean,
+          noToolbar: {
+            type: Boolean,
+            value: false
+          },
           width: {
             type: Number,
             value: 1280

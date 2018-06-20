@@ -9,12 +9,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 -->
 
 <link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/app-route/app-route.html">
+
 <link rel="import" href="mint-results-list.html">
 <link rel="import" href="mint-results-detail.html">
 
 <dom-module id="mint-results">
   <template>
     <style>
+
+      :host {
+        display: block;
+      }
+
     </style>
 
     <app-route
@@ -24,22 +31,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         tail="{{subroute}}"></app-route>
 
     <iron-pages role="main" selected="[[page]]" attr-for-selected="name" selected-attribute="visible">
-      <!-- results list  -->
+      <!-- Results List -->
       <mint-results-list name="list" server="[[server]]" userid="[[userid]]" domain="[[domain]]"
         route="[[subroute]]" selectedrunid="{{selectedrunid}}"></mint-results-list>
-      <!-- detail view of one result -->
+      <!-- Results Detail -->
       <mint-results-detail name="detail" server="[[server]]" userid="[[userid]]" domain="[[domain]]"
         route="[[subroute]]"></mint-results-detail>
     </iron-pages>
+
   </template>
 
   <script>
 
-    Polymer({
+  class MintResults extends Polymer.Element {
+    static get is() { return 'mint-results'; }
 
-      is: 'mint-results',
-
-      properties: {
+    static get properties() {
+      return {
         server: String,
         userid: String,
         domain: String,
@@ -53,28 +61,45 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         },
         route: Object,
         routeData: Object
-      },
+      };
+    }
 
-      observers: [
+    static get observers() {
+      return [
         '_routePageChanged(route.prefix, routeData.page)'
-      ],
+      ];
+    }
 
-      _selectedRunid: function(runid) {
-        if(runid) {
-          var new_path = '/results/detail/' + runid;
-          window.history.pushState({}, null, new_path);
-          window.dispatchEvent(new CustomEvent('location-changed'));
-        }
-      },
+    _loadedGraph(data) {
+        console.log("Graph data loaded");
+        console.log(data);
+    }
 
-      _routePageChanged: function(prefix, page) {
-        if(prefix == "/results") {
-          this.page = page || 'list';
-          Polymer.AppLayout.scroll({ top: 0, behavior: 'silent' });
-        }
+    _selectedRunid(runid) {
+      if(runid) {
+        var new_path = '/results/detail/' + runid;
+        window.history.pushState({}, null, new_path);
+        window.dispatchEvent(new CustomEvent('location-changed'));
       }
+    }
 
-    });
+    _routePageChanged(prefix, page) {
+      if(prefix == "/results") {
+        this.page = page || 'list';
+        Polymer.AppLayout.scroll({ top: 0, behavior: 'silent' });
+      }
+    }
+
+    _createGraphURL(cat, item) {
+      if(cat && item) {
+        var url = "files/" + cat + "/" + item + ".json";
+        console.log(url);
+        return url;
+      }
+      return null;
+    }
+  }
+  customElements.define(MintResults.is, MintResults);
 
   </script>
 

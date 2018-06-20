@@ -40,7 +40,21 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         font-weight: 500;
         margin: 32px 0;
       }
-
+      table {
+          border-collapse: collapse;
+          border: 2px solid rgb(200, 200, 200);
+          letter-spacing: 1px;
+          font-family: sans-serif;
+          font-size: .8rem;
+      }
+      th {
+          background-color: #696969;
+          color: #fff;
+      }
+      td, th {
+          border: 1px solid rgb(190, 190, 190);
+          padding: 10px;
+      }
       @media (max-width: 767px) {
         h2 {
           margin: 24px 0;
@@ -57,6 +71,28 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         You need to be logged in to see this section
       </div>
     </template>
+
+    <center>
+      <table>
+        <tr>
+          <th>Region</th>
+          <th>Analysis</th>
+          <th>Run</th>
+        </tr>
+        <tr>
+          <td rowspan="3">South Sudan</td>
+          <td rowspan="2">Food Security</td>
+          <td><a href="results/detail/south_sudan/food_security_projection/run_0b32ec8198">Run 0b32ec8198</a></td>
+        </tr>
+        <tr>
+          <td><a href="results/detail/south_sudan/food_security_projection/run_18e9174f08">Run 18e9174f08</a></td>
+        </tr>
+        <tr>
+          <td>Climate</td>
+          <td><a href="results/detail/south_sudan/climate_projection/run_76ba62233e">Run 76ba62233e</a></td>
+        </tr>
+      </table>
+    </center>
 
   </template>
 
