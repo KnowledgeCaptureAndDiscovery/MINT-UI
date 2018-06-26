@@ -10,17 +10,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 
-<dom-module id="mint-category-data">
+<dom-module id="mint-region-data">
 
   <script>
-    class MintCategoryData extends Polymer.Element {
+    class MintRegionData extends Polymer.Element {
       static get is() {
-        return 'mint-category-data';
+        return 'mint-region-data';
       }
 
       static get properties() {
         return {
-          categories: {
+          regions: {
             type: Array,
             notify: true
           }
@@ -34,12 +34,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       _fetchCategories() {
         var me = this
-        //console.log('fetching categories');
+        //console.log('fetching regions');
         this._getResource({
-          url: 'files/categories.json',
+          url: 'files/regions.json',
           onLoad(e) {
-            me.set('categories', JSON.parse(e.target.responseText));
-            //console.log(me.categories);
+            me.set('regions', JSON.parse(e.target.responseText));
+            //console.log(me.regions);
           },
           onError(e) {
           }
@@ -64,7 +64,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     }
 
 
-    window.customElements.define(MintCategoryData.is, MintCategoryData);
+    window.customElements.define(MintRegionData.is, MintRegionData);
   </script>
 
 </dom-module>

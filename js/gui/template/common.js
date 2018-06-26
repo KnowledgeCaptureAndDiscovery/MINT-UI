@@ -35,7 +35,7 @@ function getLocalName(url) {
     return url;
   if (url.indexOf('urn:') == 0)
     return url.replace(/^.*:/, '');
-  return url.replace(/^.*#/, '');
+  return url.replace(/^.*(#|\/)/, '');
 }
 
 function getNamespace(url) {

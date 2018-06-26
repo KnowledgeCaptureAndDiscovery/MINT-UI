@@ -20,7 +20,7 @@
   {
     "name": "convert_precipitation",
     "description": "Convert Precipitation",
-    "variable": "atmosphere_water__domain_time_integral_of_precipitation_leq-volume_flux",
+    "variable": "atmosphere_water__precipitation_leq-volume_flux",
     "from": {
       "metadata": {
         "units":"cm"

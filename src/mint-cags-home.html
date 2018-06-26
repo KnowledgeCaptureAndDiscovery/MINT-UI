@@ -119,7 +119,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     </style>
 
-    <template is="dom-repeat" items="[[categories]]" strip-whitespace>
+    <template is="dom-repeat" items="[[regions]]" strip-whitespace>
       <div class="item">
         <a class="image-link" href$="cags/list/[[item.name]]">
           <mint-image src="[[item.image]]" alt="[[item.title]]" placeholder-img="[[item.placeholder]]"></mint-image>
@@ -139,7 +139,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       static get properties() {
         return {
-          categories: {
+          regions: {
             type: Array
           }
         };

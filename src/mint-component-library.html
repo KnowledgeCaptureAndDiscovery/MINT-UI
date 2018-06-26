@@ -27,13 +27,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             type: Object,
             notify: true
           },
+          dataCatalog: {
+            type: Object
+          },
           components: {
             type: Array,
             notify: true
           },
           data: {
             type: Array,
-            notify: true
+            notify: true,
+            value: {}
           },
           workflow_fragments: {
             type: Array,
@@ -126,6 +130,38 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       solve(graph) {
+        return this.solve_after_fetch(graph);
+        /*
+        var me = this;
+
+        // Fetch any existing data from the data catalog
+        var num_variables = graph.variables.length;
+        var stdnames = [];
+        for(var i=0; i<num_variables; i++) {
+          var stdname = graph.variables[i].standard_name;
+          if (!(stdname in this.data)) {
+            // If this standard name's data is not fetched
+            stdnames.push(stdname);
+          }
+        }
+        this.dataCatalog.getBindingsForVariables(stdnames, function(bindings){
+          for(var stdname in bindings) {
+            var binding = bindings[stdname];
+            // FIXME: Just using 1 data item for now
+            var b = binding[0];
+            me.data[stdname] = {
+              id: b.md5hash.value,
+              name: getLocalName(b.dataset.value)
+            }
+          }
+          console.log(me.data);
+          // Now solve
+          me.solve_after_fetch(graph);
+        });
+        */
+      }
+
+      solve_after_fetch(graph) {
         var workflows = [];
 
         // Copy variables array

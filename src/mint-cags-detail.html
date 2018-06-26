@@ -11,14 +11,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/polymer/polymer.html">
 <link rel="import" href="../bower_components/app-route/app-route.html">
 <link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
-<link rel="import" href="../bower_components/google-map/google-map.html">
-<link rel="import" href="google-map-data-layer.html">
 <link rel="import" href="mint-button.html">
 <link rel="import" href="mint-common-styles.html">
 <link rel="import" href="mint-ajax.html">
 
 <link rel="import" href="variable-graph.html">
 <link rel="import" href="mint-workflows.html">
+<link rel="import" href="mint-data-catalog.html">
 <link rel="import" href="mint-component-library.html">
 
 <dom-module id="mint-cags-detail">
@@ -94,7 +93,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
       .description {
         margin: 0px;
-        margin-left: 15px;
         vertical-align: top;
       }
       .detail h2 {
@@ -105,7 +103,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         @apply(--layout-horizontal);
       }
 
-      ul {
+      ul.footnote {
         padding: 2px;
         padding-left: 15px;
         font-size: 9px;
@@ -148,47 +146,49 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
 
       }
-
     </style>
 
     <!--
-      app-route provides the name of the category and the item.
+      app-route provides the name of the region and the cag.
     -->
     <app-route
         route="[[route]]"
-        pattern="/:category/:item"
+        pattern="/:region/:category/:cag"
+        tail="{{scenarioRoute}}"
         data="{{routeData}}"></app-route>
 
     <iron-media-query query="max-width: 767px" query-matches="{{smallScreen}}"></iron-media-query>
+
+    <!-- Data Catalog -->
+    <mint-data-catalog
+      server="http://mint-demo.westus2.cloudapp.azure.com"
+      data-catalog="{{catalog}}"
+    ></mint-data-catalog>
 
     <!-- Component Library -->
     <mint-component-library
       server="[[server]]" userid="[[userid]]" domain="[[domain]]"
       component-library="{{library}}"
+      data-catalog="[[catalog]]"
     ></mint-component-library>
 
     <div smooth has-content$="[[_isDefined(userid)]]">
-      <h2>[[category.title]]: [[item.title]]</h2>
-      <div class="content">
-        <!-- Map -->
-        <div class="map">
-          <google-map id="map"
-            api-key="AIzaSyAuaqVMFvr8yEr9WzFEDg0veeOQ2HDwoHU"
-            disable-default-ui
-            latitude="[[category.latitude]]"
-            longitude="[[category.longitude]]"
-            zoom="[[category.zoom]]"
-            styles="[[mapStyles]]">
-            <google-map-data-layer
-              url="[[_createGeoJsonURL(routeData.category)]]"></google-map-data-layer>
-          </google-map>
-        </div>
-
-        <!-- Description-->
+      <h2>[[region.title]] | [[cag.name]]
+        <template is="dom-if" if="[[scenario]]">
+          | [[scenario.name]]
+        </template>
+      </h2>
+      <template is="dom-if" if="[[scenario]]">
         <div class="description">
-          [[item.description]]
+          [[scenario.description]]
         </div>
-      </div>
+        <h3>Data Bindings</h3>
+        <ul>
+          <template is="dom-repeat" items="[[scenario.data]]">
+            <li>[[item.variable]] = [[item.dataset]]</li>
+          </template>
+        </ul>
+      </template>
     </div>
 
     <div smooth>
@@ -196,11 +196,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <div class="content">
         <div class="leftfull" id="graphdiv">
           <mint-ajax result="{{graphData}}" auto
-            url="[[_createGraphURL(routeData.category, routeData.item)]]"></mint-ajax>
+            url="[[cag.json]]"></mint-ajax>
 
           <iron-collapse id="main_graph" opened no-animation>
             <variable-graph id="cag"
               component-library="[[library]]"
+              data-catalog="[[catalog]]"
               data="[[graphData]]"
               workflows="{{workflows}}"
               editable auto-load></variable-graph>
@@ -211,7 +212,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               data="[[selectedWorkflowGraph]]"></variable-graph>
           </iron-collapse>
 
-          <ul>
+          <ul class="footnote">
             <li>Double tap/click on the canvas to add a variable</li>
             <li>Double tap/click a variable to edit the variable</li>
             <li>Long press a variable to drag a link out of it</li>
@@ -247,13 +248,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           server: String,
           userid: String,
           domain: String,
-          categories: Array,
-          category: Object,
-          item: {
+          regions: Array,
+          region: Object,
+          category: {
             type: Object,
-            computed: '_computeItem(category.items, routeData.item)'
+            computed: '_computeCategory(region.categories, routeData.category)'
           },
-
+          cag: {
+            type: Object,
+            computed: '_computeCag(category, routeData.cag)'
+          },
+          scenario: {
+            type: Object,
+            computed: '_computeScenario(cag, scenarioRoute.path)'
+          },
           route: Object,
           routeData: {
             type: Object,
@@ -282,11 +290,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           selectedWorkflowItems: {
             type: Array,
             observer: '_onSelectedWorkflowItemsChanged'
-          },
-
-          mapStyles: {
-            type: String,
-            value:[{"featureType":"landscape","elementType":"labels","stylers":[{"visibility":"off"}]},{"featureType":"transit","elementType":"labels","stylers":[{"visibility":"off"}]},{"featureType":"poi","elementType":"labels","stylers":[{"visibility":"off"}]},{"featureType":"water","elementType":"labels","stylers":[{"visibility":"off"}]},{"featureType":"road","elementType":"labels.icon","stylers":[{"visibility":"off"}]},{"stylers":[{"hue":"#00aaff"},{"saturation":-100},{"gamma":2.15},{"lightness":12}]},{"featureType":"road","elementType":"labels.text.fill","stylers":[{"visibility":"on"},{"lightness":24}]},{"featureType":"road","elementType":"geometry","stylers":[{"lightness":57}]}]
           }
         };
       }
@@ -295,40 +298,41 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         super();
       }
 
-      _isDefined(item) {
-        return item != null;
+      _isDefined(cag) {
+        return cag != null;
       }
 
-      _createGraphURL(cat, item) {
-        if(cat && item) {
-          var url = "files/" + cat + "/" + item + ".json";
-          return url;
-        }
-        return null;
-      }
-
-      _createGeoJsonURL(cat) {
-        if(cat) {
-          var url = "files/" + cat + "/geojson.json";
-          //console.log(url);
-          return url;
-        }
-        return null;
-      }
-
-      _computeItem(items, itemName) {
-        if(!items || !itemName) return null;
-        for (var i = 0, item; item = items[i]; ++i) {
-          if (item.name === itemName) {
-            //console.log(item);
-            return item;
+      _computeCategory(region_categories, catid) {
+        if(!region_categories || !catid) return null;
+        for (var i = 0; i<region_categories.length; i++) {
+          var category = region_categories[i];
+          if(category.name == catid) {
+            // console.log(category);
+            return category;
           }
         }
       }
 
-      _getCategoryItem(category, item) {
-        if(category)
-          return category[item];
+      _computeCag(category, cagid) {
+        if(!category || !cagid) return null;
+        for (var j=0; j<category.cags.length; j++) {
+          var cag = category.cags[j];
+          if (cag.id === cagid) {
+            // console.log(cag);
+            return cag;
+          }
+        }
+      }
+
+      _computeScenario(cag, scenario_path) {
+        if(!cag || !scenario_path) return null;
+        for (var j=0; j<cag.scenarios.length; j++) {
+          var scenario = cag.scenarios[j];
+          if ("/"+scenario.id === scenario_path) {
+            // console.log(scenario);
+            return scenario;
+          }
+        }
       }
 
       _resetSectionSizes() {
@@ -380,8 +384,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       }
 
-      _onSelectedWorkflowItemsChanged(items) {
-        this.$.tmpcag.selectVariables(items);
+      _onSelectedWorkflowItemsChanged(cags) {
+        this.$.tmpcag.selectVariables(cags);
       }
 
       _routeChanged() {

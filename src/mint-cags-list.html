@@ -11,10 +11,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/polymer/polymer.html">
 <link rel="import" href="../bower_components/app-route/app-route.html">
 <link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../bower_components/google-map/google-map.html">
+<link rel="import" href="google-map-data-layer.html">
 <link rel="import" href="mint-common-styles.html">
 <link rel="import" href="mint-image.html">
-<link rel="import" href="mint-list-item.html">
-<link rel="import" href="mint-item-data.html">
+<link rel="import" href="mint-cag-data.html">
 
 <dom-module id="mint-cags-list">
 
@@ -56,6 +57,25 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         text-decoration: none;
       }
 
+      #map {
+        width:200px;
+        height:150px;
+      }
+      .map {
+        width: 200px;
+        height: 150px;
+        border: 2px solid var(--app-primary-color);
+        border-radius: 4px;
+        margin: 5px 0px;
+      }
+      .description {
+        margin: 0px;
+        margin-left: 15px;
+        vertical-align: top;
+      }
+      .content {
+        @apply(--layout-horizontal);
+      }
       @media (max-width: 767px) {
         .hero-image {
           display: none;
@@ -66,47 +86,82 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           flex-basis: 50%;
           max-width: 50%;
         }
+        .content {
+          @apply(--layout-vertical);
+          @apply(--layout-center);
+        }
       }
 
     </style>
 
     <!--
-      app-route provides the name of the category.
+      app-route provides the name of the region.
     -->
     <app-route
         route="[[route]]"
-        pattern="/:category"
+        pattern="/:region"
         data="{{routeData}}"></app-route>
 
     <!--
-      mint-category-data provides the category data for a given category name.
+      mint-cag-data provides the cags for a given region.
     -->
-    <mint-item-data
-        id="itemData"
-        categories="[[categories]]"
-        category-name="[[routeData.category]]"
-        category="{{category}}"
-        item="{{item}}"
-        failure="{{failure}}"></mint-item-data>
-
-    <!--mint-image
-        alt="[[category.title]]"
-        src="[[category.image]]"
-        placeholder-img="[[category.placeholder]]" class="hero-image"></mint-image-->
+    <mint-cag-data
+        id="cagData"
+        regions="[[regions]]"
+        region-name="[[routeData.region]]"
+        region="{{region}}"
+        cag="{{cag}}"
+        failure="{{failure}}"></mint-cag-data>
 
     <header>
-      <h2>[[category.title]]</h2>
-      <span>[[_getPluralizedQuantity(category.items.length)]]</span>
+      <h2>[[region.title]]</h2>
+      <!--span>[[_getPluralizedQuantity(region.cags.length)]]</span-->
     </header>
-    <br />
 
+    <div class="content">
+      <!-- Map -->
+      <div class="map">
+        <google-map id="map"
+          api-key="AIzaSyAuaqVMFvr8yEr9WzFEDg0veeOQ2HDwoHU"
+          disable-default-ui
+          latitude="[[region.latitude]]"
+          longitude="[[region.longitude]]"
+          zoom="[[region.zoom]]"
+          styles="[[mapStyles]]">
+          <google-map-data-layer
+            url="[[_createGeoJsonURL(routeData.region)]]"></google-map-data-layer>
+        </google-map>
+      </div>
+      <!-- Description-->
+      <div class="description">
+        [[region.description]]
+      </div>
+    </div>
+
+    <template is="dom-repeat" items="[[_getListItems(region.categories)]]" as="cat">
+      <h2>[[cat.title]]</h2>
+      <template is="dom-repeat" items="[[cat.cags]]" as="cag">
+        <h3>[[cag.name]]</h3>
+        <ul>
+        <template is="dom-repeat" items="[[cag.scenarios]]" as="scenario">
+          <li>
+            <a href="cags/detail/[[region.name]]/[[cat.name]]/[[cag.id]]/[[scenario.id]]">
+            [[scenario.name]]</a>
+          </li>
+        </template>
+        </ul>
+      </template>
+    </template>
+
+    <!--
     <div class="grid" hidden$="[[failure]]">
-      <template is="dom-repeat" items="[[_getListItems(category.items)]]" initial-count="4">
-        <a href$="[[_getItemHref(item)]]">
-          <mint-list-item item="[[item]]"></mint-list-item>
+      <template is="dom-repeat" items="[[_getListItems(region.cags)]]" initial-count="4">
+        <a href$="[[_getItemHref(cag)]]">
+          <mint-list-cag cag="[[cag]]"></mint-list-cag>
         </a>
       </template>
     </div>
+    -->
 
   </template>
 
@@ -117,8 +172,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       static get properties() {
         return {
-          categories: Array,
-          category: {
+          regions: Array,
+          region: {
             type: Object,
             notify: true
           },
@@ -129,47 +184,51 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             type: Boolean,
             observer: '_offlineChanged'
           },
-          failure: Boolean
+          failure: Boolean,
+          mapStyles: {
+            type: String,
+            value:[{"featureType":"landscape","elementType":"labels","stylers":[{"visibility":"off"}]},{"featureType":"transit","elementType":"labels","stylers":[{"visibility":"off"}]},{"featureType":"poi","elementType":"labels","stylers":[{"visibility":"off"}]},{"featureType":"water","elementType":"labels","stylers":[{"visibility":"off"}]},{"featureType":"road","elementType":"labels.icon","stylers":[{"visibility":"off"}]},{"stylers":[{"hue":"#00aaff"},{"saturation":-100},{"gamma":2.15},{"lightness":12}]},{"featureType":"road","elementType":"labels.text.fill","stylers":[{"visibility":"on"},{"lightness":24}]},{"featureType":"road","elementType":"geometry","stylers":[{"lightness":57}]}]
+          }
         };
       }
 
       static get observers() {
         return [
-          '_categoryChanged(category, visible)'
+          '_regionChanged(region, visible)'
         ];
       }
 
-      _getListItems(items) {
-        // Return placeholder items when the items haven't loaded yet.
-        return items || [];
+      _getListItems(cags) {
+        // Return placeholder cags when the cags haven't loaded yet.
+        return cags || [];
       }
 
-      _getItemHref(item) {
-        // By returning null when `itemId` is undefined, the href attribute won't be set and
+      _getItemHref(cag) {
+        // By returning null when `cagId` is undefined, the href attribute won't be set and
         // the link will be disabled.
-        return item.name ? ['cags/detail', this.category.name, item.name].join('/') : null;
+        return cag.name ? ['cags/detail', this.region.name, cag.name].join('/') : null;
       }
 
       _getPluralizedQuantity(quantity) {
         if (!quantity) {
           return '';
         }
-        var pluralizedQ = quantity === 1 ? 'item' : 'items';
-        return  '(' + quantity + ' ' + pluralizedQ + ')';
+        var pluralizedQ = quantity === 1 ? 'y' : 'ies';
+        return  '(' + quantity + ' categor' + pluralizedQ + ')';
       }
 
-      _categoryChanged(category, visible) {
+      _regionChanged(region, visible) {
         if (!visible) {
           return;
         }
         this._changeSectionDebouncer = Polymer.Debouncer.debounce(this._changeSectionDebouncer,
           Polymer.Async.microTask, () => {
-            if (category) {
-              // Notify the category and the page's title
+            if (region) {
+              // Notify the region and the page's title
               this.dispatchEvent(new CustomEvent('change-section', {
                 bubbles: true, composed: true, detail: {
-                  category: category.name,
-                  title: category.title
+                  region: region.name,
+                  title: region.title
                 }}));
             } else {
               this.dispatchEvent(new CustomEvent('show-invalid-url-warning', {
@@ -179,13 +238,22 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       _tryReconnect() {
-        this.$.itemData.refresh();
+        this.$.cagData.refresh();
       }
 
       _offlineChanged(offline) {
         if (!offline) {
           this._tryReconnect();
         }
+      }
+
+      _createGeoJsonURL(cat) {
+        if(cat) {
+          var url = "files/" + cat + "/geojson.json";
+          //console.log(url);
+          return url;
+        }
+        return null;
       }
     }
 

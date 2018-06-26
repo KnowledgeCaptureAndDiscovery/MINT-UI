@@ -136,8 +136,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             if(txt.match(/j_security_check/)) {
               if(!me.input_userid || !me.password)
                 return;
-              var data = "j_username=" + me.input_userid;
-              data += "&j_password=" + me.password;
+              var data = "j_username=" + encodeURIComponent(me.input_userid);
+              data += "&j_password=" + encodeURIComponent(me.password);
               me._postResource({
                 url: me.server + '/j_security_check',
                 onLoad: function(e2) {
@@ -223,7 +223,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         xhr.addEventListener('load', rq.onLoad.bind(this));
         xhr.addEventListener('error', rq.onError.bind(this));
         xhr.withCredentials = true;
-        xhr.open('POST', rq.url, true);
+        xhr.open('POST', rq.url);
         xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
         xhr.send(data);
       },

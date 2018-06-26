@@ -10,11 +10,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <link rel="import" href="../bower_components/polymer/polymer.html">
 <link rel="import" href="mint-button.html">
+<link rel="import" href="mint-ajax.html">
 <link rel="import" href="mint-image.html">
 <link rel="import" href="mint-cags-home.html">
 <link rel="import" href="mint-cags-list.html">
 <link rel="import" href="mint-cags-detail.html">
-<link rel="import" href="mint-category-data.html">
+<link rel="import" href="mint-region-data.html">
 
 <dom-module id="mint-cags">
 
@@ -48,15 +49,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         opacity: 1;
       }
 
-      .item {
+      .cag {
         display: block;
         text-decoration: none;
         text-align: center;
         /*margin-bottom: 40px;*/
       }
 
-      .item:nth-of-type(2),
-      .item:nth-of-type(3) {
+      .cag:nth-of-type(2),
+      .cag:nth-of-type(3) {
         display: inline-block;
         width: 50%;
       }
@@ -81,8 +82,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         margin: 32px 0;
       }
 
-      .item:nth-of-type(2) > h2,
-      .item:nth-of-type(3) > h2 {
+      .cag:nth-of-type(2) > h2,
+      .cag:nth-of-type(3) > h2 {
         font-size: 1.1em;
       }
 
@@ -95,8 +96,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           margin: 24px 0;
         }
 
-        .item:nth-of-type(2) > mint-button > a,
-        .item:nth-of-type(3) > mint-button > a {
+        .cag:nth-of-type(2) > mint-button > a,
+        .cag:nth-of-type(3) > mint-button > a {
           padding: 8px 24px;
         }
       }
@@ -110,21 +111,22 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         tail="{{subroute}}"></app-route>
 
     <!--
-      mint-category-data provides the list of categories.
+      mint-region-data provides the list of regions.
     -->
-    <mint-category-data auto categories="{{categories}}"></mint-category-data>
+    <!--mint-ajax url="files/regions.json" auto result="{{regions}}"></mint-ajax-->
+    <mint-region-data auto regions="{{regions}}"></mint-region-data>
 
     <iron-pages role="main" selected="[[page]]" attr-for-selected="name" selected-attribute="visible">
       <!-- cags home  -->
-      <mint-cags-home name="home" categories="[[categories]]"></mint-cags-home>
+      <mint-cags-home name="home" regions="[[regions]]"></mint-cags-home>
 
-      <!-- list view of items in a category -->
-      <mint-cags-list name="list" categories="[[categories]]"
-        category="{{category}}"
+      <!-- list view of cags in a region -->
+      <mint-cags-list name="list" regions="[[regions]]"
+        region="{{region}}"
         route="[[subroute]]"></mint-cags-list>
 
-      <!-- detail view of one item -->
-      <mint-cags-detail name="detail" categories="[[categories]]" category="[[category]]"
+      <!-- detail view of one cag -->
+      <mint-cags-detail name="detail" regions="[[regions]]" region="[[region]]"
         server="[[server]]" userid="[[userid]]" domain="[[domain]]"
         route="[[subroute]]"></mint-cags-detail>
     </iron-pages>
@@ -148,7 +150,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             type: Number,
             value: 0
           },
-          categories: {
+          regions: {
             type: Array
           }
         };
@@ -175,7 +177,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       _onChangeSection(event) {
         var detail = event.detail;
-        this.categoryName = detail.category || '';
+        this.regionName = detail.region || '';
       }
     }
 

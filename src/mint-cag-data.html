@@ -10,77 +10,77 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 
-<dom-module id="mint-item-data">
+<dom-module id="mint-cag-data">
 
   <script>
-    class MintItemData extends Polymer.Element {
+    class MintCagData extends Polymer.Element {
       static get is() {
-        return 'mint-item-data';
+        return 'mint-cag-data';
       }
 
       static get properties() {
         return {
-          categories: {
+          regions: {
             type: Array,
             value: null
           },
-          categoryName: String,
-          itemName: String,
+          regionName: String,
+          cagName: String,
 
-          category: {
+          region: {
             type: Object,
-            computed: '_computeCategory(categoryName, categories)',
+            computed: '_computeRegion(regionName, regions)',
             notify: true
           },
 
-          item: {
+          cag: {
             type: Object,
-            computed: '_computeItem(category.items, itemName)',
+            computed: '_computeCag(region.cags, cagName)',
             notify: true
           },
         };
       }
 
-      _computeCategory(categoryName, categories) {
-        if(!categoryName || !categories)
+      _computeRegion(regionName, regions) {
+        if(!regionName || !regions)
           return null;
 
-        // Fetch the items of the category. Note that the fetch is asynchronous,
-        // which means `category.items` may not be set initially (but that path
+        // Fetch the cags of the region. Note that the fetch is asynchronous,
+        // which means `region.cags` may not be set initially (but that path
         // will be notified when the fetch completes).
-        var categoryObj = this._getItemObject(categoryName);
-        this._fetchItems(categoryObj, 1);
-        return categoryObj;
+        var regionObj = this._getCagObject(regionName);
+        this._fetchCags(regionObj, 1);
+        return regionObj;
       }
 
-      _computeItem(items, itemName) {
-        if(!items) return null;
-        for (var i = 0, item; item = items[i]; ++i) {
-          if (item.name === itemName) {
-            return item;
+      _computeCag(cags, cagName) {
+        if(!cags) return null;
+        for (var i = 0, cag; cag = cags[i]; ++i) {
+          if (cag.name === cagName) {
+            return cag;
           }
         }
       }
 
-      _getItemObject(categoryName) {
-        for (var i = 0; i< this.categories.length; i++) {
-          var c = this.categories[i];
-          if (c.name === categoryName) {
+      _getCagObject(regionName) {
+        for (var i = 0; i< this.regions.length; i++) {
+          var c = this.regions[i];
+          if (c.name === regionName) {
             return c;
           }
         }
         return null;
       }
 
-      _fetchItems(category, attempts) {
-        // Only fetch the items of a category if it has not been previously set.
-        if (!category || category.items) {
+      _fetchCags(region, attempts) {
+        // Only fetch the cags of a region if it has not been previously set.
+        if (!region || region.cags) {
           return;
         }
         this._getResource({
-          url: 'files/' + category.name + '/list.json',
+          url: 'files/' + region.name + '/list.json',
           onLoad(e) {
-            this.set('category.items', JSON.parse(e.target.responseText));
+            this.set('region.categories', JSON.parse(e.target.responseText));
           },
           onError(e) {
           }
@@ -104,14 +104,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       refresh() {
-        if (this.categoryName) {
-          // Try at most 3 times to get the items.
-          this._fetchItems(this._getItemObject(this.categoryName), 3);
+        if (this.regionName) {
+          // Try at most 3 times to get the cags.
+          this._fetchCags(this._getCagObject(this.regionName), 3);
         }
       }
     }
 
-    window.customElements.define(MintItemData.is, MintItemData);
+    window.customElements.define(MintCagData.is, MintCagData);
   </script>
 
 </dom-module>
