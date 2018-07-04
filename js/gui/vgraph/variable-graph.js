@@ -45,7 +45,7 @@ function VGraph(id, store, editor) {
   this.DBG = 0;
 
   this.setData(store);
-};
+}
 
 VGraph.prototype.isEditable = function() {
   return this.editable;
@@ -301,8 +301,8 @@ VGraph.prototype.calculateGraphSizeAfterMove = function(moveditems) {
 };
 
 VGraph.prototype.setViewport = function(animate) {
-  w = this.graphsize.width;
-  h = this.graphsize.height;
+  var w = this.graphsize.width;
+  var h = this.graphsize.height;
   if (animate)
     this.svg.transition().attr("viewBox", "0 0 " + w + " " + h);
   else
@@ -326,6 +326,10 @@ VGraph.prototype.refreshGraphItems = function() {
 };
 
 VGraph.prototype.initDrawingSurface = function() {
+  // Clear existing svg
+  if(this.svg)
+    this.svg.remove();
+
   this.svg = d3.select(document.createElementNS(d3.namespaces.svg, "svg"))
     .attr("preserveAspectRatio", "xMinYMin");
 

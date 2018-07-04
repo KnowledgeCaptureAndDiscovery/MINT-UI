@@ -151,28 +151,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <!--
       app-route provides the name of the region and the cag.
     -->
-    <app-route
-        route="[[route]]"
-        pattern="/:region/:category/:cag"
-        tail="{{scenarioRoute}}"
-        data="{{routeData}}"></app-route>
+    <app-route route="[[route]]" pattern="/:region/:category/:cag" tail="{{scenarioRoute}}" data="{{routeData}}"></app-route>
 
     <iron-media-query query="max-width: 767px" query-matches="{{smallScreen}}"></iron-media-query>
 
     <!-- Data Catalog -->
-    <mint-data-catalog
-      server="http://mint-demo.westus2.cloudapp.azure.com"
-      data-catalog="{{catalog}}"
-    ></mint-data-catalog>
+    <mint-data-catalog server="http://mint-demo.westus2.cloudapp.azure.com" data-catalog="{{catalog}}"></mint-data-catalog>
 
     <!-- Component Library -->
-    <mint-component-library
-      server="[[server]]" userid="[[userid]]" domain="[[domain]]"
-      component-library="{{library}}"
-      data-catalog="[[catalog]]"
-    ></mint-component-library>
+    <mint-component-library server="[[server]]" userid="[[userid]]" domain="[[domain]]" component-library="{{library}}" data-catalog="[[catalog]]"></mint-component-library>
 
-    <div smooth has-content$="[[_isDefined(userid)]]">
+    <div smooth="" has-content$="[[_isDefined(userid)]]">
       <h2>[[region.title]] | [[cag.name]]
         <template is="dom-if" if="[[scenario]]">
           | [[scenario.name]]
@@ -191,25 +180,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       </template>
     </div>
 
-    <div smooth>
+    <div smooth="">
       <!-- Variable Graph -->
       <div class="content">
         <div class="leftfull" id="graphdiv">
-          <mint-ajax result="{{graphData}}" auto
-            url="[[cag.json]]"></mint-ajax>
+          <mint-ajax result="{{graphData}}" auto="" url="[[cag.json]]"></mint-ajax>
 
-          <iron-collapse id="main_graph" opened no-animation>
-            <variable-graph id="cag"
-              component-library="[[library]]"
-              data-catalog="[[catalog]]"
-              data="[[graphData]]"
-              workflows="{{workflows}}"
-              editable auto-load></variable-graph>
+          <iron-collapse id="main_graph" opened="" no-animation="">
+            <variable-graph id="cag" component-library="[[library]]" data-catalog="[[catalog]]" data="[[graphData]]" visible="[[visible]]"
+                            scenario="[[scenario]]" workflows="{{workflows}}" editable auto-load></variable-graph>
           </iron-collapse>
 
-          <iron-collapse id="temporary_graph" no-animation>
-            <variable-graph id="tmpcag" auto-layout
-              data="[[selectedWorkflowGraph]]"></variable-graph>
+          <iron-collapse id="temporary_graph" no-animation="">
+            <variable-graph id="tmpcag" visible="[[visible]]" auto-layout data="[[selectedWorkflowGraph]]"></variable-graph>
           </iron-collapse>
 
           <ul class="footnote">
@@ -220,13 +203,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         </div>
 
         <div class="rightnone" id="workflowdiv">
-          <mint-workflows id="workflows"
-            workflows="{{workflows}}"
-            selected-workflow="{{workflow}}"
-            selected-graph="{{selectedWorkflowGraph}}"
-            selected-items="{{selectedWorkflowItems}}"
-            server="[[server]]" userid="[[userid]]" domain="[[domain]]"
-            ></mint-workflows>
+          <mint-workflows id="workflows" workflows="{{workflows}}" selected-workflow="{{workflow}}" selected-graph="{{selectedWorkflowGraph}}" selected-items="{{selectedWorkflowItems}}" server="[[server]]" userid="[[userid]]" domain="[[domain]]"></mint-workflows>
         </div>
 
       </div>
@@ -290,6 +267,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           selectedWorkflowItems: {
             type: Array,
             observer: '_onSelectedWorkflowItemsChanged'
+          },
+
+          visible: {
+            type: Boolean,
+            value: false
           }
         };
       }
@@ -348,7 +330,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             t0.style("width", "100%");
             t1.transition().style("opacity", 1).style("width", "100%");
             var top = t1.node().offsetTop;
-            Polymer.AppLayout.scroll({top: top, behavior: 'smooth'});
+            scroll({top: top, behavior: 'smooth'});
           }
         }
         else {

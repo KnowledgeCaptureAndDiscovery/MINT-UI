@@ -180,11 +180,21 @@
           data: {
             type: Object
           },
+          scenario: {
+            type: Object
+          },
           workflows: {
             type: Array,
             notify: true
           },
-          editable: Boolean,
+          editable: {
+            type: Boolean,
+            value: false
+          },
+          visible: {
+            type: Boolean,
+            value: false
+          },
           autoLayout: Boolean,
           autoLoad: Boolean,
           noToolbar: {
@@ -212,7 +222,8 @@
           // Observer method name, followed by a list of dependencies, in parenthesis
           '_variablesEdited(data.variables.*)',
           '_linksAddedOrRemoved(data.links.splices)',
-          '_dataChanged(data)'
+          '_cagChanged(data)',
+          '_scenarioChanged(scenario, visible)'
         ]
       }
 
@@ -255,12 +266,18 @@
         this.set("workflows", this.componentLibrary.solve(this.data));
       }
 
-      _dataChanged(data, old) {
-        if (!data)
-          return;
-
-        if(this.autoLoad)
+      _cagChanged(data) {
+        if(data && this.autoLoad)
           this.loadGraph();
+      }
+
+      _scenarioChanged(scenario, visible) {
+        if(scenario && visible && this.graph) {
+          // console.log("Scenario changed to " + scenario.id);
+          // Reload the graph
+          this.loadGraph();
+          // Make any other changes ?
+        }
       }
 
       loadGraph(loader) {
@@ -356,7 +373,6 @@
           }, this);
         }
       }
-
     }
 
     window.customElements.define(VariableVGraph.is, VariableVGraph);

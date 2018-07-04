@@ -66,30 +66,41 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     </style>
 
-    <template is="dom-if" if="[[!loggedIn]]">
-      <div class="detail" has-content>
+    <template is="dom-if" if="[[!userid]]">
+      <div class="detail" has-content="">
         You need to be logged in to see this section
       </div>
     </template>
 
     <center>
+      <!-- TODO: Fetch Runs from JSON -->
       <table>
         <tr>
           <th>Region</th>
           <th>Analysis</th>
+          <th>CAG</th>
+          <th>Scenario</th>
           <th>Run</th>
         </tr>
         <tr>
-          <td rowspan="3">South Sudan</td>
-          <td rowspan="2">Food Security</td>
-          <td><a href="results/detail/south_sudan/food_security_projection/run_0b32ec8198">Run 0b32ec8198</a></td>
+          <td rowspan="4">South Sudan</td>
+          <td rowspan="3">Food Security</td>
+          <td rowspan="3">Storyboard CAG</td>
+          <td rowspan="2">Normal Scenario</td>
+          <td><a href="results/detail/south_sudan/food_security_projection/storyboard_cag/normal/run_0b32ec8198">Run 0b32ec8198</a></td>
         </tr>
         <tr>
-          <td><a href="results/detail/south_sudan/food_security_projection/run_18e9174f08">Run 18e9174f08</a></td>
+          <td><a href="results/detail/south_sudan/food_security_projection/storyboard_cag/normal/run_27e9174e23">Run 27e9174e23</a></td>
+        </tr>
+        <tr>
+          <td>El-Nino Event</td>
+          <td><a href="results/detail/south_sudan/food_security_projection/storyboard_cag/elnino/run_18e9174f08">Run 18e9174f08</a></td>
         </tr>
         <tr>
           <td>Climate</td>
-          <td><a href="results/detail/south_sudan/climate_projection/run_76ba62233e">Run 76ba62233e</a></td>
+          <td>Storyboard CAG</td>
+          <td>Normal Scenario</td>
+          <td><a href="results/detail/south_sudan/climate_projection/storyboard_cag/normal/run_76ba62233e">Run 76ba62233e</a></td>
         </tr>
       </table>
     </center>
@@ -105,7 +116,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         server: String,
         userid: String,
         domain: String,
-        visible: Boolean,
+        visible: {
+          type: Boolean,
+          value: false
+        },
         selectedrunid: {
           type: String,
           value: null,

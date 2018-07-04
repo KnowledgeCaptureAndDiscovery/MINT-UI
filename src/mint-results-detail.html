@@ -2,14 +2,13 @@
 <link rel="import" href="../bower_components/app-route/app-route.html">
 <link rel="import" href="mint-common-styles.html">
 
-<link rel="import" href="../bower_components/mint-map/mint-map.html">
+<link rel="import" href="../Mint-Map/mint-map.html">
 <link rel="import" href="mint-ajax.html">
 <link rel="import" href="variable-graph.html">
 
 <dom-module id="mint-results-detail">
 
   <template>
-
     <style include="mint-common-styles">
 
       :host {
@@ -30,7 +29,6 @@
         max-width: 1440px;
         margin:0 auto;
         margin-bottom: 5px;
-        height: 800px;
       }
 
       .left {
@@ -113,16 +111,22 @@
 
     <app-route
         route="[[route]]"
-        pattern="/:category/:item"
+        pattern="/:region/:category/:cag/:scenario/:runid"
         data="{{routeData}}"></app-route>
 
       <!-- Variable Graph -->
       <div class="content">
         <div class="left" id="graphdiv">
+          <mint-ajax result="{{cagList}}" auto
+            url="[[_createCagListURL(routeData)]]"></mint-ajax>
           <mint-ajax result="{{graphData}}" auto
-            url="[[_createGraphURL(routeData.category, routeData.item)]]"></mint-ajax>
-          <variable-graph id="cag"
-            data="[[graphData]]" no-toolbar
+            url="[[_createGraphURL(cagList, routeData)]]"></mint-ajax>
+          <!-- TODO: Get Run Details >
+          <mint-ajax result="{{runDetails}}" auto
+            url="[[_getRunDetailsURL(routeData.runid)]]"></mint-ajax>
+          -->
+          <variable-graph id="cag" visible="[[visible]]"
+            data="[[graphData]]" scenario="[[scenario]]" no-toolbar
             auto-load></variable-graph>
         </div>
         <div class="right" id="mapdiv">
@@ -131,7 +135,9 @@
             <paper-button>MAP</paper-button>
           </div>
           <div class="outer">
-            <mint-map variables="[[variables]]"></mint-map>
+            <template is="dom-if" if="[[visible]]">
+              <mint-map id="mintmap"></mint-map>
+            </template>
           </div>
           <div class="toolbar">
             <paper-button>&nbsp;</paper-button>
@@ -160,6 +166,12 @@
             notify: true,
             value: ['landuse']
           },
+          visible: {
+            type: Boolean,
+            value: false,
+            observer: '_visibleChanged'
+          },
+          scenario: Object,
           runid: String,
           route: Object,
           routeData: Object
@@ -167,16 +179,51 @@
       }
 
       _loadedGraph(data) {
-          /*console.log("Graph data loaded");
-          console.log(data);*/
+        /*console.log("Graph data loaded");
+        console.log(data);*/
+        // TODO: Setup Click listeners
+        // On click
+        // - Get Data associated with variable from runDetails
+        // - Make query to Data Catalog to get dataset id + md5hash
+        // - If available, then ask Map to visualise the variable
       }
 
-      _createGraphURL(cat, item) {
-        if(cat && item) {
-          var url = "files/" + cat + "/" + item + ".json";
-          return url;
+      _createCagListURL(route) {
+        if(route.region) {
+          return "files/" + route.region + "/list.json";
         }
         return null;
+      }
+
+      _createGraphURL(caglist, route) {
+        if(caglist && route.category && route.cag) {
+          for(var i=0; i<caglist.length; i++) {
+            var category = caglist[i];
+            if(category.name == route.category) {
+              for(var j=0; j<category.cags.length; j++) {
+                var cag = category.cags[j];
+                if(cag.id == route.cag) {
+                  for(var k=0; k<cag.scenarios.length; k++) {
+                    var scenario = cag.scenarios[k];
+                    if(scenario.id == route.scenario) {
+                      this.scenario = scenario;
+                    }
+                  }
+                  return cag.json;
+                }
+              }
+            }
+          }
+        }
+        return null;
+      }
+
+      _visibleChanged(visible) {
+        if(visible) {
+          console.log("Set height and width of map");
+          /*this.$.map.style.height = "700px";
+          this.$.map.style.width = "100%";*/
+        }
       }
     }
 

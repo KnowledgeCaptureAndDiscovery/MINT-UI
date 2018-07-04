@@ -30,7 +30,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
   <template>
 
-    <style>
+    <style include="mint-common-styles">
 
       :host {
         display: block;
@@ -151,6 +151,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       iron-pages {
         max-width: 1440px;
         margin: 0 auto;
+        padding: 0 20px;
       }
 
       footer {
@@ -196,6 +197,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         :host([page=detail]) .menu-btn {
           display: none;
         }
+
+        iron-pages {
+          padding: 0 10px;
+        }
       }
 
     </style>
@@ -204,22 +209,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       app-location and app-route elements provide the state of the URL for the app.
     -->
     <app-location route="{{route}}"></app-location>
-    <app-route
-        route="{{route}}"
-        pattern="[[base]]:page"
-        data="{{routeData}}"
-        tail="{{subroute}}"></app-route>
+    <app-route route="{{route}}" pattern="[[base]]:page" data="{{routeData}}" tail="{{subroute}}"></app-route>
 
     <iron-media-query query="max-width: 767px" query-matches="{{smallScreen}}"></iron-media-query>
 
-    <app-header role="navigation" id="header" effects="waterfall" condenses reveals>
+    <app-header role="navigation" id="header" effects="waterfall" condenses="" reveals="">
       <app-toolbar>
         <div class="left-bar-item">
           <paper-icon-button class="menu-btn" icon="menu" on-tap="_toggleDrawer" aria-label="Menu">
           </paper-icon-button>
         </div>
 
-        <div main-title class="logo" title><a href="" aria-label="MINT Home"><img height=50 src="images/logo.png" /></a></div>
+        <div main-title="" class="logo" title=""><a href="" aria-label="MINT Home"><img height="50" src="images/logo.png"></a></div>
 
         <mint-wings-login userid="{{userid}}" server="[[server]]"></mint-wings-login>
       </app-toolbar>
@@ -228,9 +229,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <div id="tabContainer" sticky$="[[_shouldShowTabs]]" hidden$="[[!_shouldShowTabs]]">
         <dom-if if="[[_shouldRenderTabs]]">
           <template>
-            <mint-tabs
-                selected="[[page]]"
-                attr-for-selected="name">
+            <mint-tabs selected="[[page]]" attr-for-selected="name">
               <mint-tab name="home"><a href="">Home</a></mint-tab>
               <mint-tab name="cags"><a href="cags/home">Analyses</a></mint-tab>
               <mint-tab name="data"><a href="data">Data</a></mint-tab>
@@ -243,8 +242,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     <!-- Lazy-create the drawer for small screen sizes. -->
     <template is="dom-if" if="[[_shouldRenderDrawer]]">
-      <!-- Two-way bind `drawerOpened` since app-drawer can update `opened` itself. -->
-      <app-drawer opened="{{drawerOpened}}" swipe-open tabindex="0">
+      <!-- Two-way bind \`drawerOpened\` since app-drawer can update \`opened\` itself. -->
+      <app-drawer opened="{{drawerOpened}}" swipe-open="" tabindex="0">
         <iron-selector role="navigation" class="drawer-list" selected="[[page]]" attr-for-selected="name">
           <a name="home" href="">Home</a>
           <a name="cags" href="cags/home">Analyses</a>
@@ -258,17 +257,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <!-- home view -->
       <mint-home name="home"></mint-home>
       <!-- cags view -->
-      <mint-cags name="cags"
-        server="[[server]]" userid="[[userid]]" domain="[[domain]]"
-        route=[[subroute]]></mint-cags>
+      <mint-cags name="cags" server="[[server]]" userid="[[userid]]" domain="[[domain]]" route="[[subroute]]"></mint-cags>
       <!-- data view -->
-      <mint-data name="data"
-        server="[[server]]" userid="[[userid]]" domain="[[domain]]"
-        route=[[subroute]]></mint-data>
+      <mint-data name="data" server="[[server]]" userid="[[userid]]" domain="[[domain]]" route="[[subroute]]"></mint-data>
       <!-- cags view -->
-      <mint-results name="results"
-        server="[[server]]" userid="[[userid]]" domain="[[domain]]"
-        route=[[subroute]]></mint-results>
+      <mint-results name="results" server="[[server]]" userid="[[userid]]" domain="[[domain]]" route="[[subroute]]"></mint-results>
     </iron-pages>
 
     <!-- a11y announcer -->
@@ -387,7 +380,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         // or if the network status changed.
         if (this.offline || (!this.offline && oldOffline === true)) {
           if (!this._networkSnackbar) {
-            this._networkSnackbar = document.createElement('shop-snackbar');
+            this._networkSnackbar = document.createElement('mint-snackbar');
             this.root.appendChild(this._networkSnackbar);
           }
           this._networkSnackbar.innerHTML = this.offline ?

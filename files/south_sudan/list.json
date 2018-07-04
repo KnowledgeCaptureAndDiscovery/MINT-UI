@@ -67,18 +67,11 @@
             ]
           }
         ]
-      }
-    ]
-  },
-  {
-    "name": "social_projection",
-    "title": "Social Instability",
-    "category": "social_projection",
-    "cags": [
+      },
       {
-        "id": "storyboard_cag",
-        "name": "Storyboard CAG",
-        "json": "files/south_sudan/cags/food_security_projection.json",
+        "id": "delphi_cag",
+        "name": "Delphi CAG",
+        "json": "files/south_sudan/cags/delphi_cag.json",
         "scenarios": [
           {
             "id": "normal",
@@ -96,15 +89,14 @@
     ]
   },
   {
-    "name": "delphi_cag",
-    "title": "Delphi CAG",
-    "category": "climate_projection",
-    "description": "Delphi CAG",
+    "name": "social_projection",
+    "title": "Social Instability",
+    "category": "social_projection",
     "cags": [
       {
-        "id": "delphi_cag",
-        "name": "Delphi CAG",
-        "json": "files/south_sudan/cags/delphi_cag.json",
+        "id": "storyboard_cag",
+        "name": "Storyboard CAG",
+        "json": "files/south_sudan/cags/food_security_projection.json",
         "scenarios": [
           {
             "id": "normal",

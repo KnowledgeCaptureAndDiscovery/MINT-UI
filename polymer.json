@@ -18,26 +18,37 @@
     ".htaccess",
 	"app.yaml",
     "manifest.json",
-    "bower_components/webcomponentsjs/*"
+    "bower_components/webcomponentsjs/*",
+    "bower_components/mint-map/*"
   ],
   "lint": {
     "rules": ["polymer-2-hybrid"]
   },
   "builds": [{
-    "name": "bundlemin",
-	"bundle": true,
+    "name": "es5",
+    "preset": "es5-bundled",
     "addServiceWorker": true,
     "swPrecacheConfig": "sw-precache-config.js",
     "css": { "minify": true },
     "js": { 
-       "minify": {
-          "exclude": ["js/lib/*"]
-       }
+       "minify": { "exclude": ["js/lib/*"] },
+       "compile": { "exclude": ["js/lib/*"] }
     },
     "html": { 
-       "minify": {
-          "exclude": ["src/index.html"]
-       }
+       "minify": { "exclude": ["src/index.html"] }
+    }
+  },
+  {
+    "name": "es6",
+    "preset": "es6-unbundled",
+    "addServiceWorker": true,
+    "swPrecacheConfig": "sw-precache-config.js",
+    "css": { "minify": true },
+    "js": { 
+       "minify": { "exclude": ["js/lib/*"] }
+    },
+    "html": { 
+       "minify": { "exclude": ["src/index.html"] }
     }
   }]
 }

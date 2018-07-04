@@ -76,6 +76,62 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       .content {
         @apply(--layout-horizontal);
       }
+      .box {
+        @apply(--layout-vertical);
+        margin-top: 20px;
+        margin-right: 20px;
+        background-color: #FEFEFE;
+        border: 1px solid var(--app-primary-color);
+        border-radius: 4px;
+        width: 250px;
+        background-size: 200px auto;
+        background-position: 0px 24px;
+      }
+      .inner {
+        background: rgba(255,255,255,0.2);
+        height: 100%;
+        padding: 10px;
+        font-weight: bold;
+      }
+      .textinner {
+        background: rgba(255,255,255,0.9);
+        height: 100%;
+        border-radius: 4px;
+      }
+      .box.climate_projection {
+        background-image: url("../images/categories/climate_projection.jpg");
+      }
+      .box.food_security_projection {
+        background-image: url("../images/categories/food_security_projection.jpg");
+      }
+      .box.social_projection {
+        background-image: url("../images/categories/social_projection.jpg");
+      }
+      .box h2 {
+        font-size: 1.25em;
+        text-align: center;
+        margin: 0px;
+        background-color: var(--app-accent-color);
+        color: white;
+      }
+      .box h3 {
+        font-size: 1.1em;
+        border-bottom: 1px solid var(--app-accent-color);
+        color: var(--app-accent-color);
+        margin: 0px;
+        padding-left: 5px;
+      }
+      .box ul {
+        margin: 2px;
+        padding-left: 20px;
+      }
+      .box ul li {
+        padding: 3px 0px;
+      }
+      .box img {
+        width: 200px;
+        height: 100px;
+      }
       @media (max-width: 767px) {
         .hero-image {
           display: none;
@@ -97,21 +153,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <!--
       app-route provides the name of the region.
     -->
-    <app-route
-        route="[[route]]"
-        pattern="/:region"
-        data="{{routeData}}"></app-route>
+    <app-route route="[[route]]" pattern="/:region" data="{{routeData}}"></app-route>
 
     <!--
       mint-cag-data provides the cags for a given region.
     -->
-    <mint-cag-data
-        id="cagData"
-        regions="[[regions]]"
-        region-name="[[routeData.region]]"
-        region="{{region}}"
-        cag="{{cag}}"
-        failure="{{failure}}"></mint-cag-data>
+    <mint-cag-data id="cagData" regions="[[regions]]" region-name="[[routeData.region]]" region="{{region}}" cag="{{cag}}" failure="{{failure}}"></mint-cag-data>
 
     <header>
       <h2>[[region.title]]</h2>
@@ -121,15 +168,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <div class="content">
       <!-- Map -->
       <div class="map">
-        <google-map id="map"
-          api-key="AIzaSyAuaqVMFvr8yEr9WzFEDg0veeOQ2HDwoHU"
-          disable-default-ui
-          latitude="[[region.latitude]]"
-          longitude="[[region.longitude]]"
-          zoom="[[region.zoom]]"
-          styles="[[mapStyles]]">
-          <google-map-data-layer
-            url="[[_createGeoJsonURL(routeData.region)]]"></google-map-data-layer>
+        <google-map id="map" api-key="AIzaSyAuaqVMFvr8yEr9WzFEDg0veeOQ2HDwoHU" disable-default-ui="" latitude="[[region.latitude]]" longitude="[[region.longitude]]" zoom="[[region.zoom]]" styles="[[mapStyles]]">
+          <google-map-data-layer url="[[_createGeoJsonURL(routeData.region)]]"></google-map-data-layer>
         </google-map>
       </div>
       <!-- Description-->
@@ -138,20 +178,28 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       </div>
     </div>
 
-    <template is="dom-repeat" items="[[_getListItems(region.categories)]]" as="cat">
-      <h2>[[cat.title]]</h2>
-      <template is="dom-repeat" items="[[cat.cags]]" as="cag">
-        <h3>[[cag.name]]</h3>
-        <ul>
-        <template is="dom-repeat" items="[[cag.scenarios]]" as="scenario">
-          <li>
-            <a href="cags/detail/[[region.name]]/[[cat.name]]/[[cag.id]]/[[scenario.id]]">
-            [[scenario.name]]</a>
-          </li>
-        </template>
-        </ul>
+    <div class="content">
+      <template is="dom-repeat" items="[[_getListItems(region.categories)]]" as="cat">
+        <div class$="box [[cat.name]]">
+          <h2>[[cat.title]]</h2>
+          <div class="inner">
+            <div class="textinner">
+              <template is="dom-repeat" items="[[cat.cags]]" as="cag">
+                <h3>[[cag.name]]</h3>
+                <ul>
+                  <template is="dom-repeat" items="[[cag.scenarios]]" as="scenario">
+                    <li>
+                      <a href="cags/detail/[[region.name]]/[[cat.name]]/[[cag.id]]/[[scenario.id]]">
+                      [[scenario.name]]</a>
+                    </li>
+                  </template>
+                </ul>
+              </template>
+            </div>
+          </div>
+        </div>
       </template>
-    </template>
+    </div>
 
     <!--
     <div class="grid" hidden$="[[failure]]">

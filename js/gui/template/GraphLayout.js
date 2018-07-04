@@ -22,7 +22,8 @@
 var GraphLayout = function() {
   this.graph = null;
 };
-GraphLayout.layoutWorker = undefined;
+// Global layout worker
+GraphLayout.layoutWorker = layoutWorker;
 
 GraphLayout.prototype.layoutVizDot = function(loader, graph, animate, domnode) {
   this.graph = graph;
@@ -52,7 +53,7 @@ GraphLayout.prototype.layoutVizDot = function(loader, graph, animate, domnode) {
     var id = this.cleanID(n.getName());
     /*var machine_text = n.getMachinesText();
     if(machine_text)
-    	text += "\n" + machine_text;*/
+       text += "\n" + machine_text;*/
 
     var ips = n.getInputPorts();
     var ops = n.getOutputPorts();
@@ -111,18 +112,18 @@ GraphLayout.prototype.layoutVizDot = function(loader, graph, animate, domnode) {
   dotstr += nl + "}";
 
   var me = this;
-  if(GraphLayout.layoutWorker == undefined)
-    GraphLayout.layoutWorker = new Worker("/js/lib/layout-worker.js");
+  var myid = "wings-workflow";
+  var fn = function(e) {
+    var response = e.data;
+    // console.log(myid + ": received message from " + response[0]);
+    if(response[0] != myid) // This response is not for me
+      return;
 
-  GraphLayout.layoutWorker.postMessage([dotstr, "dot"]);
-  GraphLayout.layoutWorker.onmessage = function(e) {
+    var layout = response[1];
+    var lines = layout.split(/\n/);
+
     if(loader)
       loader.loading = false;
-
-    var layout = e.data;
-
-    //console.log(layout);
-    var lines = layout.split(/\n/);
 
     var graph = lines[0].split(/\s+/);
     var gw = parseFloat(graph[2]);
@@ -169,6 +170,12 @@ GraphLayout.prototype.layoutVizDot = function(loader, graph, animate, domnode) {
       me.graph.resizeViewport(true, animate);
     }
   }
+  var curfn = GraphLayout.layoutWorker.listeners[myid];
+  if(curfn)
+    GraphLayout.layoutWorker.removeEventListener("message", curfn);
+  GraphLayout.layoutWorker.listeners[myid] = fn;
+  GraphLayout.layoutWorker.addEventListener("message", fn);
+  GraphLayout.layoutWorker.postMessage([myid, dotstr, "dot"]);
 };
 
 GraphLayout.prototype.cleanID = function(id) {

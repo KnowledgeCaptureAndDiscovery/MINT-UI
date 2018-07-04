@@ -1,5 +1,6 @@
-self.importScripts("viz.js");
+importScripts("viz.js");
 
-self.onmessage = function(e) {
-    self.postMessage(Viz(e.data[0], { engine: e.data[1], format: "plain" }));
+onmessage = function(e) {
+  var layoutdata = Viz(e.data[1], { engine: e.data[2], format: "plain" });
+  postMessage([e.data[0], layoutdata]);
 };

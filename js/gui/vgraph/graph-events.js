@@ -18,7 +18,7 @@ function VGraphEvents(graph, canvas) {
   this.linker = {waiting: false, active: false, timeout: null, from: null, to: null};
 
   this.editable = false;
-};
+}
 
 VGraphEvents.prototype.initialize = function() {
   this.initializeDraggerItems();

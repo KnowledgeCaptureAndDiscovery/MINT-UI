@@ -22,7 +22,8 @@
 var VGraphLayout = function() {
   this.graph = null;
 };
-VGraphLayout.layoutWorker = undefined;
+// Global layout worker
+VGraphLayout.layoutWorker = layoutWorker;
 
 VGraphLayout.prototype.layout = function(graph, animate, loader) {
   this.graph = graph;
@@ -78,17 +79,18 @@ VGraphLayout.prototype.layout = function(graph, animate, loader) {
   dotstr += nl + "}";
 
   var me = this;
-  if(VGraphLayout.layoutWorker == undefined)
-    VGraphLayout.layoutWorker = new Worker("/js/lib/layout-worker.js");
+  var myid = "variable-graph";
+  var fn = function(e) {
+    var response = e.data;
+    // console.log(myid + ": received message from " + response[0]);
+    if(response[0] != myid) // This response is not for me
+      return;
 
-  VGraphLayout.layoutWorker.postMessage([dotstr, "neato"]);
-  VGraphLayout.layoutWorker.onmessage = function(e) {
+    var layout = response[1];
+    var lines = layout.split(/\n/);
+
     if(loader)
       loader.loading = false;
-
-    var layout = e.data;
-
-    var lines = layout.split(/\n/);
 
     var graph = lines[0].split(/\s+/);
     var gw = parseFloat(graph[2]);
@@ -133,6 +135,12 @@ VGraphLayout.prototype.layout = function(graph, animate, loader) {
     me.graph.resizeViewport(true, false);
     me.graph.zoom(1);
   }
+  var curfn = VGraphLayout.layoutWorker.listeners[myid];
+  if(curfn)
+    VGraphLayout.layoutWorker.removeEventListener("message", curfn);
+  VGraphLayout.layoutWorker.listeners[myid] = fn;
+  VGraphLayout.layoutWorker.addEventListener("message", fn);
+  VGraphLayout.layoutWorker.postMessage([myid, dotstr, "neato"]);
 };
 
 VGraphLayout.prototype.cleanID = function(id) {
