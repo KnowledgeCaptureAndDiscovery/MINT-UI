@@ -31,7 +31,8 @@
     "paper-toggle-button": "polymerelements/paper-toggle-button#^2.0.0",
     "iron-input": "polymerelements/iron-input#^2.0.0",
     "iron-collapse": "polymerelements/iron-collapse#^2.0.0",
-    "google-map": "^2.0.0"
+    "google-map": "^2.0.0",
+    "mint-map": "https://github.com/limbov8/Mint-Map.git"
   },
   "devDependencies": {
     "web-component-tester": "^6.0.0"
