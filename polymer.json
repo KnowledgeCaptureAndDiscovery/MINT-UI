@@ -25,23 +25,8 @@
     "rules": ["polymer-2-hybrid"]
   },
   "builds": [{
-    "name": "es5",
-    "preset": "es5-bundled",
-    "addServiceWorker": true,
-    "swPrecacheConfig": "sw-precache-config.js",
-    "css": { "minify": true },
-    "js": { 
-       "minify": { "exclude": ["js/lib/*"] },
-       "compile": { "exclude": ["js/lib/*"] }
-    },
-    "html": { 
-       "minify": { "exclude": ["src/index.html"] }
-    }
-  },
-  {
-    "name": "es6",
-    "preset": "es6-unbundled",
-    "addServiceWorker": true,
+    "name": "default",
+    "preset": "es6-bundled",
     "swPrecacheConfig": "sw-precache-config.js",
     "css": { "minify": true },
     "js": { 
