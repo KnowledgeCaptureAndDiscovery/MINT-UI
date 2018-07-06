@@ -17,14 +17,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <link rel="import" href="variable-graph.html">
 <link rel="import" href="mint-workflows.html">
-<link rel="import" href="mint-data-catalog.html">
-<link rel="import" href="mint-component-library.html">
 
 <dom-module id="mint-cags-detail">
 
   <template>
 
-    <style include="mint-button">
+    <style include="mint-common-styles">
 
       :host {
         display: block;
@@ -155,12 +153,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     <iron-media-query query="max-width: 767px" query-matches="{{smallScreen}}"></iron-media-query>
 
-    <!-- Data Catalog -->
-    <mint-data-catalog server="http://mint-demo.westus2.cloudapp.azure.com" data-catalog="{{catalog}}"></mint-data-catalog>
-
-    <!-- Component Library -->
-    <mint-component-library server="[[server]]" userid="[[userid]]" domain="[[domain]]" component-library="{{library}}" data-catalog="[[catalog]]"></mint-component-library>
-
     <div smooth="" has-content$="[[_isDefined(userid)]]">
       <h2>[[region.title]] | [[cag.name]]
         <template is="dom-if" if="[[scenario]]">
@@ -187,12 +179,21 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <mint-ajax result="{{graphData}}" auto="" url="[[cag.json]]"></mint-ajax>
 
           <iron-collapse id="main_graph" opened="" no-animation="">
-            <variable-graph id="cag" component-library="[[library]]" data-catalog="[[catalog]]" data="[[graphData]]" visible="[[visible]]"
-                            scenario="[[scenario]]" workflows="{{workflows}}" editable auto-load></variable-graph>
+            <variable-graph id="cag"
+              visible="[[visible]]"
+              model-catalog="[[modelCatalog]]"
+              data-catalog="[[dataCatalog]]"
+              data="[[graphData]]"
+              scenario="[[scenario]]"
+              workflows="{{workflows}}"
+              editable auto-load></variable-graph>
           </iron-collapse>
 
           <iron-collapse id="temporary_graph" no-animation="">
-            <variable-graph id="tmpcag" visible="[[visible]]" auto-layout data="[[selectedWorkflowGraph]]"></variable-graph>
+            <variable-graph id="tmpcag"
+              visible="[[visible]]"
+              auto-layout
+              data="[[selectedWorkflowGraph]]"></variable-graph>
           </iron-collapse>
 
           <ul class="footnote">
@@ -229,22 +230,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           region: Object,
           category: {
             type: Object,
-            computed: '_computeCategory(region.categories, routeData.category)'
+            computed: '_computeCategory(visible, region.categories, routeData.category)'
           },
           cag: {
             type: Object,
-            computed: '_computeCag(category, routeData.cag)'
+            computed: '_computeCag(visible, category, routeData.cag)'
           },
           scenario: {
             type: Object,
-            computed: '_computeScenario(cag, scenarioRoute.path)'
+            computed: '_computeScenario(visible, cag, scenarioRoute.path)'
           },
           route: Object,
           routeData: {
             type: Object,
             observer: '_routeChanged'
           },
-
+          modelCatalog: Object,
+          dataCatalog: Object,
           smallScreen: {
             type: Boolean,
             observer: '_resetSectionSizes'
@@ -268,7 +270,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             type: Array,
             observer: '_onSelectedWorkflowItemsChanged'
           },
-
           visible: {
             type: Boolean,
             value: false
@@ -284,8 +285,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         return cag != null;
       }
 
-      _computeCategory(region_categories, catid) {
-        if(!region_categories || !catid) return null;
+      _computeCategory(visible, region_categories, catid) {
+        if(!visible || !region_categories || !catid) return null;
         for (var i = 0; i<region_categories.length; i++) {
           var category = region_categories[i];
           if(category.name == catid) {
@@ -295,8 +296,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       }
 
-      _computeCag(category, cagid) {
-        if(!category || !cagid) return null;
+      _computeCag(visible, category, cagid) {
+        if(!visible || !category || !cagid) return null;
         for (var j=0; j<category.cags.length; j++) {
           var cag = category.cags[j];
           if (cag.id === cagid) {
@@ -306,8 +307,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       }
 
-      _computeScenario(cag, scenario_path) {
-        if(!cag || !scenario_path) return null;
+      _computeScenario(visible, cag, scenario_path) {
+        if(!visible || !cag || !scenario_path) return null;
         for (var j=0; j<cag.scenarios.length; j++) {
           var scenario = cag.scenarios[j];
           if ("/"+scenario.id === scenario_path) {

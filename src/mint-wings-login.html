@@ -17,8 +17,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="mint-ajax.html">
 
 <dom-module id="mint-wings-login">
+
   <template>
+
     <style is="custom-style">
+
       paper-button {
         font-size: 14px;
       }
@@ -70,53 +73,58 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <paper-button dialog-confirm autofocus>Login</paper-button>
       </div>
     </paper-dialog>
+
   </template>
 
   <script>
-    Polymer({
 
-      is: 'mint-wings-login',
+    class MintWingsLogin extends Polymer.Element {
 
-      properties: {
-        server: String,
-        input_userid: String,
-        userid: {
-          type: String,
-          notify: true
-        },
-        password: String,
-        loggedIn: {
-          type: Boolean,
-          value: false,
-          notify: true
-        },
+      static get is() { return 'mint-wings-login'; }
 
-        failure: {
-          type: Boolean,
-          notify: true,
-          readOnly: true
-        }
-      },
+      static get properties() {
+        return {
+          server: String,
+          input_userid: String,
+          userid: {
+            type: String,
+            notify: true
+          },
+          password: String,
+          loggedIn: {
+            type: Boolean,
+            value: false,
+            notify: true
+          },
+          failure: {
+            type: Boolean,
+            notify: true,
+            readOnly: true
+          }
+        };
+      }
 
-      /*observers: [
-        '_login(userid, password, server)'
-      ],*/
+      /*static get observers() {
+        return [
+          '_login(userid, password, server)'
+        ],
+      }*/
 
-      _clearDialog: function() {
+      _clearDialog() {
         this.input_userid = null;
         this.password = null;
-      },
+      }
 
-      _openDialog: function() {
+      _openDialog() {
         this.$.logindialog.open();
-      },
+      }
 
-      _checkAndLogin: function(e) {
+      _checkAndLogin(e) {
         if(e.detail.confirmed)
           this._login();
-      },
+      }
 
-      _login: function() {
+      _login() {
         var me = this;
         if(!me.server)
           return;
@@ -184,9 +192,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             this._setFailure(true);
           }
         });
-      },
+      }
 
-      _logout: function() {
+      _logout() {
         var me = this;
         if(!me.server)
           return;
@@ -203,22 +211,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             //console.log("Could not logout !");
           }
         });
-      },
+      }
 
-      ready: function() {
-        this._login()
-      },
+      ready() {
+        super.ready();
+        this._login();
+      }
 
-      _getResource: function(rq) {
+      _getResource(rq) {
         var xhr = new XMLHttpRequest();
         xhr.addEventListener('load', rq.onLoad.bind(this));
         xhr.addEventListener('error', rq.onError.bind(this));
         xhr.withCredentials = true;
         xhr.open('GET', rq.url);
         xhr.send();
-      },
+      }
 
-      _postResource: function(rq, data) {
+      _postResource(rq, data) {
         var xhr = new XMLHttpRequest();
         xhr.addEventListener('load', rq.onLoad.bind(this));
         xhr.addEventListener('error', rq.onError.bind(this));
@@ -226,13 +235,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         xhr.open('POST', rq.url);
         xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
         xhr.send(data);
-      },
-
-      _setFailure: function(val) {
-        this.failure = true;
       }
 
-    });
+      _setFailure(val) {
+        this.failure = true;
+      }
+    }
+
+    customElements.define(MintWingsLogin.is, MintWingsLogin);
+
   </script>
 
 </dom-module>

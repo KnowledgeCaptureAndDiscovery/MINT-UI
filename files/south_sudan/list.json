@@ -10,8 +10,8 @@
         "scenarios": [
           {
             "id": "normal",
-            "name": "Normal Scenario",
-            "description": "This is a normal scenario",
+            "name": "Baseline",
+            "description": "This is a Baseline",
             "data": [
               {
                 "variable": "atmosphere_water__precipitation_leq-volume_flux",
@@ -46,8 +46,8 @@
         "scenarios": [
           {
             "id": "normal",
-            "name": "Normal Scenario",
-            "description": "This is a normal scenario",
+            "name": "Baseline",
+            "description": "This is a Baseline",
             "data": [
               {
                 "variable": "atmosphere_water__precipitation_leq-volume_flux",
@@ -75,8 +75,8 @@
         "scenarios": [
           {
             "id": "normal",
-            "name": "Normal Scenario",
-            "description": "This is a normal scenario",
+            "name": "Baseline",
+            "description": "This is a Baseline",
             "data": [
               {
                 "variable": "atmosphere_water__precipitation_leq-volume_flux",
@@ -100,8 +100,8 @@
         "scenarios": [
           {
             "id": "normal",
-            "name": "Normal Scenario",
-            "description": "This is a normal scenario",
+            "name": "Baseline",
+            "description": "This is a Baseline",
             "data": [
               {
                 "variable": "atmosphere_water__precipitation_leq-volume_flux",

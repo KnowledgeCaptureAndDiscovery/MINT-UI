@@ -9,7 +9,7 @@
         "json": "files/mexico/cags/climate_projection.json",
         "scenarios": [
           {
-            "name": "Normal Scenario",
+            "name": "Baseline",
             "data": [
               {
                 "variable": "atmosphere_water__precipitation_leq-volume_flux",

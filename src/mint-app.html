@@ -19,12 +19,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/iron-pages/iron-pages.html">
 <link rel="import" href="../bower_components/iron-selector/iron-selector.html">
 
+<link rel="import" href="loading-screen.html">
 <link rel="import" href="mint-icons.html">
 <link rel="import" href="mint-wings-login.html">
 <link rel="import" href="mint-common-styles.html">
+<link rel="import" href="mint-data-catalog.html">
+<link rel="import" href="mint-model-catalog.html">
 
-<!-- Since 'home' is the default route, eagerly load it. -->
-<link rel="import" href="mint-home.html">
+<!-- Lazy Imports -->
+<link rel="lazy-import" href="mint-home.html">
+<link rel="lazy-import" href="mint-cags.html">
+<link rel="lazy-import" href="mint-data.html">
+<link rel="lazy-import" href="mint-results.html">
 
 <dom-module id="mint-app">
 
@@ -209,7 +215,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       app-location and app-route elements provide the state of the URL for the app.
     -->
     <app-location route="{{route}}"></app-location>
-    <app-route route="{{route}}" pattern="[[base]]:page" data="{{routeData}}" tail="{{subroute}}"></app-route>
+    <app-route route="[[route]]" pattern="[[base]]:page" data="{{routeData}}" tail="{{subroute}}"></app-route>
 
     <iron-media-query query="max-width: 767px" query-matches="{{smallScreen}}"></iron-media-query>
 
@@ -232,7 +238,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <mint-tabs selected="[[page]]" attr-for-selected="name">
               <mint-tab name="home"><a href="">Home</a></mint-tab>
               <mint-tab name="cags"><a href="cags/home">Analyses</a></mint-tab>
-              <mint-tab name="data"><a href="data">Data</a></mint-tab>
+              <mint-tab name="data"><a href="data/search">Data</a></mint-tab>
               <mint-tab name="results"><a href="results/list">Results</a></mint-tab>
             </mint-tabs>
           </template>
@@ -247,21 +253,38 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <iron-selector role="navigation" class="drawer-list" selected="[[page]]" attr-for-selected="name">
           <a name="home" href="">Home</a>
           <a name="cags" href="cags/home">Analyses</a>
-          <a name="data" href="data">Data</a>
+          <a name="data" href="data/search">Data</a>
           <a name="results" href="results/list">Results</a>
         </iron-selector>
       </app-drawer>
     </template>
 
+    <!-- Data Catalog -->
+    <mint-data-catalog server="http://mint-demo.westus2.cloudapp.azure.com" data-catalog="{{dataCatalog}}"></mint-data-catalog>
+
+    <!-- Model Catalog -->
+    <mint-model-catalog server="[[server]]" userid="[[userid]]" domain="[[domain]]"
+      model-catalog="{{modelCatalog}}" data-catalog="[[dataCatalog]]"></mint-model-catalog>
+
+    <!-- Loading screen -->
+    <loading-screen loading="true" id="pageLoading"></loading-screen>
+
+    <!-- Different Views of hte app -->
     <iron-pages role="main" selected="[[page]]" attr-for-selected="name" selected-attribute="visible">
       <!-- home view -->
       <mint-home name="home"></mint-home>
+
       <!-- cags view -->
-      <mint-cags name="cags" server="[[server]]" userid="[[userid]]" domain="[[domain]]" route="[[subroute]]"></mint-cags>
+      <mint-cags name="cags" server="[[server]]" userid="[[userid]]" domain="[[domain]]"
+        model-catalog="[[modelCatalog]]" route="[[subroute]]"></mint-cags>
+
       <!-- data view -->
-      <mint-data name="data" server="[[server]]" userid="[[userid]]" domain="[[domain]]" route="[[subroute]]"></mint-data>
-      <!-- cags view -->
-      <mint-results name="results" server="[[server]]" userid="[[userid]]" domain="[[domain]]" route="[[subroute]]"></mint-results>
+      <mint-data name="data" server="[[server]]" userid="[[userid]]" domain="[[domain]]"
+        data-catalog="[[dataCatalog]]" route="[[subroute]]"></mint-data>
+
+      <!-- results view -->
+      <mint-results name="results" server="[[server]]" userid="[[userid]]" domain="[[domain]]"
+        route="[[subroute]]"></mint-results>
     </iron-pages>
 
     <!-- a11y announcer -->
@@ -280,10 +303,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           server: String,
           domain: String,
           base: String,
+          routeData: Object,
+          modelCatalog: Object,
+          dataCatalog: Object,
           page: {
             type: String,
             reflectToAttribute: true,
             observer: '_pageChanged'
+          },
+          loadedPages: {
+            type: Object,
+            value: {}
           },
           _shouldShowTabs: {
             computed: '_computeShouldShowTabs(page, smallScreen)'
@@ -324,6 +354,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       _routePageChanged(page) {
+        // console.log("mint-app: " + page + ": " + this.route.prefix);
         this.page = page || 'home';
         // Close the drawer - in case the *route* change came from a link in the drawer.
         this.drawerOpened = false;
@@ -331,13 +362,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       _pageChanged(page, oldPage) {
         if (page != null) {
-          // home route is eagerly loaded
-          if (page == 'home') {
-            this._pageLoaded(Boolean(oldPage));
-          // other routes are lazy loaded
-          } else {
-            // When a load failed, it triggered a 404 which means we need to
-            // eagerly load the 404 page definition
+          console.log(page);
+          if(!this.loadedPages[page]) {
+            this.$.pageLoading.loading = true;
+            this.loadedPages[page] = true;
             let cb = this._pageLoaded.bind(this, Boolean(oldPage));
             Polymer.importHref(
               this.resolveUrl('mint-' + page + '.html'),
@@ -353,6 +381,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           // do not appear), so reset the header's layout only when switching pages.
           Polymer.Async.timeOut.run(() => {
             this.$.header.resetLayout();
+            this.$.pageLoading.loading = false;
           }, 1);
         }
       }
@@ -368,6 +397,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               }
               //this._notifyNetworkStatus();
               this.loadComplete = true;
+              this.$.pageLoading.loading = false;
             });
           });
         }
@@ -399,8 +429,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         let detail = event.detail;
         // Scroll to the top of the page
         Polymer.AppLayout.scroll({ top: 0, behavior: 'silent' });
-
-        this.categoryName = detail.category || '';
 
         // Announce the page's title
         if (detail.title) {

@@ -9,19 +9,22 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 -->
 
 <link rel="import" href="../bower_components/polymer/polymer.html">
+
 <link rel="import" href="mint-button.html">
 <link rel="import" href="mint-ajax.html">
 <link rel="import" href="mint-image.html">
+<link rel="import" href="mint-region-data.html">
+<link rel="import" href="mint-common-styles.html">
+
 <link rel="import" href="mint-cags-home.html">
 <link rel="import" href="mint-cags-list.html">
 <link rel="import" href="mint-cags-detail.html">
-<link rel="import" href="mint-region-data.html">
 
 <dom-module id="mint-cags">
 
   <template>
 
-    <style include="mint-button">
+    <style include="mint-common-styles">
 
       .image-link {
         outline: none;
@@ -128,6 +131,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <!-- detail view of one cag -->
       <mint-cags-detail name="detail" regions="[[regions]]" region="[[region]]"
         server="[[server]]" userid="[[userid]]" domain="[[domain]]"
+        model-catalog="[[modelCatalog]]"
         route="[[subroute]]"></mint-cags-detail>
     </iron-pages>
   </template>
@@ -142,6 +146,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           server: String,
           userid: String,
           domain: String,
+          modelCatalog: Object,
+          visible: {
+            type: Boolean,
+            observer: '_visibleChanged'
+          },
           page: {
             type: String,
             reflectToAttribute: true
@@ -168,16 +177,24 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.addEventListener('change-section', (e)=>this._onChangeSection(e));
       }
 
-      _routePageChanged(page) {
-        if(this.route.prefix.endsWith("/cags")) {
-          this.page = page || 'home';
-          //Polymer.AppLayout.scroll({ top: 0, behavior: 'silent' });
+      _visibleChanged(visible) {
+        if (visible) {
+          this.dispatchEvent(new CustomEvent('change-section', {
+            bubbles: true, composed: true, detail: {title: 'CAGs'}}));
         }
       }
 
       _onChangeSection(event) {
         var detail = event.detail;
         this.regionName = detail.region || '';
+      }
+
+      _routePageChanged(page) {
+        if(this.route.prefix.endsWith("/cags")) {
+          console.log("mint-cags: " + page);
+          this.page = page || 'home';
+          Polymer.AppLayout.scroll({ top: 0, behavior: 'silent' });
+        }
       }
     }
 

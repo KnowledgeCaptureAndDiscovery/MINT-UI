@@ -48,26 +48,12 @@
       }
 
       mint-map {
-        width: 100%;
+        width: calc(100% - 2px);
+        margin-left: 2px;
         height: 100%;
       }
-
-      .outer {
-        width:100%;
-        height: 700px;
-        overflow: auto;
-        border: 2px solid var(--app-accent-color);
-        border-width:0px 2px;
-      }
       .toolbar {
-        color:white;
-        width:100%;
-        background-color: var(--app-accent-color);
-        border: 2px solid var(--app-accent-color);
         border-radius: 0px 4px 0px 0px;
-        @apply --layout-horizontal;
-        @apply --layout-no-wrap;
-        @apply --layout-center-justified;
       }
       .toolbar paper-button, .toolbar paper-icon-button {
         max-height: 36px;
@@ -117,10 +103,12 @@
       <!-- Variable Graph -->
       <div class="content">
         <div class="left" id="graphdiv">
-          <mint-ajax result="{{cagList}}" auto
-            url="[[_createCagListURL(routeData)]]"></mint-ajax>
-          <mint-ajax result="{{graphData}}" auto
-            url="[[_createGraphURL(cagList, routeData)]]"></mint-ajax>
+          <template is="dom-if" if="[[visible]]">
+            <mint-ajax result="{{cagList}}" auto
+              url="[[_createCagListURL(routeData)]]"></mint-ajax>
+            <mint-ajax result="{{graphData}}" auto
+              url="[[_createGraphURL(cagList, routeData)]]"></mint-ajax>
+          </template>
           <!-- TODO: Get Run Details >
           <mint-ajax result="{{runDetails}}" auto
             url="[[_getRunDetailsURL(routeData.runid)]]"></mint-ajax>
@@ -139,7 +127,7 @@
               <mint-map id="mintmap"></mint-map>
             </template>
           </div>
-          <div class="toolbar">
+          <div class="toolbar bottom">
             <paper-button>&nbsp;</paper-button>
           </div>
         </div>
@@ -188,24 +176,24 @@
         // - If available, then ask Map to visualise the variable
       }
 
-      _createCagListURL(route) {
-        if(route.region) {
-          return "files/" + route.region + "/list.json";
+      _createCagListURL(routeData) {
+        if(routeData.region) {
+          return "files/" + routeData.region + "/list.json";
         }
         return null;
       }
 
-      _createGraphURL(caglist, route) {
-        if(caglist && route.category && route.cag) {
+      _createGraphURL(caglist, routeData) {
+        if(caglist && routeData.category && routeData.cag) {
           for(var i=0; i<caglist.length; i++) {
             var category = caglist[i];
-            if(category.name == route.category) {
+            if(category.name == routeData.category) {
               for(var j=0; j<category.cags.length; j++) {
                 var cag = category.cags[j];
-                if(cag.id == route.cag) {
+                if(cag.id == routeData.cag) {
                   for(var k=0; k<cag.scenarios.length; k++) {
                     var scenario = cag.scenarios[k];
-                    if(scenario.id == route.scenario) {
+                    if(scenario.id == routeData.scenario) {
                       this.scenario = scenario;
                     }
                   }
@@ -220,9 +208,7 @@
 
       _visibleChanged(visible) {
         if(visible) {
-          console.log("Set height and width of map");
-          /*this.$.map.style.height = "700px";
-          this.$.map.style.width = "100%";*/
+          // Maybe set click handlers here ?
         }
       }
     }

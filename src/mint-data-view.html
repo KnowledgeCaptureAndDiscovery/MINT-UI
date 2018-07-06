@@ -1,0 +1,136 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/mint-map/mint-map.html">
+<link rel="import" href="../bower_components/mint-chart/mint-chart.html">
+<link rel="import" href="../bower_components/mint-time/mint-time.html">
+<link rel="import" href="mint-common-styles.html">
+
+<dom-module id="mint-data-view">
+  <template>
+    <style include="mint-common-styles">
+      mint-map {
+        height: 650px;
+      }
+      .visualisation {
+        margin: 20px;
+      }
+    </style>
+
+    <app-route
+        route="[[route]]"
+        pattern="/:standard_name/:json_hash"
+        data="{{routeData}}"></app-route>
+
+    <div class="visualisation">
+      <div class="toolbar">
+        <paper-button>[[dataset_name]] : MAP</paper-button>
+      </div>
+      <div class="outer">
+        <template is="dom-if" if="[[visible]]">
+          <mint-map variables="[[variables]]"></mint-map>
+        </template>
+      </div>
+      <div class="toolbar bottom">
+        <paper-button>&nbsp;</paper-button>
+      </div>
+    </div>
+
+    <div class="visualisation">
+      <div class="toolbar">
+        <paper-button>[[dataset_name]] : CHART</paper-button>
+      </div>
+      <div class="outer">
+        <template is="dom-if" if="[[visible]]">
+          <mint-chart variables="[[variables]]"></mint-chart>
+        </template>
+      </div>
+      <div class="toolbar bottom">
+        <paper-button>&nbsp;</paper-button>
+      </div>
+    </div>
+
+    <div class="visualisation">
+      <div class="toolbar">
+        <paper-button>[[dataset_name]] : TIMELINE</paper-button>
+      </div>
+      <div class="outer">
+        <template is="dom-if" if="[[visible]]">
+          <mint-time variables="[[variables]]"></mint-time>
+        </template>
+      </div>
+      <div class="toolbar bottom">
+        <paper-button>&nbsp;</paper-button>
+      </div>
+    </div>
+
+  </template>
+
+  <script>
+
+    class MintDataView extends Polymer.Element {
+      static get is() { return 'mint-data-view'; }
+
+      static get properties() {
+        return {
+          dataCatalog: Object,
+          standard_name: String,
+          dataset_name: String,
+          variable_id: String,
+          file_location: String,
+          md5hash: String,
+          data_list: Array,
+          routeData: Object,
+          variables: {
+            type: Array,
+            notify: true
+          },
+          visible: Boolean
+        };
+      }
+
+      static get observers() {
+        return [
+          '_initializeFromURL(visible, routeData)'
+        ];
+      }
+
+      _initializeFromURL(visible, routeData) {
+        var me = this;
+        if(visible && this.route.prefix.endsWith("/view") && routeData) {
+          var item = JSON.parse(atob(routeData.json_hash));
+          this.set("standard_name", routeData.standard_name);
+          this.set("dataset_name", item.ds);
+          this.set("variable_id", item.id);
+          this.set("md5hash", item.md5);
+          var variable = {
+            name: me.standard_name,
+            stdname: me.standard_name,
+            md5: me.md5hash,
+            uri: me.variable_id
+          };
+          me.set("variables", [variable]);
+          /*me.set("variables",
+            [{ name: 'precipitation',
+              stdname: 'precipitation-south-sudan',
+              md5: '594f8555a2ae43a5e8c566bed938afe6',
+              uri: 'https://mint.isi.edu/dcat/variables/precipitation-south-sudan?file_name=https%3A%2F%2Fedcintl.cr.usgs.gov%2Ffews_geoengine4%2Frest%2Fimage%2Fgeotiff%2Fdataset%2Ffewschirps%2Freg'
+            },
+            { name: 'soil',
+              stdname: 'soil-south-sudan',
+              md5: '4275a535a7c2612dfd5162092821d507',
+              uri: 'https://mint.isi.edu/dcat/variables/soil-south-sudan?file_name=https%3A%2F%2Fdrive.google.com%2Fuc%3Fexport%3Ddownload%26id%3D1eVToBB0ZLL1LGspPqju_Bo7a7yk99KJj&variable_i'
+            }]);*/
+
+        }
+      }
+
+      _getFileLocation(vid, fn) {
+        this.dataCatalog.getDatasetLocation(vid, function(list) {
+          if(list.length > 0)
+            fn(list[0].storage_path.value);
+        });
+      }
+    }
+
+    customElements.define(MintDataView.is, MintDataView);
+  </script>
+</dom-module>

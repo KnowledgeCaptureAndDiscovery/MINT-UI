@@ -1,0 +1,113 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/iron-a11y-keys/iron-a11y-keys.html">
+
+<link rel="import" href="mint-common-styles.html">
+<link rel="import" href="loading-screen.html">
+
+<dom-module id="mint-data-search">
+  <template>
+    <style include="mint-common-styles">
+      .searchbox {
+        @apply(--layout-horizontal);
+        width: calc(100%-20px);
+        margin-left: 10px;
+      }
+      .searchbox paper-button {
+        font-size: 12px;
+        max-height: 36px;
+      }
+      .searchbox paper-input {
+        font-size: 12px;
+        width: 100%;
+      }
+    </style>
+
+    <app-route
+        route="[[route]]"
+        pattern="/:url_searchTerm"
+        data="{{routeData}}"></app-route>
+
+    <!-- Top toolbar -->
+    <div class="toolbar">
+      <paper-button>SEARCH</paper-button>
+    </div>
+    <div class="outer">
+      <div class="searchbox">
+        <iron-a11y-keys id="a11y"
+          target="[[paperInput]]" keys="enter"
+          on-keys-pressed="_onKeyPress"></iron-a11y-keys>
+        <paper-input id="paper_input"
+          no-label-float
+          label="Search term"
+          value="{{searchTerm}}"></paper-input>
+        <paper-button on-tap="_searchVariables">Search</paper-button>
+      </div>
+      <div class="results">
+        <loading-screen id="dataloader"></loading-screen>
+        <ul>
+          <template is="dom-repeat" items="[[variablesList]]">
+            <li><a href="data/list/[[item.label_name]]">[[item.label_name]]</li>
+          </template>
+        </ul>
+      </div>
+    </div>
+    <div class="toolbar bottom">
+      <paper-button>&nbsp;</paper-button>
+    </div>
+
+  </template>
+
+  <script>
+
+    class MintDataSearch extends Polymer.Element {
+      static get is() { return 'mint-data-search'; }
+
+      static get properties() {
+        return {
+          dataCatalog: Object,
+          searchTerm: String,
+          variablesList: Array,
+          routeData: Object,
+          visible: Boolean,
+          paperInput: Object
+        };
+      }
+
+      static get observers() {
+        return [
+          '_initializeFromURL(visible, routeData)'
+        ];
+      }
+
+      ready() {
+        super.ready();
+        this.paperInput = this.$.paper_input;
+      }
+
+      _initializeFromURL(visible, routeData) {
+        if(visible && this.route.prefix.endsWith("/search") && routeData.url_searchTerm) {
+          this.set("searchTerm", routeData.url_searchTerm);
+          this._searchVariables();
+        }
+      }
+
+      _onKeyPress(e) {
+        this._searchVariables();
+      }
+
+      _searchVariables() {
+        var me = this;
+        this.$.dataloader.loading = true;
+        this.dataCatalog.searchVariables(this.searchTerm, function(list) {
+          //console.log(list);
+          me.set("variablesList", list);
+          me.$.dataloader.loading = false;
+        });
+      }
+    }
+
+    customElements.define(MintDataSearch.is, MintDataSearch);
+  </script>
+</dom-module>

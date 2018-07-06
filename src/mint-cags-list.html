@@ -158,7 +158,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <!--
       mint-cag-data provides the cags for a given region.
     -->
-    <mint-cag-data id="cagData" regions="[[regions]]" region-name="[[routeData.region]]" region="{{region}}" cag="{{cag}}" failure="{{failure}}"></mint-cag-data>
+    <mint-cag-data id="cagData" regions="[[regions]]"
+      region-name="[[routeData.region]]"
+      region="{{region}}"
+      cag="{{cag}}"></mint-cag-data>
 
     <header>
       <h2>[[region.title]]</h2>
@@ -169,7 +172,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <!-- Map -->
       <div class="map">
         <google-map id="map" api-key="AIzaSyAuaqVMFvr8yEr9WzFEDg0veeOQ2HDwoHU" disable-default-ui="" latitude="[[region.latitude]]" longitude="[[region.longitude]]" zoom="[[region.zoom]]" styles="[[mapStyles]]">
-          <google-map-data-layer url="[[_createGeoJsonURL(routeData.region)]]"></google-map-data-layer>
+          <google-map-data-layer url="[[geoJsonURL]]"></google-map-data-layer>
         </google-map>
       </div>
       <!-- Description-->
@@ -228,11 +231,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           route: Object,
           routeData: Object,
           visible: Boolean,
-          offline: {
-            type: Boolean,
-            observer: '_offlineChanged'
-          },
-          failure: Boolean,
+          geoJsonURL: String,
           mapStyles: {
             type: String,
             value:[{"featureType":"landscape","elementType":"labels","stylers":[{"visibility":"off"}]},{"featureType":"transit","elementType":"labels","stylers":[{"visibility":"off"}]},{"featureType":"poi","elementType":"labels","stylers":[{"visibility":"off"}]},{"featureType":"water","elementType":"labels","stylers":[{"visibility":"off"}]},{"featureType":"road","elementType":"labels.icon","stylers":[{"visibility":"off"}]},{"stylers":[{"hue":"#00aaff"},{"saturation":-100},{"gamma":2.15},{"lightness":12}]},{"featureType":"road","elementType":"labels.text.fill","stylers":[{"visibility":"on"},{"lightness":24}]},{"featureType":"road","elementType":"geometry","stylers":[{"lightness":57}]}]
@@ -269,9 +268,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         if (!visible) {
           return;
         }
+        var me = this;
         this._changeSectionDebouncer = Polymer.Debouncer.debounce(this._changeSectionDebouncer,
           Polymer.Async.microTask, () => {
             if (region) {
+              me.set('geoJsonURL', me._createGeoJsonURL(region));
               // Notify the region and the page's title
               this.dispatchEvent(new CustomEvent('change-section', {
                 bubbles: true, composed: true, detail: {
@@ -285,19 +286,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           });
       }
 
-      _tryReconnect() {
-        this.$.cagData.refresh();
-      }
-
-      _offlineChanged(offline) {
-        if (!offline) {
-          this._tryReconnect();
-        }
-      }
-
-      _createGeoJsonURL(cat) {
-        if(cat) {
-          var url = "files/" + cat + "/geojson.json";
+      _createGeoJsonURL(region) {
+        if(region) {
+          var url = "files/" + region.name + "/geojson.json";
           //console.log(url);
           return url;
         }

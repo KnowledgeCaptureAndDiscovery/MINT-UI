@@ -19,6 +19,7 @@
     "iron-overlay-behavior": "polymerelements/iron-overlay-behavior#^2.0.0",
     "iron-pages": "polymerelements/iron-pages#^2.0.0",
     "iron-selector": "polymerelements/iron-selector#^2.0.0",
+    "iron-a11y-keys": "polymerelements/iron-a11y-keys#^2.0.0",
     "paper-icon-button": "polymerelements/paper-icon-button#^2.0.0",
     "paper-spinner": "polymerelements/paper-spinner#^2.0.0",
     "paper-button": "polymerelements/paper-button#^2.0.0",
@@ -32,7 +33,9 @@
     "iron-input": "polymerelements/iron-input#^2.0.0",
     "iron-collapse": "polymerelements/iron-collapse#^2.0.0",
     "google-map": "^2.0.0",
-    "mint-map": "https://github.com/limbov8/Mint-Map.git"
+    "mint-map": "https://github.com/limbov8/Mint-Map.git",
+    "mint-chart": "https://github.com/limbov8/mint-chart.git",
+    "mint-time": "https://github.com/limbov8/mint-time.git"
   },
   "devDependencies": {
     "web-component-tester": "^6.0.0"

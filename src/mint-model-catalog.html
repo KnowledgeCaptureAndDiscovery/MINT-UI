@@ -10,12 +10,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 
-<dom-module id="mint-component-library">
+<dom-module id="mint-model-catalog">
 
   <script>
-    class MintComponentLibrary extends Polymer.Element {
+    class MintModelCatalog extends Polymer.Element {
       static get is() {
-        return 'mint-component-library';
+        return 'mint-model-catalog';
       }
 
       static get properties() {
@@ -23,7 +23,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           server: String,
           userid: String,
           domain: String,
-          componentLibrary: {
+          modelCatalog: {
             type: Object,
             notify: true
           },
@@ -51,7 +51,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this._fetchComponents();
         this._fetchData();
         this._fetchWorkflowFragments();
-        this.set("componentLibrary", this);
+        this.set("modelCatalog", this);
       }
 
       _fetchComponents() {
@@ -932,7 +932,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
     }
 
-    window.customElements.define(MintComponentLibrary.is, MintComponentLibrary);
+    window.customElements.define(MintModelCatalog.is, MintModelCatalog);
   </script>
 
 </dom-module>

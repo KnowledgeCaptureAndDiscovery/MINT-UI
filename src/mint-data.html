@@ -8,8 +8,13 @@ Code distributed by Google as part of the polymer project is also
 subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
 -->
 
-<link rel="import" href="../bower_components/polymer/polymer.html">
-<link rel="import" href="mint-ajax.html">
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="mint-data-catalog.html">
+<link rel="import" href="mint-common-styles.html">
+
+<link rel="import" href="mint-data-search.html">
+<link rel="import" href="mint-data-list.html">
+<link rel="import" href="mint-data-view.html">
 
 <dom-module id="mint-data">
 
@@ -92,43 +97,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06), 0 2px 0 rgba(0, 0, 0, 0.075), 0 3px 0 rgba(0, 0, 0, 0.05), 0 4px 0 rgba(0, 0, 0, 0.015);
       }
 
-      .section .upload {
-        padding-top: 10px;
-        border: 1px solid #E3E3E3;
-        border-width: 0px 1px 0px 1px;
-      }
-
-
-      file-upload {
-        padding:5px;
-
-        --file-upload-upload-border: {
-          padding: 0px;
-          border-color: #D3D3D3;
-          color: rgba(0, 0, 0, 0.54);
-          margin-bottom:8px;
-        };
-        --file-upload-upload-border-hover: {
-          background-color: #EEEEEE;
-        };
-        --file-upload-drop-area: {
-          padding: 8px;
-          width: 200px;
-        };
-        --file-upload-button: {
-          margin-bottom: 0px;
-          /*background-color: var(--app-primary-color);
-          color: white;*/
-        };
-        --file-upload-file: {
-          padding: 4px;
-          width: 200px;
-        }
-      }
-
-      file-upload iron-icon {
-        height: 16px;
-      }
 
       @media (max-width: 767px) {
         h2 {
@@ -140,48 +108,89 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           flex-basis: calc(50% - 11px);
           max-width: calc(50% - 11px);
         }
-
       }
-
     </style>
+
+    <app-route
+        route="[[route]]"
+        pattern="/:page"
+        data="{{dataRoute}}"
+        tail="{{subroute}}"></app-route>
+
+    <iron-pages role="main" selected="[[page]]" attr-for-selected="name" selected-attribute="visible">
+      <!-- data search by variables -->
+      <mint-data-search name="search" data-catalog="[[dataCatalog]]" route="[[subroute]]"></mint-data-search>
+      <!-- list view of datasets for a variable -->
+      <mint-data-list name="list" data-catalog="[[dataCatalog]]" route="[[subroute]]"></mint-data-list>
+      <!-- visualize datasets for a variable -->
+      <mint-data-view name="view" data-catalog="[[dataCatalog]]" route="[[subroute]]"></mint-data-view>
+    </iron-pages>
 
   </template>
 
   <script>
 
-    Polymer({
+    class MintData extends Polymer.Element {
 
-      is: 'mint-data',
+      static get is() { return 'mint-data'; }
 
-      properties: {
-        server: String,
-        userid: {
-          type: String,
-          observer: '_checkLogin'
-        },
-        domain: String,
-        dataItems: Object
-      },
+      static get properties() {
+        return {
+          server: String,
+          userid: String,
+          domain: String,
+          page: {
+            type: String,
+            reflectToAttribute: true
+          },
+          dataCatalog: Object,
+          visible: {
+            type: Boolean,
+            observer: '_visibleChanged'
+          }
+        }
+      }
 
-      _computeLoggedInStatus: function(userid) {
+      static get observers() {
+        return [
+          '_routePageChanged(dataRoute.page)'
+        ];
+      }
+
+      _visibleChanged(visible) {
+        if (visible) {
+          this.dispatchEvent(new CustomEvent('change-section', {
+            bubbles: true, composed: true, detail: {title: 'Data'}}));
+        }
+      }
+
+      _routePageChanged(page) {
+        if(this.route.prefix.endsWith("/data")) {
+          console.log("mint-data: " + page);
+          this.page = page || 'search';
+          Polymer.AppLayout.scroll({ top: 0, behavior: 'silent' });
+        }
+      }
+
+      _computeLoggedInStatus(userid) {
         return userid != null;
-      },
+      }
 
-      _isDefined: function(item) {
+      _isDefined(item) {
         return item != null;
-      },
+      }
 
-      _hashKeys: function(hash) {
+      _hashKeys(hash) {
         if(hash)
           return Object.keys(hash).sort();
-      },
+      }
 
-      _checkLogin: function(userid) {
+      _checkLogin(userid) {
         if(!userid)
           this.dataItems = null;
       }
-    });
-
+    }
+    customElements.define(MintData.is, MintData);
   </script>
 
 </dom-module>

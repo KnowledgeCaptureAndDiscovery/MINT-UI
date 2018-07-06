@@ -7,8 +7,10 @@
 <link rel="import" href="../bower_components/paper-input/paper-textarea.html">
 <link rel="import" href="../bower_components/paper-item/paper-item.html">
 <link rel="import" href="../bower_components/polymer/lib/utils/render-status.html">
+
 <link rel="import" href="d3-import.html">
 <link rel="import" href="loading-screen.html">
+<link rel="import" href="mint-common-styles.html">
 
 <script src="../js/gui/template/common.js"></script>
 <script src="../js/gui/vgraph/graph-variable.js"></script>
@@ -20,30 +22,9 @@
 
 <dom-module id="variable-graph">
   <template>
-    <style>
+    <style include="mint-common-styles">
       :host {
         display: block;
-      }
-      .outer {
-        position: relative;
-        width:100%;
-        height: 700px;
-        overflow: auto;
-        border: 2px solid var(--app-accent-color);
-        border-width:0px 2px;
-      }
-      .toolbar {
-        color:white;
-        width:100%;
-        background-color: var(--app-accent-color);
-        border: 2px solid var(--app-accent-color);
-        border-radius: 4px 4px 0px 0px;
-        @apply --layout-horizontal;
-        @apply --layout-wrap;
-        @apply --layout-center-justified;
-      }
-      .bottom {
-        border-radius: 0px 0px 4px 4px;
       }
       paper-toggle-button {
         --paper-toggle-button-checked-button-color:  white;
@@ -58,7 +39,7 @@
       }
       #canvas {
         width:100%;
-        height:calc(100% - 4px);
+        height:100%;
       }
       paper-input, paper-dropdown-menu-light {
         margin:0px;
@@ -136,8 +117,8 @@
 
     <!-- Edit/Add Variable Dialog -->
     <paper-dialog modal id="variable_editor" on-iron-overlay-closed="_editVariable">
-      <div class='heading'>Edit Variable</div>
-      <paper-input label="Variable Name" value="{{ed_item.name}}"></paper-input>
+      <div class='heading'>Edit Graph Node</div>
+      <paper-input label="Graph Node Name" value="{{ed_item.name}}"></paper-input>
       <paper-input label="Standard Name" value="{{ed_item.standard_name}}"></paper-input>
       <paper-dropdown-menu-light no-animations label="Category">
         <paper-listbox slot="dropdown-content" attr-for-selected="value" selected="{{ed_item.category}}">
@@ -212,8 +193,7 @@
           ed_item: Object,
           graph_json : String,
 
-          componentLibrary: Object,
-          dataCatalog: Object
+          modelCatalog: Object
         };
       }
 
@@ -263,7 +243,7 @@
       }
 
       analyze() {
-        this.set("workflows", this.componentLibrary.solve(this.data));
+        this.set("workflows", this.modelCatalog.solve(this.data));
       }
 
       _cagChanged(data) {

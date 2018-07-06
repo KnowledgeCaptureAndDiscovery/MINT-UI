@@ -22,6 +22,22 @@
         this.set("dataCatalog", this);
       }
 
+      searchVariables(term, fn) {
+        var url = this.server + "/data_sets/search?query=" +
+          encodeURIComponent(term);
+        this._getResource({
+          url: url,
+          onLoad: function(e) {
+            var list = JSON.parse(e.target.responseText);
+            var vlist = list.data;
+            fn(vlist);
+          },
+          onError: function() {
+            console.log("Cannot search for variables");
+          }
+        });
+      }
+
       getVariableData(standard_name, fn) {
         var url = this.server + "/data_sets?standard_name=" +
           encodeURIComponent(standard_name);
@@ -48,26 +64,33 @@
             files.push(binding);
             // console.log(binding);
             let bid = binding.variable_id.value;
-            let data = {variable_id: bid};
-            me._postResource({
-              url: me.server + "/data_sets/get_location_url",
-              onLoad: function(e) {
-                num++;
-                var bdata = JSON.parse(e.target.responseText);
-                binding.plan = bdata.results.bindings;
-                // console.log(bdata);
-                if(num==blist.length) {
-                  fn(files);
-                }
-              },
-              onError: function() {
-                console.log("Cannot fetch file data");
+            me.getDatasetLocation(bid, function(bindings) {
+              num++;
+              binding.plan = bindings;
+              if(num == blist.length) {
+                fn(files);
               }
-            }, JSON.stringify(data));
+            });
           }
           if(blist.length == 0)
             fn(null);
         });
+      }
+
+      getDatasetLocation(vid, fn) {
+        var me = this;
+        var data = {variable_id: vid};
+        me._postResource({
+          url: me.server + "/data_sets/get_location_url",
+          onLoad: function(e) {
+            var bdata = JSON.parse(e.target.responseText);
+            var bindings = bdata.results.bindings;
+            fn(bindings);
+          },
+          onError: function() {
+            console.log("Cannot fetch file location");
+          }
+        }, JSON.stringify(data));
       }
 
       getBindingsForVariables(variables, fn) {
