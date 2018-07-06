@@ -114,7 +114,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <app-route
         route="[[route]]"
         pattern="/:page"
-        data="{{dataRoute}}"
+        data="{{routeData}}"
         tail="{{subroute}}"></app-route>
 
     <iron-pages role="main" selected="[[page]]" attr-for-selected="name" selected-attribute="visible">
@@ -153,7 +153,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       static get observers() {
         return [
-          '_routePageChanged(dataRoute.page)'
+          '_routePageChanged(visible, routeData.page)'
         ];
       }
 
@@ -164,8 +164,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       }
 
-      _routePageChanged(page) {
-        if(this.route.prefix.endsWith("/data")) {
+      _routePageChanged(visible, page) {
+        if(visible && this.route.prefix.endsWith("/data")) {
           console.log("mint-data: " + page);
           this.page = page || 'search';
           Polymer.AppLayout.scroll({ top: 0, behavior: 'silent' });

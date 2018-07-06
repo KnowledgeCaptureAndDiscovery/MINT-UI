@@ -167,7 +167,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       static get observers() {
         return [
-          '_routePageChanged(routeData.page)'
+          '_routePageChanged(visible, routeData.page)'
         ];
       }
 
@@ -189,8 +189,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.regionName = detail.region || '';
       }
 
-      _routePageChanged(page) {
-        if(this.route.prefix.endsWith("/cags")) {
+      _routePageChanged(visible, page) {
+        if(visible && this.route.prefix.endsWith("/cags")) {
           console.log("mint-cags: " + page);
           this.page = page || 'home';
           Polymer.AppLayout.scroll({ top: 0, behavior: 'silent' });

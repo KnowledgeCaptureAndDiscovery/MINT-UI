@@ -362,7 +362,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       _pageChanged(page, oldPage) {
         if (page != null) {
-          console.log(page);
           if(!this.loadedPages[page]) {
             this.$.pageLoading.loading = true;
             this.loadedPages[page] = true;

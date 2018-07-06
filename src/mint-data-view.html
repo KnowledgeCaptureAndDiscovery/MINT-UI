@@ -7,11 +7,11 @@
 <dom-module id="mint-data-view">
   <template>
     <style include="mint-common-styles">
-      mint-map {
+      mint-map, mint-chart, mint-time {
         height: 650px;
       }
       .visualisation {
-        margin: 20px;
+        margin-bottom: 40px;
       }
     </style>
 
@@ -95,7 +95,7 @@
 
       _initializeFromURL(visible, routeData) {
         var me = this;
-        if(visible && this.route.prefix.endsWith("/view") && routeData) {
+        if(visible && this.route.prefix.endsWith("/data/view") && routeData) {
           var item = JSON.parse(atob(routeData.json_hash));
           this.set("standard_name", routeData.standard_name);
           this.set("dataset_name", item.ds);

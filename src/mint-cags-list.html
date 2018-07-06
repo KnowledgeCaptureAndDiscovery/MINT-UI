@@ -171,9 +171,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <div class="content">
       <!-- Map -->
       <div class="map">
-        <google-map id="map" api-key="AIzaSyAuaqVMFvr8yEr9WzFEDg0veeOQ2HDwoHU" disable-default-ui="" latitude="[[region.latitude]]" longitude="[[region.longitude]]" zoom="[[region.zoom]]" styles="[[mapStyles]]">
-          <google-map-data-layer url="[[geoJsonURL]]"></google-map-data-layer>
-        </google-map>
+        <template is="dom-if" if="[[visible]]">
+          <google-map id="map" api-key="AIzaSyAuaqVMFvr8yEr9WzFEDg0veeOQ2HDwoHU"
+              disable-default-ui="" latitude="[[region.latitude]]"
+              longitude="[[region.longitude]]"
+              zoom="[[region.zoom]]"
+              styles="[[mapStyles]]">
+            <google-map-data-layer url="[[_createGeoJsonURL(region, visible)]]"></google-map-data-layer>
+          </google-map>
+        </template>
       </div>
       <!-- Description-->
       <div class="description">
@@ -265,14 +271,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       _regionChanged(region, visible) {
-        if (!visible) {
+        if (!visible)
           return;
-        }
+        if (!this.route || !this.route.prefix.endsWith("/cags/list"))
+          return;
+
         var me = this;
         this._changeSectionDebouncer = Polymer.Debouncer.debounce(this._changeSectionDebouncer,
           Polymer.Async.microTask, () => {
             if (region) {
-              me.set('geoJsonURL', me._createGeoJsonURL(region));
               // Notify the region and the page's title
               this.dispatchEvent(new CustomEvent('change-section', {
                 bubbles: true, composed: true, detail: {
@@ -286,8 +293,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           });
       }
 
-      _createGeoJsonURL(region) {
-        if(region) {
+      _createGeoJsonURL(region, visible) {
+        if(region && visible) {
           var url = "files/" + region.name + "/geojson.json";
           //console.log(url);
           return url;

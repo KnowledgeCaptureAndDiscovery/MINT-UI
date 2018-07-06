@@ -77,7 +77,7 @@
 
       static get observers() {
         return [
-          '_initializeFromURL(visible, routeData)'
+          '_initializeFromURL(routeData)'
         ];
       }
 
@@ -86,8 +86,8 @@
         this.paperInput = this.$.paper_input;
       }
 
-      _initializeFromURL(visible, routeData) {
-        if(visible && this.route.prefix.endsWith("/search") && routeData.url_searchTerm) {
+      _initializeFromURL(routeData) {
+        if(this.route && this.route.prefix.endsWith("/data/search") && routeData.url_searchTerm) {
           this.set("searchTerm", routeData.url_searchTerm);
           this._searchVariables();
         }

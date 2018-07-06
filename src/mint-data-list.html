@@ -65,7 +65,7 @@
       }
 
       _initializeFromURL(visible, routeData) {
-        if(visible && this.route.prefix.endsWith("/list") && routeData.standard_name) {
+        if(visible && this.route.prefix.endsWith("/data/list") && routeData.standard_name) {
           this.set("standard_name", routeData.standard_name);
           this._searchData();
         }

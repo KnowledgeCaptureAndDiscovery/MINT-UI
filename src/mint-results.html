@@ -13,6 +13,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <link rel="import" href="mint-results-list.html">
 <link rel="import" href="mint-results-detail.html">
+
 <link rel="import" href="mint-common-styles.html">
 
 <dom-module id="mint-results">
@@ -60,6 +61,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           type: String,
           reflectToAttribute: true
         },
+        visible: Boolean,
         route: Object,
         routeData: Object
       };
@@ -85,7 +87,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     }
 
     _routePageChanged(page) {
-      if(this.route.prefix.endsWith("/results")) {
+      if(this.route && this.route.prefix.endsWith("/results")) {
         console.log("mint-results: " + page);
         this.page = page || 'list';
         Polymer.AppLayout.scroll({ top: 0, behavior: 'silent' });
