@@ -49,14 +49,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       .grid > a {
-        -webkit-flex: 1 1;
-        flex: 1 1;
-        -webkit-flex-basis: 33%;
-        flex-basis: 33%;
-        max-width: 33%;
         text-decoration: none;
       }
-
       #map {
         width:200px;
         height:150px;
@@ -78,14 +72,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
       .box {
         @apply(--layout-vertical);
-        margin-top: 20px;
-        margin-right: 20px;
         background-color: #FEFEFE;
         border: 1px solid var(--app-primary-color);
         border-radius: 4px;
-        width: 250px;
+        width: 100%;
         background-size: 200px auto;
         background-position: 0px 24px;
+        margin: 5px;
       }
       .inner {
         background: rgba(255,255,255,0.2);
@@ -136,11 +129,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         .hero-image {
           display: none;
         }
-
-        .grid > a {
-          -webkit-flex-basis: 50%;
-          flex-basis: 50%;
-          max-width: 50%;
+        .description {
+          margin: 0px;
+          vertical-align: top;
+        }
+        .map {
+          width: 100%;
+        }
+        .grid > .box {
+          -webkit-flex-basis: 100%;
+          flex-basis: 100%;
+          max-width: 100%;
         }
         .content {
           @apply(--layout-vertical);
@@ -295,7 +294,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       _createGeoJsonURL(region, visible) {
         if(region && visible) {
-          var url = "files/" + region.name + "/geojson.json";
+          var url = "files/regions/" + region.name + "/geojson.json";
           //console.log(url);
           return url;
         }

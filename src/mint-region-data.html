@@ -36,7 +36,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         var me = this
         //console.log('fetching regions');
         this._getResource({
-          url: 'files/regions.json',
+          url: 'files/regions/list.json',
           onLoad(e) {
             me.set('regions', JSON.parse(e.target.responseText));
             //console.log(me.regions);

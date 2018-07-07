@@ -6,7 +6,7 @@
     "cags": [
       {
         "name": "Storyboard CAG",
-        "json": "files/mexico/cags/climate_projection.json",
+        "json": "files/regions/mexico/cags/climate_projection.json",
         "scenarios": [
           {
             "name": "Baseline",

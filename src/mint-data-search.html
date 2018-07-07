@@ -31,7 +31,7 @@
 
     <!-- Top toolbar -->
     <div class="toolbar">
-      <paper-button>SEARCH</paper-button>
+      <paper-button>SEARCH: [[searchTerm]]</paper-button>
     </div>
     <div class="outer">
       <div class="searchbox">
@@ -77,7 +77,7 @@
 
       static get observers() {
         return [
-          '_initializeFromURL(routeData)'
+          '_initializeFromURL(visible, routeData)'
         ];
       }
 
@@ -86,8 +86,8 @@
         this.paperInput = this.$.paper_input;
       }
 
-      _initializeFromURL(routeData) {
-        if(this.route && this.route.prefix.endsWith("/data/search") && routeData.url_searchTerm) {
+      _initializeFromURL(visible, routeData) {
+        if(visible && this.route.prefix.endsWith("/data/search") && routeData.url_searchTerm) {
           this.set("searchTerm", routeData.url_searchTerm);
           this._searchVariables();
         }

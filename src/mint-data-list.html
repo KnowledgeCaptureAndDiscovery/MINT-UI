@@ -26,9 +26,10 @@
 
     <!-- Top toolbar -->
     <div class="toolbar">
-      <paper-button>[[standard_name]]</paper-button>
+      <paper-button>DATASETS: [[standard_name]]</paper-button>
     </div>
     <div class="outer">
+      <loading-screen id="datalistloader"></loading-screen>
       <ul>
         <template is="dom-repeat" items="[[files_list]]">
           <li><a href="[[_getViewDataURL(item)]]">[[item.dataset.value]]</li>
@@ -73,7 +74,9 @@
 
       _searchData() {
         var me = this;
+        me.$.datalistloader.loading = true;
         this.dataCatalog.getVariableData(this.standard_name, function(list) {
+          me.$.datalistloader.loading = false;
           me.set("files_list", list);
         });
       }

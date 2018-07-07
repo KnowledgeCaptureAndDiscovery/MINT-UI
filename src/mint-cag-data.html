@@ -78,7 +78,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           return;
         }
         this._getResource({
-          url: 'files/' + region.name + '/list.json',
+          url: 'files/regions/' + region.name + '/list.json',
           onLoad(e) {
             this.set('region.categories', JSON.parse(e.target.responseText));
           },

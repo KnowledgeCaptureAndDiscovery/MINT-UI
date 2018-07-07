@@ -6,7 +6,7 @@
       {
         "id": "storyboard_cag",
         "name": "Storyboard CAG",
-        "json": "files/south_sudan/cags/climate_projection.json",
+        "json": "files/regions/south_sudan/cags/climate_projection.json",
         "scenarios": [
           {
             "id": "normal",
@@ -42,7 +42,7 @@
       {
         "id": "storyboard_cag",
         "name": "Storyboard CAG",
-        "json": "files/south_sudan/cags/food_security_projection.json",
+        "json": "files/regions/south_sudan/cags/food_security_projection.json",
         "scenarios": [
           {
             "id": "normal",
@@ -71,7 +71,7 @@
       {
         "id": "delphi_cag",
         "name": "Delphi CAG",
-        "json": "files/south_sudan/cags/delphi_cag.json",
+        "json": "files/regions/south_sudan/cags/delphi_cag.json",
         "scenarios": [
           {
             "id": "normal",
@@ -96,7 +96,7 @@
       {
         "id": "storyboard_cag",
         "name": "Storyboard CAG",
-        "json": "files/south_sudan/cags/food_security_projection.json",
+        "json": "files/regions/south_sudan/cags/food_security_projection.json",
         "scenarios": [
           {
             "id": "normal",
