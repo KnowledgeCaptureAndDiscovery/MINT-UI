@@ -235,10 +235,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           },
           route: Object,
           routeData: Object,
-          visible: {
-            type: Boolean,
-            observer: '_visibleChanged'
-          },
+          visible: Boolean,
           geoJsonURL: String,
           mapStyles: {
             type: String,
@@ -249,14 +246,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       static get observers() {
         return [
-          '_regionChanged(region, visible)'
+          '_regionChanged(region)'
         ];
       }
-
-      _visibleChanged(visible) {
-        console.log("cags-list, visible: " + visible);
-      }
-
       _getListItems(cags) {
         // Return placeholder cags when the cags haven't loaded yet.
         return cags || [];
@@ -276,12 +268,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         return  '(' + quantity + ' categor' + pluralizedQ + ')';
       }
 
-      _regionChanged(region, visible) {
-        if (!visible)
-          return;
-        if (!this.route || !this.route.prefix.endsWith("/cags/list"))
-          return;
-
+      _regionChanged(region) {
         var me = this;
         this._changeSectionDebouncer = Polymer.Debouncer.debounce(this._changeSectionDebouncer,
           Polymer.Async.microTask, () => {

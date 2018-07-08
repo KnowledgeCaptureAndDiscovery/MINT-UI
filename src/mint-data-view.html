@@ -89,15 +89,16 @@
 
       static get observers() {
         return [
-          '_initializeFromURL(visible, routeData)'
+          '_routeDataChanged(routeData.standard_name, routeData.json_hash)'
         ];
       }
 
-      _initializeFromURL(visible, routeData) {
+      _routeDataChanged(standard_name, json_hash) {
         var me = this;
-        if(visible && this.route.prefix.endsWith("/data/view") && routeData) {
-          var item = JSON.parse(atob(routeData.json_hash));
-          this.set("standard_name", routeData.standard_name);
+        if(standard_name && this.standard_name != standard_name &&
+            json_hash && this.json_hash != json_hash) {
+          var item = JSON.parse(atob(json_hash));
+          this.set("standard_name", standard_name);
           this.set("dataset_name", item.ds);
           this.set("variable_id", item.id);
           this.set("md5hash", item.md5);
@@ -107,6 +108,8 @@
             md5: me.md5hash,
             uri: me.variable_id
           };
+          // console.log("Setting variable to:")
+          // console.log(variable);
           me.set("variables", [variable]);
           /*me.set("variables",
             [{ name: 'precipitation',

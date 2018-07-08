@@ -61,13 +61,14 @@
 
       static get observers() {
         return [
-          '_routeDataChanged(routeData)'
+          '_routeDataChanged(routeData.standard_name)'
         ];
       }
 
-      _routeDataChanged(routeData) {
-        if(routeData.standard_name) {
-          this.set("standard_name", routeData.standard_name);
+      _routeDataChanged(standard_name) {
+        if(standard_name && this.standard_name != standard_name) {
+          // console.log("Data changed to " + standard_name);
+          this.set("standard_name", standard_name);
           this._searchData();
         }
       }

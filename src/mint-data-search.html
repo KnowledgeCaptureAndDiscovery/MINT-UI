@@ -77,7 +77,7 @@
 
       static get observers() {
         return [
-          '_routeDataChanged(routeData)'
+          '_routeDataChanged(routeData.url_searchTerm)'
         ];
       }
 
@@ -86,9 +86,10 @@
         this.paperInput = this.$.paper_input;
       }
 
-      _routeDataChanged(routeData) {
-        if(routeData.url_searchTerm) {
-          this.set("searchTerm", routeData.url_searchTerm);
+      _routeDataChanged(url_searchTerm) {
+        if(url_searchTerm & this.url_searchTerm != url_searchTerm) {
+          //console.log("Setting search term to " + url_searchTerm)
+          this.set("searchTerm", url_searchTerm);
           this._searchVariables();
         }
       }
