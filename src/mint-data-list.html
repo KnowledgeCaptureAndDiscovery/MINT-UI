@@ -61,12 +61,12 @@
 
       static get observers() {
         return [
-          '_initializeFromURL(visible, routeData)'
+          '_routeDataChanged(routeData)'
         ];
       }
 
-      _initializeFromURL(visible, routeData) {
-        if(visible && this.route.prefix.endsWith("/data/list") && routeData.standard_name) {
+      _routeDataChanged(routeData) {
+        if(routeData.standard_name) {
           this.set("standard_name", routeData.standard_name);
           this._searchData();
         }

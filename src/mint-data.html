@@ -11,128 +11,126 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 <link rel="import" href="mint-data-catalog.html">
 <link rel="import" href="mint-common-styles.html">
+<link rel="import" href="mint-base-router.html">
 
 <link rel="import" href="mint-data-search.html">
 <link rel="import" href="mint-data-list.html">
 <link rel="import" href="mint-data-view.html">
 
 <dom-module id="mint-data">
-
-  <template>
-
-    <style include="mint-common-styles">
-
-      .item {
-        display: block;
-        text-decoration: none;
-        text-align: center;
-        margin-bottom: 40px;
-      }
-
-      h2 {
-        font-size: 1.3em;
-        font-weight: 500;
-        margin: 32px 0;
-      }
-
-      .detail {
-        margin: 10px;
-        margin-top: 0px;
-        width: calc(100% - 20px);
-        transition: opacity 0.4s;
-        @apply(--layout-center-justified);
-      }
-
-      .grid {
-        @apply(--layout-horizontal);
-        @apply(--layout-wrap);
-        @apply(--layout-center);
-        display: flex;
-        flex-flow: row wrap;
-        border: 1px solid #E3E3E3;
-        border-width: 1px 0px 0px 1px;
-      }
-
-      .grid > a {
-        -webkit-flex: 1 1;
-        flex: 1 1;
-        -webkit-flex-basis: calc(33.3333% - 11px);
-        flex-basis: calc(33.3333% - 11px);
-        max-width: calc(33.3333% - 11px);
-        padding-left: 10px;
-        height: 34px;
-        line-height:34px;
-        /*color: black;*/
-        text-decoration: none;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        border: 1px solid #E3E3E3;
-        border-width: 0px 1px 1px 0px;
-      }
-
-      .grid > a:hover {
-        background-color: #EEEEEE;
-        text-decoration: underline;
-      }
-
-      .section {
-        /*border: 1px solid #E3E3E3;*/
-        margin-bottom: 15px;
-      }
-
-      .section .content {
-
-      }
-
-      .section .head {
-        color: var(--app-secondary-color);
-        font-size: 12px;
-        height: 42px;
-        line-height:42px;
-        font-weight: 500;
-        padding: 0px 10px;
-        border: 1px solid #E3E3E3;
-        border-width: 1px 1px 0px 1px;
-        box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06), 0 2px 0 rgba(0, 0, 0, 0.075), 0 3px 0 rgba(0, 0, 0, 0.05), 0 4px 0 rgba(0, 0, 0, 0.015);
-      }
-
-
-      @media (max-width: 767px) {
-        h2 {
-          margin: 24px 0;
-        }
-
-        .grid a {
-          -webkit-flex-basis: calc(50% - 11px);
-          flex-basis: calc(50% - 11px);
-          max-width: calc(50% - 11px);
-        }
-      }
-    </style>
-
-    <app-route
-        route="[[route]]"
-        pattern="/:page"
-        data="{{routeData}}"
-        tail="{{subroute}}"></app-route>
-
-    <iron-pages role="main" selected="[[page]]" attr-for-selected="name" selected-attribute="visible">
-      <!-- data search by variables -->
-      <mint-data-search name="search" data-catalog="[[dataCatalog]]" route="[[subroute]]"></mint-data-search>
-      <!-- list view of datasets for a variable -->
-      <mint-data-list name="list" data-catalog="[[dataCatalog]]" route="[[subroute]]"></mint-data-list>
-      <!-- visualize datasets for a variable -->
-      <mint-data-view name="view" data-catalog="[[dataCatalog]]" route="[[subroute]]"></mint-data-view>
-    </iron-pages>
-
-  </template>
-
   <script>
 
-    class MintData extends Polymer.Element {
+    class MintData extends MintBaseRouter {
 
       static get is() { return 'mint-data'; }
+
+      static get template() {
+        return html`
+        <style include="mint-common-styles">
+
+          .item {
+            display: block;
+            text-decoration: none;
+            text-align: center;
+            margin-bottom: 40px;
+          }
+
+          h2 {
+            font-size: 1.3em;
+            font-weight: 500;
+            margin: 32px 0;
+          }
+
+          .detail {
+            margin: 10px;
+            margin-top: 0px;
+            width: calc(100% - 20px);
+            transition: opacity 0.4s;
+            @apply(--layout-center-justified);
+          }
+
+          .grid {
+            @apply(--layout-horizontal);
+            @apply(--layout-wrap);
+            @apply(--layout-center);
+            display: flex;
+            flex-flow: row wrap;
+            border: 1px solid #E3E3E3;
+            border-width: 1px 0px 0px 1px;
+          }
+
+          .grid > a {
+            -webkit-flex: 1 1;
+            flex: 1 1;
+            -webkit-flex-basis: calc(33.3333% - 11px);
+            flex-basis: calc(33.3333% - 11px);
+            max-width: calc(33.3333% - 11px);
+            padding-left: 10px;
+            height: 34px;
+            line-height:34px;
+            /*color: black;*/
+            text-decoration: none;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            border: 1px solid #E3E3E3;
+            border-width: 0px 1px 1px 0px;
+          }
+
+          .grid > a:hover {
+            background-color: #EEEEEE;
+            text-decoration: underline;
+          }
+
+          .section {
+            /*border: 1px solid #E3E3E3;*/
+            margin-bottom: 15px;
+          }
+
+          .section .content {
+
+          }
+
+          .section .head {
+            color: var(--app-secondary-color);
+            font-size: 12px;
+            height: 42px;
+            line-height:42px;
+            font-weight: 500;
+            padding: 0px 10px;
+            border: 1px solid #E3E3E3;
+            border-width: 1px 1px 0px 1px;
+            box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06), 0 2px 0 rgba(0, 0, 0, 0.075), 0 3px 0 rgba(0, 0, 0, 0.05), 0 4px 0 rgba(0, 0, 0, 0.015);
+          }
+
+          @media (max-width: 767px) {
+            h2 {
+              margin: 24px 0;
+            }
+
+            .grid a {
+              -webkit-flex-basis: calc(50% - 11px);
+              flex-basis: calc(50% - 11px);
+              max-width: calc(50% - 11px);
+            }
+          }
+        </style>
+
+        ${super.template}
+
+        <iron-pages role="main" selected="[[page]]" attr-for-selected="name" selected-attribute="visible">
+          <!-- data search by variables -->
+          <mint-data-search name="search" data-catalog="[[dataCatalog]]"
+            route="[[pageSubRoute.search]]"></mint-data-search>
+          <!-- list view of datasets for a variable -->
+          <mint-data-list name="list" data-catalog="[[dataCatalog]]"
+            route="[[pageSubRoute.list]]"></mint-data-list>
+          <!-- visualize datasets for a variable -->
+          <mint-data-view name="view" data-catalog="[[dataCatalog]]"
+            route="[[pageSubRoute.view]]"></mint-data-view>
+        </iron-pages>
+`;
+      }
 
       static get properties() {
         return {
@@ -151,12 +149,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       }
 
-      static get observers() {
-        return [
-          '_routePageChanged(visible, routeData.page)'
-        ];
-      }
-
       _visibleChanged(visible) {
         if (visible) {
           this.dispatchEvent(new CustomEvent('change-section', {
@@ -164,12 +156,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       }
 
-      _routePageChanged(visible, page) {
-        if(visible && this.route.prefix.endsWith("/data")) {
-          console.log("mint-data: " + page);
-          this.page = page || 'search';
-          Polymer.AppLayout.scroll({ top: 0, behavior: 'silent' });
-        }
+      _routePageChanged(page) {
+        console.log("mint-data: " + page);
+        this.page = page || 'search';
+        Polymer.AppLayout.scroll({ top: 0, behavior: 'silent' });
       }
 
       _computeLoggedInStatus(userid) {

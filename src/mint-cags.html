@@ -15,6 +15,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="mint-image.html">
 <link rel="import" href="mint-region-data.html">
 <link rel="import" href="mint-common-styles.html">
+<link rel="import" href="mint-base-router.html">
 
 <link rel="import" href="mint-cags-home.html">
 <link rel="import" href="mint-cags-list.html">
@@ -22,127 +23,123 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <dom-module id="mint-cags">
 
-  <template>
-
-    <style include="mint-common-styles">
-
-      .image-link {
-        outline: none;
-      }
-
-      .image-link > mint-image::after {
-        display: block;
-        content: '';
-        position: absolute;
-        transition-property: opacity;
-        transition-duration: 0s;
-        transition-delay: 90ms;
-        pointer-events: none;
-        opacity: 0;
-        top: 5px;
-        left: 5px;
-        right: 5px;
-        bottom: 5px;
-        outline: #2196F3 auto 5px;
-        outline: -moz-mac-focusring auto 5px;
-        outline: -webkit-focus-ring-color auto 5px;
-      }
-
-      .image-link:focus > mint-image::after {
-        opacity: 1;
-      }
-
-      .cag {
-        display: block;
-        text-decoration: none;
-        text-align: center;
-        /*margin-bottom: 40px;*/
-      }
-
-      .cag:nth-of-type(2),
-      .cag:nth-of-type(3) {
-        display: inline-block;
-        width: 50%;
-      }
-
-      mint-image {
-        position: relative;
-        height: 240px;
-        overflow: hidden;
-        --mint-image-img: {
-          position: absolute;
-          top: 0;
-          bottom: 0;
-          left: -9999px;
-          right: -9999px;
-          max-width: none;
-        };
-      }
-
-      h2 {
-        font-size: 1.3em;
-        font-weight: 500;
-        margin: 32px 0;
-      }
-
-      .cag:nth-of-type(2) > h2,
-      .cag:nth-of-type(3) > h2 {
-        font-size: 1.1em;
-      }
-
-      @media (max-width: 767px) {
-        mint-image {
-          height: 240px;
-        }
-
-        h2 {
-          margin: 24px 0;
-        }
-
-        .cag:nth-of-type(2) > mint-button > a,
-        .cag:nth-of-type(3) > mint-button > a {
-          padding: 8px 24px;
-        }
-      }
-
-    </style>
-
-    <app-route
-        route="[[route]]"
-        pattern="/:page"
-        data="{{routeData}}"
-        tail="{{subroute}}"></app-route>
-
-    <!--
-      mint-region-data provides the list of regions.
-    -->
-    <!--mint-ajax url="files/regions.json" auto result="{{regions}}"></mint-ajax-->
-    <mint-region-data auto regions="{{regions}}"></mint-region-data>
-
-    <iron-pages role="main" selected="[[page]]" attr-for-selected="name" selected-attribute="visible">
-      <!-- cags home  -->
-      <mint-cags-home name="home" regions="[[regions]]"></mint-cags-home>
-
-      <!-- list view of cags in a region -->
-      <mint-cags-list name="list" regions="[[regions]]"
-        region="{{region}}"
-        route="[[subroute]]"></mint-cags-list>
-
-      <!-- detail view of one cag -->
-      <mint-cags-detail name="detail" regions="[[regions]]" region="[[region]]"
-        server="[[server]]" userid="[[userid]]" domain="[[domain]]"
-        model-catalog="[[modelCatalog]]"
-        route="[[subroute]]"></mint-cags-detail>
-    </iron-pages>
-  </template>
-
   <script>
 
-    class MintCags extends Polymer.Element {
+    class MintCags extends MintBaseRouter {
       static get is() { return 'mint-cags'; }
 
+      static get template() {
+        return html`
+        <style include="mint-common-styles">
+
+          .image-link {
+            outline: none;
+          }
+
+          .image-link > mint-image::after {
+            display: block;
+            content: '';
+            position: absolute;
+            transition-property: opacity;
+            transition-duration: 0s;
+            transition-delay: 90ms;
+            pointer-events: none;
+            opacity: 0;
+            top: 5px;
+            left: 5px;
+            right: 5px;
+            bottom: 5px;
+            outline: #2196F3 auto 5px;
+            outline: -moz-mac-focusring auto 5px;
+            outline: -webkit-focus-ring-color auto 5px;
+          }
+
+          .image-link:focus > mint-image::after {
+            opacity: 1;
+          }
+
+          .cag {
+            display: block;
+            text-decoration: none;
+            text-align: center;
+            /*margin-bottom: 40px;*/
+          }
+
+          .cag:nth-of-type(2),
+          .cag:nth-of-type(3) {
+            display: inline-block;
+            width: 50%;
+          }
+
+          mint-image {
+            position: relative;
+            height: 240px;
+            overflow: hidden;
+            --mint-image-img: {
+              position: absolute;
+              top: 0;
+              bottom: 0;
+              left: -9999px;
+              right: -9999px;
+              max-width: none;
+            };
+          }
+
+          h2 {
+            font-size: 1.3em;
+            font-weight: 500;
+            margin: 32px 0;
+          }
+
+          .cag:nth-of-type(2) > h2,
+          .cag:nth-of-type(3) > h2 {
+            font-size: 1.1em;
+          }
+
+          @media (max-width: 767px) {
+            mint-image {
+              height: 240px;
+            }
+
+            h2 {
+              margin: 24px 0;
+            }
+
+            .cag:nth-of-type(2) > mint-button > a,
+            .cag:nth-of-type(3) > mint-button > a {
+              padding: 8px 24px;
+            }
+          }
+
+        </style>
+
+        <!-- Insert parent template : app-router basically -->
+        ${super.template}
+
+        <!-- mint-region-data provides the list of regions -->
+        <mint-region-data auto regions="{{regions}}"></mint-region-data>
+
+        <iron-pages role="main" selected="[[page]]" attr-for-selected="name" selected-attribute="visible">
+          <!-- cags home  -->
+          <mint-cags-home name="home" regions="[[regions]]"
+            route="[[pageSubRoute.home]]"></mint-cags-home>
+
+          <!-- list view of cags in a region -->
+          <mint-cags-list name="list" regions="[[regions]]"
+            region="{{region}}"
+            route="[[pageSubRoute.list]]"></mint-cags-list>
+
+          <!-- detail view of one cag -->
+          <mint-cags-detail name="detail" regions="[[regions]]" region="[[region]]"
+            server="[[server]]" userid="[[userid]]" domain="[[domain]]"
+            model-catalog="[[modelCatalog]]"
+            route="[[pageSubRoute.detail]]"></mint-cags-detail>
+        </iron-pages>
+`;
+      }
+
       static get properties() {
-        return {
+        return Object.assign({}, super.properties, {
           server: String,
           userid: String,
           domain: String,
@@ -162,13 +159,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           regions: {
             type: Array
           }
-        };
-      }
-
-      static get observers() {
-        return [
-          '_routePageChanged(visible, routeData.page)'
-        ];
+        });
       }
 
       ready() {
@@ -189,12 +180,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.regionName = detail.region || '';
       }
 
-      _routePageChanged(visible, page) {
-        if(visible && this.route.prefix.endsWith("/cags")) {
-          console.log("mint-cags: " + page);
-          this.page = page || 'home';
-          Polymer.AppLayout.scroll({ top: 0, behavior: 'silent' });
-        }
+      _routePageChanged(page) {
+        console.log("mint-cags: " + page);
+        this.page = page || 'home';
+        Polymer.AppLayout.scroll({ top: 0, behavior: 'silent' });
       }
     }
 

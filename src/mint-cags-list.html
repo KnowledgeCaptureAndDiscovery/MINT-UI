@@ -133,7 +133,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           margin: 0px;
           vertical-align: top;
         }
-        .map {
+        .map, #map {
           width: 100%;
         }
         .grid > .box {
@@ -171,6 +171,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <!-- Map -->
       <div class="map">
         <template is="dom-if" if="[[visible]]">
+          <!--
           <google-map id="map" api-key="AIzaSyAuaqVMFvr8yEr9WzFEDg0veeOQ2HDwoHU"
               disable-default-ui="" latitude="[[region.latitude]]"
               longitude="[[region.longitude]]"
@@ -178,6 +179,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               styles="[[mapStyles]]">
             <google-map-data-layer url="[[_createGeoJsonURL(region, visible)]]"></google-map-data-layer>
           </google-map>
+          -->
+          [[region.latitude]], [[region.longitude]] : [[region.zoom]]<br/>
+          [[_createGeoJsonURL(region, visible)]]
         </template>
       </div>
       <!-- Description-->
@@ -235,7 +239,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           },
           route: Object,
           routeData: Object,
-          visible: Boolean,
+          visible: {
+            type: Boolean,
+            observer: '_visibleChanged'
+          },
           geoJsonURL: String,
           mapStyles: {
             type: String,
@@ -248,6 +255,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         return [
           '_regionChanged(region, visible)'
         ];
+      }
+
+      _visibleChanged(visible) {
+        console.log("cags-list, visible: " + visible);
       }
 
       _getListItems(cags) {

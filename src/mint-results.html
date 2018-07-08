@@ -11,42 +11,32 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/polymer/polymer.html">
 <link rel="import" href="../bower_components/app-route/app-route.html">
 
+<link rel="import" href="mint-base-router.html">
 <link rel="import" href="mint-results-list.html">
 <link rel="import" href="mint-results-detail.html">
 
 <link rel="import" href="mint-common-styles.html">
 
-<dom-module id="mint-results">
-  <template>
-    <style>
-
-      :host {
-        display: block;
-      }
-
-    </style>
-
-    <app-route
-        route="[[route]]"
-        pattern="/:page"
-        data="{{routeData}}"
-        tail="{{subroute}}"></app-route>
-
-    <iron-pages role="main" selected="[[page]]" attr-for-selected="name" selected-attribute="visible">
-      <!-- Results List -->
-      <mint-results-list name="list" server="[[server]]" userid="[[userid]]" domain="[[domain]]"
-        route="[[subroute]]" selectedrunid="{{selectedrunid}}"></mint-results-list>
-      <!-- Results Detail -->
-      <mint-results-detail name="detail" server="[[server]]" userid="[[userid]]" domain="[[domain]]"
-        route="[[subroute]]"></mint-results-detail>
-    </iron-pages>
-
-  </template>
-
   <script>
 
-  class MintResults extends Polymer.Element {
+  class MintResults extends MintBaseRouter {
     static get is() { return 'mint-results'; }
+
+    static get template() {
+      return html`
+
+      ${super.template}
+
+      <iron-pages role="main" selected="[[page]]" attr-for-selected="name" selected-attribute="visible">
+        <!-- Results List -->
+        <mint-results-list name="list" server="[[server]]" userid="[[userid]]" domain="[[domain]]"
+          route="[[pageSubRoute.list]]" selectedrunid="{{selectedrunid}}"></mint-results-list>
+        <!-- Results Detail -->
+        <mint-results-detail name="detail" server="[[server]]" userid="[[userid]]" domain="[[domain]]"
+          route="[[pageSubRoute.detail]]"></mint-results-detail>
+      </iron-pages>
+`;
+    }
 
     static get properties() {
       return {
@@ -67,12 +57,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       };
     }
 
-    static get observers() {
-      return [
-        '_routePageChanged(routeData.page)'
-      ];
-    }
-
     _loadedGraph(data) {
         console.log("Graph data loaded");
         console.log(data);
@@ -87,11 +71,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     }
 
     _routePageChanged(page) {
-      if(this.route && this.route.prefix.endsWith("/results")) {
-        console.log("mint-results: " + page);
-        this.page = page || 'list';
-        Polymer.AppLayout.scroll({ top: 0, behavior: 'silent' });
-      }
+      console.log("mint-results: " + page);
+      this.page = page || 'list';
+      Polymer.AppLayout.scroll({ top: 0, behavior: 'silent' });
     }
 
     _createGraphURL(cat, item) {

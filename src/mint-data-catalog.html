@@ -23,6 +23,10 @@
       }
 
       searchVariables(term, fn) {
+        var response = {"data":[{"class":"http://www.geoscienceontology.org/geo-lower/variable#atmosphere_water__one-hour_time_integral_of_precipitation_leq-volume_flux","dataset_count":0,"label_name":"atmosphere_water__one-hour_time_integral_of_precipitation_leq-volume_flux","score":5.28},{"class":"http://www.geoscienceontology.org/geo-lower/variable#atmosphere_water__precipitation_leq-volume_flux","dataset_count":0,"label_name":"atmosphere_water__precipitation_leq-volume_flux","score":5.28},{"class":"http://www.geoscienceontology.org/geo-lower/variable#sea_surface_water__precipitation_mass_flux","dataset_count":0,"label_name":"sea_surface_water__precipitation_mass_flux","score":5.28},{"class":"http://www.geoscienceontology.org/geo-lower/variable#atmosphere_sleet__precipitation_duration","dataset_count":0,"label_name":"atmosphere_sleet__precipitation_duration","score":5.28},{"class":"http://www.geoscienceontology.org/geo-lower/variable#atmosphere_water__domain_time_max_of_precipitation_leq-volume_flux","dataset_count":0,"label_name":"atmosphere_water__domain_time_max_of_precipitation_leq-volume_flux","score":5.28},{"class":"http://www.geoscienceontology.org/geo-lower/variable#sea_surface_water__precipitation_leq-volume_flux","dataset_count":0,"label_name":"sea_surface_water__precipitation_leq-volume_flux","score":5.28},{"class":"http://www.geoscienceontology.org/geo-lower/quantity#one-year_time_integral_of_precipitation_leq-volume_flux","dataset_count":0,"label_name":"one-year_time_integral_of_precipitation_leq-volume_flux","score":5.28},{"class":"http://www.geoscienceontology.org/geo-lower/variable#atmosphere_water__one-day_time_integral_of_precipitation_leq-volume_flux","dataset_count":0,"label_name":"atmosphere_water__one-day_time_integral_of_precipitation_leq-volume_flux","score":5.28},{"class":"http://www.geoscienceontology.org/geo-lower/variable#titan_atmosphere_methane__precipitation_leq-volume_flux","dataset_count":0,"label_name":"titan_atmosphere_methane__precipitation_leq-volume_flux","score":5.28},{"class":"http://www.geoscienceontology.org/geo-lower/quantity#one-hour_time_integral_of_precipitation_leq-volume_flux","dataset_count":0,"label_name":"one-hour_time_integral_of_precipitation_leq-volume_flux","score":5.28},{"class":"http://www.geoscienceontology.org/geo-lower/quantity#domain_time_max_of_precipitation_leq-volume_flux","dataset_count":0,"label_name":"domain_time_max_of_precipitation_leq-volume_flux","score":5.28},{"class":"http://www.geoscienceontology.org/geo-lower/quantity#precipitation_leq-volume_flux","dataset_count":0,"label_name":"precipitation_leq-volume_flux","score":5.28},{"class":"http://www.geoscienceontology.org/geo-lower/quantity#one-day_time_integral_of_precipitation_leq-volume_flux","dataset_count":0,"label_name":"one-day_time_integral_of_precipitation_leq-volume_flux","score":5.28},{"class":"http://www.geoscienceontology.org/geo-lower/variable#atmosphere_ice__precipitation_volume_flux","dataset_count":0,"label_name":"atmosphere_ice__precipitation_volume_flux","score":5.28},{"class":"http://www.geoscienceontology.org/geo-lower/variable#atmosphere_snow__precipitation_duration","dataset_count":0,"label_name":"atmosphere_snow__precipitation_duration","score":5.28},{"class":"http://www.geoscienceontology.org/geo-lower/variable#atmosphere_hail__precipitation_volume_flux","dataset_count":0,"label_name":"atmosphere_hail__precipitation_volume_flux","score":5.28},{"class":"http://www.geoscienceontology.org/geo-lower/variable#atmosphere_water__precipitation_duration","dataset_count":0,"label_name":"atmosphere_water__precipitation_duration","score":5.28},{"class":"http://www.geoscienceontology.org/geo-lower/quantity#precipitation_mass_flux","dataset_count":0,"label_name":"precipitation_mass_flux","score":5.28},{"class":"http://www.geoscienceontology.org/geo-lower/variable#atmosphere_hail__precipitation_duration","dataset_count":0,"label_name":"atmosphere_hail__precipitation_duration","score":5.28},{"class":"http://www.geoscienceontology.org/geo-lower/process#precipitation","dataset_count":0,"label_name":"precipitation","score":5.28}],"status":"ok"};
+        fn(response.data);
+
+        /*
         var url = this.server + "/data_sets/search?query=" +
           encodeURIComponent(term);
         this._getResource({
@@ -36,9 +40,13 @@
             console.log("Cannot search for variables");
           }
         });
+        */
       }
 
       getVariableData(standard_name, fn) {
+        var response = {"head":{"vars":["variable_id","standardName","dataset","md5hash","start_time","end_time","boundary"]},"results":{"bindings":[{"boundary":{"datatype":"http://www.opengis.net/ont/geosparql#wktLiteral","type":"literal","value":"<http://www.opengis.net/def/crs/OGC/1.3/CRS84> POLYGON ((41.239706 -95.620333, 41.239706 -95.594684, 41.225164 -95.594684, 41.225164 -95.620333, 41.239706 -95.620333))"},"dataset":{"type":"uri","value":"https://mint.isi.edu/dcat/datasets/Treynor---Iowa-30m_June_07_67"},"end_time":{"datatype":"http://www.w3.org/2001/XMLSchema#dateTime","type":"literal","value":"2012-06-07T23:59:59"},"md5hash":{"type":"literal","value":"44c29edb103a2872f519ad0c9a0fdaaa"},"standardName":{"type":"uri","value":"http://www.geoscienceontology.org/geo-lower/atmosphere_water__precipitation_leq-volume_flux"},"start_time":{"datatype":"http://www.w3.org/2001/XMLSchema#dateTime","type":"literal","value":"2012-06-07T00:00:00"},"variable_id":{"type":"uri","value":"https://mint.isi.edu/dcat/variables/atmosphere_water__precipitation_leq-volume_flux?file_location=d771fe71dca94eb1513c4523dd92b843&time_range=2012-06-07T00%3A00%3A00%2F2012-06-07T23%3A59%3A59&spatial_coverage=b317cfc4f7877ec30e2a4afd23c431a2&short_name=P"}}]}};
+        fn(response.results.bindings);
+        /*
         var url = this.server + "/data_sets?standard_name=" +
           encodeURIComponent(standard_name);
         this._getResource({
@@ -51,7 +59,7 @@
           onError: function() {
             console.log("Cannot fetch files info");
           }
-        });
+        });*/
       }
 
       getVariableFiles(standard_name, fn) {
@@ -80,6 +88,7 @@
       getDatasetLocation(vid, fn) {
         var me = this;
         var data = {variable_id: vid};
+        /*
         me._postResource({
           url: me.server + "/data_sets/get_location_url",
           onLoad: function(e) {
@@ -90,7 +99,7 @@
           onError: function() {
             console.log("Cannot fetch file location");
           }
-        }, JSON.stringify(data));
+        }, JSON.stringify(data));*/
       }
 
       getBindingsForVariables(variables, fn) {
