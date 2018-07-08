@@ -42,15 +42,12 @@
         border-radius: 4px;
         margin: 5px 0px;
       }
-
-      .content {
-        @apply(--layout-horizontal);
-      }
-
-      mint-map#mintmap {
+      mint-map {
         width: calc(100% - 2px);
         margin-left: 2px;
-        height: 100%;
+      }
+      .content {
+        @apply(--layout-horizontal);
       }
       .toolbar {
         border-radius: 0px 4px 0px 0px;
