@@ -58,8 +58,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     }
 
     _loadedGraph(data) {
-        console.log("Graph data loaded");
-        console.log(data);
+        //console.log("Graph data loaded");
+        //console.log(data);
     }
 
     _selectedRunid(runid) {
@@ -71,7 +71,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     }
 
     _routePageChanged(page) {
-      console.log("mint-results: " + page);
+      //console.log("mint-results: " + page);
       this.page = page || 'list';
       Polymer.AppLayout.scroll({ top: 0, behavior: 'silent' });
     }
@@ -79,7 +79,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     _createGraphURL(cat, item) {
       if(cat && item) {
         var url = "files/" + cat + "/" + item + ".json";
-        console.log(url);
+        //console.log(url);
         return url;
       }
       return null;

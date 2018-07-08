@@ -171,7 +171,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <!-- Map -->
       <div class="map">
         <template is="dom-if" if="[[visible]]">
-          <!--
           <google-map id="map" api-key="AIzaSyAuaqVMFvr8yEr9WzFEDg0veeOQ2HDwoHU"
               disable-default-ui="" latitude="[[region.latitude]]"
               longitude="[[region.longitude]]"
@@ -179,9 +178,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               styles="[[mapStyles]]">
             <google-map-data-layer url="[[_createGeoJsonURL(region, visible)]]"></google-map-data-layer>
           </google-map>
-          -->
-          [[region.latitude]], [[region.longitude]] : [[region.zoom]]<br/>
-          [[_createGeoJsonURL(region, visible)]]
         </template>
       </div>
       <!-- Description-->
