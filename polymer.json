@@ -19,7 +19,9 @@
 	"app.yaml",
     "manifest.json",
     "bower_components/webcomponentsjs/*",
-    "bower_components/mint-map/*"
+    "bower_components/mint-map/*",
+    "bower_components/mint-chart/*",
+    "bower_components/mint-time/*"
   ],
   "lint": {
     "rules": ["polymer-2-hybrid"]
