@@ -1,5 +1,7 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
 <link rel="import" href="../bower_components/mint-map/mint-map.html">
+<link rel="import" href="../bower_components/app-route/app-route.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
 <link rel="import" href="mint-ajax.html">
 <link rel="import" href="variable-graph.html">
 <link rel="import" href="mint-common-styles.html">
@@ -8,7 +10,7 @@
   <template>
     <style include="mint-common-styles">
       .searchbox {
-        @apply(--layout-horizontal);
+        @apply --layout-horizontal;
         width: 100%;
       }
       .searchbox paper-button {
@@ -21,20 +23,26 @@
 
     <app-route
         route="[[route]]"
-        pattern="/:standard_name"
+        pattern="/:standardName"
         data="{{routeData}}"></app-route>
 
     <!-- Top toolbar -->
     <div class="toolbar">
-      <paper-button>DATASETS: [[standard_name]]</paper-button>
+      <paper-button>DATASETS: [[standardName]]</paper-button>
     </div>
     <div class="outer">
       <loading-screen id="datalistloader"></loading-screen>
-      <ul>
-        <template is="dom-repeat" items="[[files_list]]">
-          <li><a href="[[_getViewDataURL(item)]]">[[item.dataset.value]]</li>
-        </template>
-      </ul>
+      <template is="dom-if" if="[[_isEmpty(filesList)]]">
+        <br/>
+        <center>NO DATASETS FOUND</center>
+      </template>
+      <template is="dom-if" if="[[!_isEmpty(filesList)]]">
+        <ul>
+          <template is="dom-repeat" items="[[filesList]]">
+            <li><a href="[[_getViewDataURL(item)]]">[[item.dataset.value]]</li>
+          </template>
+        </ul>
+      </template>
     </div>
     <!-- Bottom toolbar -->
     <div class="toolbar bottom">
@@ -51,8 +59,12 @@
       static get properties() {
         return {
           dataCatalog: Object,
-          standard_name: String,
-          data_list: Array,
+          standardName: String,
+          dataList: Array,
+          filesList: {
+            type: Array,
+            value: []
+          },
           routeData: Object,
           route: Object,
           visible: Boolean
@@ -61,14 +73,14 @@
 
       static get observers() {
         return [
-          '_routeDataChanged(routeData.standard_name)'
+          '_routeDataChanged(routeData.standardName)'
         ];
       }
 
-      _routeDataChanged(standard_name) {
-        if(standard_name && this.standard_name != standard_name) {
-          // console.log("Data changed to " + standard_name);
-          this.set("standard_name", standard_name);
+      _routeDataChanged(standardName) {
+        if(standardName && this.standardName != standardName) {
+          // console.log("Data changed to " + standardName);
+          this.set("standardName", standardName);
           this._searchData();
         }
       }
@@ -76,17 +88,21 @@
       _searchData() {
         var me = this;
         me.$.datalistloader.loading = true;
-        this.dataCatalog.getVariableData(this.standard_name, function(list) {
+        this.dataCatalog.getVariableData(this.standardName, function(list) {
           me.$.datalistloader.loading = false;
-          me.set("files_list", list);
+          me.set("filesList", list);
         });
       }
 
       _getViewDataURL(item) {
-        var url = "data/view/"+this.standard_name+"/";
-        var json = {ds:item.dataset.value, id:item.variable_id.value, md5:item.md5hash.value};
+        var url = "data/view/"+this.standardName+"/";
+        var json = {id:item.variable_id.value, md5:item.md5hash.value, ds:item.dataset.value};
         url += btoa(JSON.stringify(json));
         return url;
+      }
+
+      _isEmpty(list) {
+        return list.length == 0;
       }
     }
 

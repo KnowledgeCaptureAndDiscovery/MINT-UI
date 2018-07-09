@@ -1,7 +1,9 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/app-route/app-route.html">
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../bower_components/iron-a11y-keys/iron-a11y-keys.html">
+<link rel="import" href="../bower_components/paper-toggle-button/paper-toggle-button.html">
 
 <link rel="import" href="mint-common-styles.html">
 <link rel="import" href="loading-screen.html">
@@ -10,7 +12,7 @@
   <template>
     <style include="mint-common-styles">
       .searchbox {
-        @apply(--layout-horizontal);
+        @apply --layout-horizontal;
         width: calc(100%-20px);
         margin-left: 10px;
       }
@@ -44,11 +46,14 @@
           value="{{searchTerm}}"></paper-input>
         <paper-button on-tap="_searchVariables">Search</paper-button>
       </div>
+      <div class="searchbox">
+        <paper-toggle-button checked="{{filterByAvailable}}">ONLY SHOW VARIABLES WITH DATASETS</paper-toggle-button>
+      </div>
       <div class="results">
         <loading-screen id="dataloader"></loading-screen>
         <ul>
           <template is="dom-repeat" items="[[variablesList]]">
-            <li><a href="data/list/[[item.label_name]]">[[item.label_name]]</li>
+            <li><a href="data/list/[[item.label_name]]">[[item.label_name]] (datasets: [[item.dataset_count]])</li>
           </template>
         </ul>
       </div>
@@ -66,8 +71,10 @@
 
       static get properties() {
         return {
+          route: Object,
           dataCatalog: Object,
           searchTerm: String,
+          filterByAvailable: Boolean,
           variablesList: Array,
           routeData: Object,
           visible: Boolean,
@@ -77,7 +84,8 @@
 
       static get observers() {
         return [
-          '_routeDataChanged(routeData.url_searchTerm)'
+          '_routeDataChanged(routeData.url_searchTerm)',
+          '_filterAvailableChanged(filterByAvailable)'
         ];
       }
 
@@ -98,10 +106,16 @@
         this._searchVariables();
       }
 
+      _filterAvailableChanged(filterByAvailable) {
+        if(this.searchTerm) {
+          this._searchVariables();
+        }
+      }
+
       _searchVariables() {
         var me = this;
         this.$.dataloader.loading = true;
-        this.dataCatalog.searchVariables(this.searchTerm, function(list) {
+        this.dataCatalog.searchVariables(this.searchTerm, this.filterByAvailable, function(list) {
           //console.log(list);
           me.set("variablesList", list);
           me.$.dataloader.loading = false;

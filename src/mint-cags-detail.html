@@ -10,10 +10,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <link rel="import" href="../bower_components/polymer/polymer.html">
 <link rel="import" href="../bower_components/app-route/app-route.html">
+<link rel="import" href="../bower_components/iron-media-query/iron-media-query.html">
 <link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
 <link rel="import" href="mint-button.html">
 <link rel="import" href="mint-common-styles.html">
 <link rel="import" href="mint-ajax.html">
+<link rel="import" href="mint-cag-data.html">
 
 <link rel="import" href="variable-graph.html">
 <link rel="import" href="mint-workflows.html">
@@ -98,7 +100,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       .content {
-        @apply(--layout-horizontal);
+        @apply --layout-horizontal;
       }
 
       ul.footnote {
@@ -126,8 +128,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           width: 100%;
         }
         .content {
-          @apply(--layout-vertical);
-          @apply(--layout-center);
+          @apply --layout-vertical;
+          @apply --layout-center;
         }
 
         .detail {
@@ -150,6 +152,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       app-route provides the name of the region and the cag.
     -->
     <app-route route="[[route]]" pattern="/:region/:category/:cag" tail="{{scenarioRoute}}" data="{{routeData}}"></app-route>
+
+    <mint-cag-data id="cagData" regions="[[regions]]"
+      region-name="[[routeData.region]]"
+      region="{{region}}"
+      cag="{{cag}}"></mint-cag-data>
 
     <iron-media-query query="max-width: 767px" query-matches="{{smallScreen}}"></iron-media-query>
 
@@ -182,7 +189,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <variable-graph id="cag"
               visible="[[visible]]"
               model-catalog="[[modelCatalog]]"
-              data-catalog="[[dataCatalog]]"
+              data-catalog$="[[dataCatalog]]"
               data="[[graphData]]"
               scenario="[[scenario]]"
               workflows="{{workflows}}"
@@ -228,6 +235,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           domain: String,
           regions: Array,
           region: Object,
+          workflow: Object,
           category: {
             type: Object,
             computed: '_computeCategory(visible, region.categories, routeData.category)'
@@ -245,6 +253,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             type: Object,
             observer: '_routeChanged'
           },
+          scenarioRoute: Object,
           modelCatalog: Object,
           dataCatalog: Object,
           smallScreen: {

@@ -22,9 +22,10 @@
         this.set("dataCatalog", this);
       }
 
-      searchVariables(term, fn) {
+      searchVariables(term, filterByAvailable, fn) {
         var url = this.server + "/data_sets/search?query=" +
-          encodeURIComponent(term);
+          encodeURIComponent(term) +
+          "&filter_by_available=" + filterByAvailable;
         this._getResource({
           url: url,
           onLoad: function(e) {

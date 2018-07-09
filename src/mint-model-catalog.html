@@ -176,6 +176,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           var c = this.models[i];
           for (var j=0; j<c.outputs.length; j++) {
             var op = c.outputs[j];
+            if(!op.variables) {
+              op.variables = [{standard_name: op.id}];
+            }
             for(var k=0; k<op.variables.length; k++) {
               var v = op.variables[k].standard_name;
               var prov = comp_providers[v];
@@ -184,68 +187,112 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               comp_providers[v] = prov;
             }
           }
+          for (var j=0; j<c.inputs.length; j++) {
+            var ip = c.inputs[j];
+            if(!ip.variables) {
+              ip.variables = [{standard_name: ip.id}];
+            }
+          }
+          // console.log(c);
         }
 
         // Create solutions
         var solution_queue = [new Solution(variables)];
+        var numi = 0;
         while(solution_queue.length) {
           var solution = solution_queue.shift();
           // console.log("Expanding Solution---")
           var varqueue = solution.variables.slice(0);
           while(varqueue.length) {
             var v = varqueue.shift();
-            // console.log("Checking variable " + v.name);
-            var stdname = v.standard_name;
+            // console.log("******* Checking .. " + v.name);
             // Skip if variable already resolved
             if(v.resolved) {
               // console.log(v.name + " already resolved. Continue.");
               continue;
             }
 
-            // Check data provider
-            if(stdname in data_providers) {
-              // Mark variable as resolved
-              v.resolved = true;
-              v.provider = {
-                type: "data",
-                item: data_providers[stdname]
-              }
-              // console.log(v.name + " has a data provider. Variable resolved. Continue.");
+            if(!v.standard_names && v.standard_name)
+              v.standard_names = [v.standard_name];
+
+            if(!v.standard_names)
               continue;
+
+            // Resolve data providers
+            for(var sni=0; sni<v.standard_names.length; sni++) {
+              var stdname = v.standard_names[sni];
+              // Check data provider
+              if(stdname in data_providers) {
+                // Mark variable as resolved
+                v.resolved = true;
+                v.standard_name = stdname;
+                v.provider = {
+                  type: "data",
+                  item: data_providers[stdname]
+                }
+                // console.log(stdname + " has a data provider. Variable resolved. Continue.");
+                // FIXME: Handle multiple data providers !!
+                break;
+              }
             }
 
-            // Check model provider
-            if(stdname in comp_providers) {
-              var comps = comp_providers[stdname];
-              // console.log(v.name + " has "+ comps.length+" model providers");
+            // Resolve component providers
+            var matching_providers = [];
+            for(var sni=0; sni<v.standard_names.length; sni++) {
+              var stdname = v.standard_names[sni];
 
-              // If more than one model, create extra solutions
+              // Check model provider
+              if(stdname in comp_providers) {
+                var comps = comp_providers[stdname];
+                for(var i=0; i<comps.length; i++) {
+                  matching_providers.push({
+                    standard_name: stdname,
+                    provider: comps[i]
+                  });
+                }
+              }
+            }
+
+            if(matching_providers.length) {
+              // console.log(v);
+              // console.log(matching_providers);
+
+              // If more than one match, create extra solutions
               // from 2 onwards
-              for(var i=1; i<comps.length; i++) {
+              for(var i=1; i<matching_providers.length; i++) {
+                var mprov = matching_providers[i];
+                var stdname = mprov.standard_name;
+                var comp = mprov.provider;
+                // console.log(stdname + " has "+ comps.id +" model provider");
+                v.standard_name = stdname;
+
                 var newsolution = new Solution({});
                 newsolution.copy(solution);
-                newsolution.addModel(comps[i]);
+                newsolution.addModel(comp);
                 solution_queue.push(newsolution);
                 // Mark variable as resolved
-                var varhash = v.standard_name;
+                var varhash = stdname;
                 var newv = newsolution.varhash[varhash];
                 newv.resolved = true;
                 newv.provider = {
                   type: "model",
                   item: {
-                    id: comps[i].id,
-                    category: comps[i].category
+                    id: comp.id,
+                    category: comp.category
                   }
                 };
+                // console.log(JSON.parse(JSON.stringify(newsolution)));
               }
-
-              // Use the first model to modify current solution
-              var comp = comps[0];
+              // Use the first match to modify current solution
+              var mprov = matching_providers[0];
+              var stdname = mprov.standard_name;
+              var comp = mprov.provider;
               var newvars = solution.addModel(comp)
               for(var j=0; j<newvars.length; j++)
                 varqueue.push(newvars[j]);
               // Mark variable as resolved
               v.resolved = true;
+              v.standard_name = stdname;
               v.provider = {
                 type: "model",
                 item: {
@@ -254,11 +301,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 }
               };
             }
+            // console.log(JSON.parse(JSON.stringify(solution)))
           }
+
           // Create workflow for solution
+          // console.log(solution);
           var workflow = solution.createWorkflow(graph, this);
-          if(workflow)
+          if(workflow) {
             workflows.push(workflow);
+            // console.log(workflow);
+          }
+          numi++;
+          if(numi > 200)
+            break;
         }
         return workflows;
       }
@@ -293,6 +348,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       addModel(model) {
         var c = Object.assign({}, model);
+        // Check if model already exists
+        var exists = false;
+        for(var i=0; i<this.models.length; i++) {
+          if(this.models[i].id == model.id) {
+            exists = true;
+            break;
+          }
+        }
+        if(exists)
+          return [];
+
         this.models.push(c);
         var newvars = [];
         for (var i=0; i<c.inputs.length; i++) {

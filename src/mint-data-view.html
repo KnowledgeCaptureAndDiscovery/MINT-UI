@@ -2,6 +2,8 @@
 <link rel="import" href="../bower_components/mint-map/mint-map.html">
 <link rel="import" href="../bower_components/mint-chart/mint-chart.html">
 <link rel="import" href="../bower_components/mint-time/mint-time.html">
+<link rel="import" href="../bower_components/app-route/app-route.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
 <link rel="import" href="mint-common-styles.html">
 
 <dom-module id="mint-data-view">
@@ -17,12 +19,12 @@
 
     <app-route
         route="[[route]]"
-        pattern="/:standard_name/:json_hash"
+        pattern="/:standardName/:jsonHash"
         data="{{routeData}}"></app-route>
 
     <div class="visualisation">
       <div class="toolbar">
-        <paper-button>MAP: [[dataset_name]]</paper-button>
+        <paper-button>MAP: [[datasetName]]</paper-button>
       </div>
       <div class="outer">
         <template is="dom-if" if="[[visible]]">
@@ -36,11 +38,11 @@
 
     <div class="visualisation">
       <div class="toolbar">
-        <paper-button>CHART: [[dataset_name]]</paper-button>
+        <paper-button>CHART: [[datasetName]]</paper-button>
       </div>
       <div class="outer">
         <template is="dom-if" if="[[visible]]">
-          <mint-chart variables="[[variables]]"></mint-chart>
+          <mint-chart variables$="[[variables]]"></mint-chart>
         </template>
       </div>
       <div class="toolbar bottom">
@@ -50,7 +52,7 @@
 
     <div class="visualisation">
       <div class="toolbar">
-        <paper-button>TIMELINE: [[dataset_name]]</paper-button>
+        <paper-button>TIMELINE: [[datasetName]]</paper-button>
       </div>
       <div class="outer">
         <template is="dom-if" if="[[visible]]">
@@ -71,13 +73,14 @@
 
       static get properties() {
         return {
+          route: Object,
           dataCatalog: Object,
-          standard_name: String,
-          dataset_name: String,
-          variable_id: String,
-          file_location: String,
-          md5hash: String,
-          data_list: Array,
+          standardName: String,
+          datasetName: String,
+          variableId: String,
+          fileLocation: String,
+          md5Hash: String,
+          dataList: Array,
           routeData: Object,
           variables: {
             type: Array,
@@ -89,24 +92,25 @@
 
       static get observers() {
         return [
-          '_routeDataChanged(routeData.standard_name, routeData.json_hash)'
+          '_routeDataChanged(routeData.standardName, routeData.jsonHash)'
         ];
       }
 
-      _routeDataChanged(standard_name, json_hash) {
+      _routeDataChanged(standardName, jsonHash) {
         var me = this;
-        if(standard_name && this.standard_name != standard_name &&
-            json_hash && this.json_hash != json_hash) {
-          var item = JSON.parse(atob(json_hash));
-          this.set("standard_name", standard_name);
-          this.set("dataset_name", item.ds);
-          this.set("variable_id", item.id);
-          this.set("md5hash", item.md5);
+        if(standardName &&
+            jsonHash && this.jsonHash != jsonHash) {
+          var item = JSON.parse(atob(jsonHash));
+          // console.log(item);
+          this.set("standardName", standardName);
+          this.set("datasetName", item.ds);
+          this.set("variableId", item.id);
+          this.set("md5Hash", item.md5);
           var variable = {
-            name: me.standard_name,
-            stdname: me.standard_name,
-            md5: me.md5hash,
-            uri: me.variable_id
+            name: me.standardName,
+            stdname: me.standardName,
+            md5: me.md5Hash,
+            uri: me.variableId
           };
           // console.log("Setting variable to:")
           // console.log(variable);

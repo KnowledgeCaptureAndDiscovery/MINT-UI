@@ -5,7 +5,9 @@
 <link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu-light.html">
 <link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
 <link rel="import" href="../bower_components/paper-input/paper-textarea.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../bower_components/polymer/lib/utils/render-status.html">
 
 <link rel="import" href="d3-import.html">
@@ -118,10 +120,10 @@
     <!-- Edit/Add Variable Dialog -->
     <paper-dialog modal id="variable_editor" on-iron-overlay-closed="_editVariable">
       <div class='heading'>Edit Graph Node</div>
-      <paper-input label="Graph Node Name" value="{{ed_item.name}}"></paper-input>
-      <paper-input label="Standard Name" value="{{ed_item.standard_name}}"></paper-input>
+      <paper-input label="Graph Node Name" value="{{edItem.name}}"></paper-input>
+      <paper-input label="Standard Name" value="{{edItem.standard_name}}"></paper-input>
       <paper-dropdown-menu-light no-animations label="Category">
-        <paper-listbox slot="dropdown-content" attr-for-selected="value" selected="{{ed_item.category}}">
+        <paper-listbox slot="dropdown-content" attr-for-selected="value" selected="{{edItem.category}}">
           <paper-item value="">None</paper-item>
           <paper-item value="climate">Climate</paper-item>
           <paper-item value="hydrology">Hydrology</paper-item>
@@ -140,7 +142,7 @@
     <!-- Temporary dialog to display graph json (no Saving for now) -->
     <paper-dialog id="save_display">
       <paper-dialog-scrollable>
-        <paper-textarea label="Graph JSON" readonly value="[[graph_json]]"></paper-textarea>
+        <paper-textarea label="Graph JSON" readonly value="[[graphJson]]"></paper-textarea>
       </paper-dialog-scrollable>
     </paper-dialog>
   </template>
@@ -156,7 +158,6 @@
       }
 
       static get properties() {
-        var me = this;
         return {
           data: {
             type: Object
@@ -190,9 +191,8 @@
             type: Number,
             value: 800
           },
-          ed_item: Object,
-          graph_json : String,
-
+          edItem: Object,
+          graphJson : String,
           modelCatalog: Object
         };
       }
@@ -232,7 +232,7 @@
 
       save() {
         this.graph.savePositions();
-        this.graph_json = JSON.stringify(this.data, null, 2);
+        this.graphJson = JSON.stringify(this.data, null, 2);
         this.$.save_display.open();
         //TODO: Save on server
       }
@@ -285,23 +285,23 @@
         if(e.detail.confirmed) {
           // Check if existing edited
           for (var i=0; i<this.data.variables.length; i++) {
-            if(this.ed_item) {
-              if(this.data.variables[i].id == this.ed_item.id) {
-                this.set("data.variables."+i, this.ed_item);
+            if(this.edItem) {
+              if(this.data.variables[i].id == this.edItem.id) {
+                this.set("data.variables."+i, this.edItem);
                 return;
               }
             }
           }
           // New Variable
-          this.graph.editor.push("data.variables", this.ed_item);
+          this.graph.editor.push("data.variables", this.edItem);
         }
       }
 
       _deleteVariable() {
         for (var i=0; i<this.data.variables.length; i++) {
-          if(this.data.variables[i].id == this.ed_item.id) {
+          if(this.data.variables[i].id == this.edItem.id) {
             this.splice("data.variables", i, 1);
-            this.ed_item = null;
+            this.edItem = null;
             break;
           }
         }

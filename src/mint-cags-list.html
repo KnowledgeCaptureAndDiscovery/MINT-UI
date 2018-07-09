@@ -42,9 +42,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       .grid {
-        @apply(--layout-horizontal);
-        @apply(--layout-wrap);
-        @apply(--layout-justified);
+        @apply --layout-horizontal;
+        @apply --layout-wrap;
+        @apply --layout-justified;
         margin: 0 10px 32px 10px;
       }
 
@@ -68,10 +68,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         vertical-align: top;
       }
       .content {
-        @apply(--layout-horizontal);
+        @apply --layout-horizontal;
       }
       .box {
-        @apply(--layout-vertical);
+        @apply --layout-vertical;
         background-color: #FEFEFE;
         border: 1px solid var(--app-primary-color);
         border-radius: 4px;
@@ -142,8 +142,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           max-width: 100%;
         }
         .content {
-          @apply(--layout-vertical);
-          @apply(--layout-center);
+          @apply --layout-vertical;
+          @apply --layout-center;
         }
       }
 
@@ -233,6 +233,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             type: Object,
             notify: true
           },
+          cag: Object,
           route: Object,
           routeData: Object,
           visible: Boolean,
