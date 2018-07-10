@@ -93,14 +93,19 @@
     <!-- Top Toolbar -->
     <div class="toolbar">
       <template is="dom-if" if="[[!noToolbar]]">
+        <!--
         <paper-button on-click="save">Save</paper-button>
         <paper-button on-click="layout">Layout</paper-button>
+        -->
         <template is="dom-if" if="[[editable]]">
-          <paper-button on-click="analyze">Analyze</paper-button>
+          <paper-button on-click="analyze">ANALYZE</paper-button>
+        </template>
+        <template is="dom-if" if="[[!editable]]">
+          <paper-button>VARIABLES</paper-button>
         </template>
       </template>
       <template is="dom-if" if="[[noToolbar]]">
-        <paper-button>VARIABLE GRAPH</paper-button>
+        <paper-button>VARIABLES</paper-button>
       </template>
     </div>
 
@@ -162,9 +167,6 @@
           data: {
             type: Object
           },
-          scenario: {
-            type: Object
-          },
           workflows: {
             type: Array,
             notify: true
@@ -202,8 +204,7 @@
           // Observer method name, followed by a list of dependencies, in parenthesis
           '_variablesEdited(data.variables.*)',
           '_linksAddedOrRemoved(data.links.splices)',
-          '_cagChanged(data)',
-          '_scenarioChanged(scenario, visible)'
+          '_cagChanged(data)'
         ]
       }
 
@@ -249,15 +250,6 @@
       _cagChanged(data) {
         if(data && this.autoLoad)
           this.loadGraph();
-      }
-
-      _scenarioChanged(scenario, visible) {
-        if(scenario && visible && this.graph) {
-          // console.log("Scenario changed to " + scenario.id);
-          // Reload the graph
-          this.loadGraph();
-          // Make any other changes ?
-        }
       }
 
       loadGraph(loader) {

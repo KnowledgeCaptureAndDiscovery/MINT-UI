@@ -58,7 +58,7 @@ VGraphLayout.prototype.layout = function(graph, animate, loader) {
     var fsize = v.config.getFontsize();
     var fname = v.config.getFont() + " " + v.config.getFontweight();
 
-    var fsize = 13;
+    var fsize = 12;
     dotstr += nl + tab + id +
       "[label=\"" + text + "\", " +
       "fontname=\"" + fname + "\", fontsize=\"" + fsize + "\"];";
@@ -153,5 +153,8 @@ VGraphLayout.prototype.cleanID = function(id) {
 
 VGraphLayout.prototype.cleanText = function(text, dim) {
   text = text.replace(/\n/g, '\\n');
+  if(text.length > 25) {
+    text = text.substr(0,25) + "...";
+  }
   return text;
 }

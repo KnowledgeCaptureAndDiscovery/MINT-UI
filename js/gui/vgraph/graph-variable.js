@@ -144,8 +144,8 @@ VGraphVariable.prototype.drawText = function() {
   if(!text) {
     text = "None"
   }
-  if(text.length > 20) {
-    text = text.substr(0,20) + "...";
+  if(text.length > 25) {
+    text = text.substr(0,25) + "...";
   }
   var lines = text.split(/\n/);
   for (var i = 0; i < lines.length; i++) {

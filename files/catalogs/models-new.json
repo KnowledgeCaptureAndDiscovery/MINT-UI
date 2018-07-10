@@ -1,0 +1,356 @@
+[
+  {
+    "id":"cycles_cfg_simple",
+    "name":"CYCLES",
+    "category":"agronomy",
+    "inputs":[
+      {
+        "id":"cycles_weather",
+        "variables":[
+          {
+            "id":"cycles_pp",
+            "name":"PP",
+            "description":"Precipitation in mm",
+            "standard_name":"atmosphere_water__time_integral_of_precipitation_volume_flux",
+            "metadata":{
+              "units":"mm"
+            }
+          }
+        ]
+      },
+      {
+        "id":"cycles_reinit",
+        "variables":[
+          {
+            "id":"Cycles_SMC_L1",
+            "name":"SMC_L1",
+            "description":"Soil moisture content in layer 1",
+            "canonical_name":"soil_water__volume_fraction",
+            "standard_name":"soil_top_water__volume_fraction",
+            "metadata":{
+              "units":"m3/m4"
+            }
+          }
+        ]
+      }
+    ],
+    "outputs":[
+      {
+        "id":"cycles_aggregatedOutput",
+        "variables":[
+          {
+            "id":"Cycles_forage_yield",
+            "name":"FORAGE YIELD",
+            "description":"Forage yield or removed residue biomass at harvest",
+            "standard_name":"crop_biomass_residue__harvested_forage_yield",
+            "metadata":{
+              "units":"Mg/ha"
+            }
+          },
+          {
+            "id":"Cycles_snow_sub",
+            "name":"SNOW SUB",
+            "description":"Sublimation from snow cover",
+            "standard_name":"land_surface_snow__volume-per-area_sublimation_rate",
+            "metadata":{
+              "units":"mm/day"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id":"ldasDataDownload",
+    "name":"ldasDataDownload",
+    "category":"climate",
+    "inputs":[
+      {
+        "id":"mint_run_config"
+      },
+      {
+        "id":"ldas_inputQuery"
+      }
+    ],
+    "outputs":[
+      {
+        "id":"ldas_weather_data",
+        "variables": [
+          {
+            "id": "ldas_weather_data",
+            "standard_name": "ldas_weather_data"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id":"pihm_cfg_simple",
+    "name":"PIHM",
+    "category":"hydrology",
+    "inputs":[
+      {
+        "id":"pihm_aggr_files"
+      },
+      {
+        "id":"mint_run_config"
+      },
+      {
+        "id":"pihm_forc",
+        "variables":[
+          {
+            "id":"PIHM_PRCP",
+            "name":"PRCP",
+            "standard_name":"atmosphere_water__precipitation_volume_flux",
+            "metadata":{
+              "units":"m/day"
+            }
+          }
+        ]
+      }
+    ],
+    "outputs":[
+      {
+        "id":"pihm_aggregatedOutput",
+        "variables":[
+          {
+            "id":"PIHM_THETAR",
+            "name":"ThetaR",
+            "standard_name":"soil__residual_porosity",
+            "metadata":{
+              "units":"m3/m3"
+            }
+          },
+          {
+            "id":"PIHM_INFD",
+            "name":"infD",
+            "standard_name": "land_surface_water__infiltration_rate",
+            "metadata":{
+              "units":"m"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id":"ldas2cycles",
+    "name":"ldas2cycles",
+    "category":"none",
+    "inputs":[
+      {
+        "id":"mint_run_config"
+      },
+      {
+        "id":"ldas_weather_data",
+        "variables": [
+          {
+            "id": "ldas_weather_data",
+            "standard_name": "ldas_weather_data"
+          }
+        ]
+      }
+    ],
+    "outputs":[
+      {
+        "id":"cycles_weather",
+        "variables":[
+          {
+            "id":"cycles_pp",
+            "name":"PP",
+            "description":"Precipitation in mm",
+            "standard_name":"atmosphere_water__time_integral_of_precipitation_volume_flux",
+            "metadata":{
+              "units":"mm"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id":"ldas2pihm",
+    "name":"ldas2pihm",
+    "category":"none",
+    "inputs":[
+      {
+        "id":"mint_run_config"
+      },
+      {
+        "id":"ldas_weather_data",
+        "variables": [
+          {
+            "id": "ldas_weather_data",
+            "standard_name": "ldas_weather_data"
+          }
+        ]
+      },
+      {
+        "id":"fldas2pihm_r",
+        "variables": []
+      },
+      {
+        "id":"pihm_aggr_files",
+        "variables": []
+      }
+    ],
+    "outputs":[
+      {
+        "id":"pihm_forc",
+        "variables":[
+          {
+            "id":"PIHM_PRCP",
+            "name":"PRCP",
+            "standard_name":"atmosphere_water__precipitation_volume_flux",
+            "metadata":{
+              "units":"m/day"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id":"pihm2cycles",
+    "name":"pihm2cycles",
+    "category":"none",
+    "inputs":[
+      {
+        "id":"mint_config",
+        "variables": []
+      },
+      {
+        "id":"cycles_config",
+        "variables": []
+      },
+      {
+        "id":"pihm_aggregatedOutput",
+        "variables":[
+          {
+            "id":"PIHM_THETAR",
+            "name":"ThetaR",
+            "standard_name":"soil__residual_porosity",
+            "metadata":{
+              "units":"m3/m3"
+            }
+          },
+          {
+            "id":"PIHM_INFD",
+            "name":"infD",
+            "standard_name": "land_surface_water__infiltration_rate",
+            "metadata":{
+              "units":"m"
+            }
+          }
+        ]
+      }
+    ],
+    "outputs":[
+      {
+        "id":"cycles_reinit",
+        "variables":[
+          {
+            "id":"Cycles_SMC_L1",
+            "name":"SMC_L1",
+            "description":"Soil moisture content in layer 1",
+            "canonical_name":"soil_water__volume_fraction",
+            "standard_name":"soil_top_water__volume_fraction",
+            "metadata":{
+              "units":"m3/m4"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id":"cycles2crop",
+    "name":"cycles2crop",
+    "category":"none",
+    "inputs":[
+      {
+        "id":"cycles_aggregatedOutput",
+        "variables":[
+          {
+            "id":"Cycles_forage_yield",
+            "name":"FORAGE YIELD",
+            "description":"Forage yield or removed residue biomass at harvest",
+            "standard_name":"crop_biomass_residue__harvested_forage_yield",
+            "metadata":{
+              "units":"Mg/ha"
+            }
+          },
+          {
+            "id":"Cycles_snow_sub",
+            "name":"SNOW SUB",
+            "description":"Sublimation from snow cover",
+            "standard_name":"land_surface_snow__volume-per-area_sublimation_rate",
+            "metadata":{
+              "units":"mm/day"
+            }
+          }
+        ]
+      }
+    ],
+    "outputs":[
+      {
+        "id":"econ_yield_input",
+        "variables":[
+          {
+            "id":"ECON_yield",
+            "name":"yieldN",
+            "description":"Crop Yield",
+            "canonical_name":"crop__yield",
+            "standard_name":"crop_biomass_residue__harvested_forage_yield"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id":"economic_land_quality_cfg_simple",
+    "name":"ECONOMIC_LAND_QUALITY",
+    "category":"economics",
+    "inputs":[
+      {
+        "id":"econ_yield_input",
+        "variables":[
+          {
+            "id":"ECON_yield",
+            "name":"yieldN",
+            "description":"Crop Yield",
+            "canonical_name":"crop__yield",
+            "standard_name":"crop_biomass_residue__harvested_forage_yield"
+          }
+        ]
+      }
+    ],
+    "outputs":[
+      {
+        "id":"econ_landuse_result",
+        "variables":[
+          {
+            "id":"ECON_crop_production",
+            "name":"production",
+            "description":"Crop production",
+            "canonical_name":"crop__production",
+            "standard_name":"land_crop__volume-per-area_yield",
+            "metadata": {
+              "units": "mkg"
+            }
+          },
+          {
+            "id":"ECON_landuse",
+            "name":"landuse",
+            "description":"Land-use prediction by parcel",
+            "canonical_name":"land__usage",
+            "standard_name":"land__usage_prediction",
+            "metadata": {
+              "units": "kha"
+            }
+          }
+        ]
+      }
+    ]
+  }
+]

@@ -151,7 +151,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <!--
       app-route provides the name of the region and the cag.
     -->
-    <app-route route="[[route]]" pattern="/:region/:category/:cag" tail="{{scenarioRoute}}" data="{{routeData}}"></app-route>
+    <app-route route="[[route]]" pattern="/:region/:category/:cag" data="{{routeData}}"></app-route>
 
     <mint-cag-data id="cagData" regions="[[regions]]"
       region-name="[[routeData.region]]"
@@ -161,22 +161,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <iron-media-query query="max-width: 767px" query-matches="{{smallScreen}}"></iron-media-query>
 
     <div smooth="" has-content$="[[_isDefined(userid)]]">
-      <h2>[[region.title]] | [[cag.name]]
-        <template is="dom-if" if="[[scenario]]">
-          | [[scenario.name]]
-        </template>
-      </h2>
-      <template is="dom-if" if="[[scenario]]">
-        <div class="description">
-          [[scenario.description]]
-        </div>
-        <h3>Data Bindings</h3>
-        <ul>
-          <template is="dom-repeat" items="[[scenario.data]]">
-            <li>[[item.variable]] = [[item.dataset]]</li>
-          </template>
-        </ul>
-      </template>
+      <h2>[[region.title]] | [[cag.name]]</h2>
     </div>
 
     <div smooth="">
@@ -191,7 +176,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               model-catalog="[[modelCatalog]]"
               data-catalog$="[[dataCatalog]]"
               data="[[graphData]]"
-              scenario="[[scenario]]"
               workflows="{{workflows}}"
               editable auto-load></variable-graph>
           </iron-collapse>
@@ -244,16 +228,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             type: Object,
             computed: '_computeCag(visible, category, routeData.cag)'
           },
-          scenario: {
+          /*scenario: {
             type: Object,
             computed: '_computeScenario(visible, cag, scenarioRoute.path)'
-          },
+          },*/
           route: Object,
           routeData: {
             type: Object,
             observer: '_routeChanged'
           },
-          scenarioRoute: Object,
           modelCatalog: Object,
           dataCatalog: Object,
           smallScreen: {
@@ -312,16 +295,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       }
 
+      /*
       _computeScenario(visible, cag, scenario_path) {
         if(!visible || !cag || !scenario_path) return null;
         for (var j=0; j<cag.scenarios.length; j++) {
           var scenario = cag.scenarios[j];
           if ("/"+scenario.id === scenario_path) {
-            // console.log(scenario);
             return scenario;
           }
         }
       }
+      */
 
       _resetSectionSizes() {
         var t0 = d3.select(this.$.graphdiv)

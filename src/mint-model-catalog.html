@@ -58,7 +58,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         var me = this
         //console.log('fetching categories');
         this._getResource({
-          url: 'files/catalogs/models.json',
+          url: 'files/catalogs/models-new.json',
           onLoad(e) {
             me.set('models', JSON.parse(e.target.responseText));
             //console.log(me.models);
@@ -72,7 +72,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         var me = this
         //console.log('fetching categories');
         this._getResource({
-          url: 'files/catalogs/data.json',
+          url: 'files/catalogs/data-new.json',
           onLoad(e) {
             me.set('data', JSON.parse(e.target.responseText));
             //console.log(me.data);
@@ -177,10 +177,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           for (var j=0; j<c.outputs.length; j++) {
             var op = c.outputs[j];
             if(!op.variables) {
-              op.variables = [{standard_name: op.id}];
+              op.variables = [];
             }
             for(var k=0; k<op.variables.length; k++) {
-              var v = op.variables[k].standard_name;
+              if(!op.variables[k].canonical_name)
+                op.variables[k].canonical_name = op.variables[k].standard_name;
+              var v = op.variables[k].canonical_name;
               var prov = comp_providers[v];
               if(!prov) prov = [];
               prov.push(c);
@@ -190,109 +192,76 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           for (var j=0; j<c.inputs.length; j++) {
             var ip = c.inputs[j];
             if(!ip.variables) {
-              ip.variables = [{standard_name: ip.id}];
+              ip.variables = [];
+            }
+            for(var k=0; k<ip.variables.length; k++) {
+              if(!ip.variables[k].canonical_name)
+                ip.variables[k].canonical_name = ip.variables[k].standard_name;
             }
           }
-          // console.log(c);
         }
 
         // Create solutions
         var solution_queue = [new Solution(variables)];
-        var numi = 0;
         while(solution_queue.length) {
           var solution = solution_queue.shift();
-          // console.log("Expanding Solution---")
+          console.log("Expanding Solution---")
           var varqueue = solution.variables.slice(0);
           while(varqueue.length) {
             var v = varqueue.shift();
-            // console.log("******* Checking .. " + v.name);
+            console.log("Checking variable " + v.name);
+            var cname = v.canonical_name;
+            var stdname = v.standard_name;
             // Skip if variable already resolved
             if(v.resolved) {
-              // console.log(v.name + " already resolved. Continue.");
+              console.log(v.name + " already resolved. Continue.");
               continue;
             }
 
-            if(!v.standard_names && v.standard_name)
-              v.standard_names = [v.standard_name];
-
-            if(!v.standard_names)
+            // Check data provider
+            if(stdname in data_providers) {
+              // Mark variable as resolved
+              v.resolved = true;
+              v.provider = {
+                type: "data",
+                item: data_providers[stdname]
+              }
+              console.log(v.name + " has a data provider. Variable resolved. Continue.");
               continue;
-
-            // Resolve data providers
-            for(var sni=0; sni<v.standard_names.length; sni++) {
-              var stdname = v.standard_names[sni];
-              // Check data provider
-              if(stdname in data_providers) {
-                // Mark variable as resolved
-                v.resolved = true;
-                v.standard_name = stdname;
-                v.provider = {
-                  type: "data",
-                  item: data_providers[stdname]
-                }
-                // console.log(stdname + " has a data provider. Variable resolved. Continue.");
-                // FIXME: Handle multiple data providers !!
-                break;
-              }
             }
 
-            // Resolve component providers
-            var matching_providers = [];
-            for(var sni=0; sni<v.standard_names.length; sni++) {
-              var stdname = v.standard_names[sni];
+            // Check model provider
+            if(cname in comp_providers) {
+              var comps = comp_providers[cname];
+              console.log(v.name + " has "+ comps.length+" model providers");
 
-              // Check model provider
-              if(stdname in comp_providers) {
-                var comps = comp_providers[stdname];
-                for(var i=0; i<comps.length; i++) {
-                  matching_providers.push({
-                    standard_name: stdname,
-                    provider: comps[i]
-                  });
-                }
-              }
-            }
-
-            if(matching_providers.length) {
-              // console.log(v);
-              // console.log(matching_providers);
-
-              // If more than one match, create extra solutions
+              // If more than one model, create extra solutions
               // from 2 onwards
-              for(var i=1; i<matching_providers.length; i++) {
-                var mprov = matching_providers[i];
-                var stdname = mprov.standard_name;
-                var comp = mprov.provider;
-                // console.log(stdname + " has "+ comps.id +" model provider");
-                v.standard_name = stdname;
-
+              for(var i=1; i<comps.length; i++) {
                 var newsolution = new Solution({});
                 newsolution.copy(solution);
-                newsolution.addModel(comp);
+                newsolution.addModel(comps[i]);
                 solution_queue.push(newsolution);
                 // Mark variable as resolved
-                var varhash = stdname;
+                var varhash = v.canonical_name;
                 var newv = newsolution.varhash[varhash];
                 newv.resolved = true;
                 newv.provider = {
                   type: "model",
                   item: {
-                    id: comp.id,
-                    category: comp.category
+                    id: comps[i].id,
+                    category: comps[i].category
                   }
                 };
-                // console.log(JSON.parse(JSON.stringify(newsolution)));
               }
-              // Use the first match to modify current solution
-              var mprov = matching_providers[0];
-              var stdname = mprov.standard_name;
-              var comp = mprov.provider;
+
+              // Use the first model to modify current solution
+              var comp = comps[0];
               var newvars = solution.addModel(comp)
               for(var j=0; j<newvars.length; j++)
                 varqueue.push(newvars[j]);
               // Mark variable as resolved
               v.resolved = true;
-              v.standard_name = stdname;
               v.provider = {
                 type: "model",
                 item: {
@@ -301,19 +270,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 }
               };
             }
-            // console.log(JSON.parse(JSON.stringify(solution)))
           }
-
+          console.log(solution);
           // Create workflow for solution
-          // console.log(solution);
           var workflow = solution.createWorkflow(graph, this);
-          if(workflow) {
+          if(workflow)
             workflows.push(workflow);
-            // console.log(workflow);
-          }
-          numi++;
-          if(numi > 200)
-            break;
         }
         return workflows;
       }
@@ -329,7 +291,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           // Copy graph variable
           var v = Object.assign({}, variables[i]);
           v.provenance = {};
-          this.varhash[v.standard_name] = v;
+          this.varhash[v.canonical_name] = v;
           this.variables.push(v);
         }
       }
@@ -340,7 +302,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         for (var i=0; i<solution.variables.length; i++) {
           // Deep copy solution variable
           var v = JSON.parse(JSON.stringify(solution.variables[i]));
-          this.varhash[v.standard_name] = v;
+          this.varhash[v.canonical_name] = v;
           this.variables.push(v);
         }
         this.models = solution.models.slice(0);
@@ -348,24 +310,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       addModel(model) {
         var c = Object.assign({}, model);
-        // Check if model already exists
-        var exists = false;
-        for(var i=0; i<this.models.length; i++) {
-          if(this.models[i].id == model.id) {
-            exists = true;
-            break;
-          }
-        }
-        if(exists)
-          return [];
-
         this.models.push(c);
         var newvars = [];
         for (var i=0; i<c.inputs.length; i++) {
           var ip = c.inputs[i];
           for(var k=0; k<ip.variables.length; k++) {
             var v = ip.variables[k];
-            var hashid = v.standard_name
+            var hashid = v.canonical_name
             if(hashid in this.varhash) {
               var prov = new VariableProvenance(c.id, ip.id, v.metadata, true);
               this.varhash[hashid].provenance[c.id] = prov;
@@ -380,10 +331,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           var op = c.outputs[i];
           for(var k=0; k<op.variables.length; k++) {
             var v = op.variables[k];
-            var hashid = v.standard_name;
+            var hashid = v.canonical_name;
             if(hashid in this.varhash) {
               var prov = new VariableProvenance(c.id, op.id, v.metadata, false);
-              this.varhash[hashid].provenance[c.id] = prov;
+              v = this.varhash[hashid];
+              v.provenance[c.id] = prov;
             }
             else {
               v = this.createNewVariable(v, c, op, false);
@@ -399,10 +351,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             };
           }
         }
-        // console.log(" - Adding "+c.id+" created "+newvars.length+" new variables");
-        // console.log(newvars);
+        console.log(" - Adding "+c.id+" created "+newvars.length+" new variables");
+        console.log(newvars);
         for(var i=0; i<newvars.length; i++) {
-          var hashid = newvars[i].standard_name;
+          var hashid = newvars[i].canonical_name;
           this.varhash[hashid] = newvars[i];
           this.variables.push(newvars[i]);
         }
@@ -414,11 +366,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         var vid = 'v_' + Math.random().toString(36).substr(2, 9);
         var provenance = {};
         provenance[c.id] = new VariableProvenance(c.id, f.id, v.metadata, isinput);
+        console.log(v);
         return {
           id:vid,
           standard_name: v.standard_name,
+          canonical_name: v.canonical_name,
           provenance: provenance,
-          name: v.standard_name.replace(/_/g, " "),
+          name: v.canonical_name.replace(/_+/g, " "),
           position: {x: 100, y: 100} // Should be set a bit more intelligently
         }
       }
@@ -441,10 +395,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           for(var j=0; j<c.inputs.length; j++) {
             var ip = c.inputs[j];
             for(var k=0; k<ip.variables.length; k++) {
-              var hashid = ip.variables[k].standard_name;
+              var hashid = ip.variables[k].canonical_name;
               var v = this.varhash[hashid];
               if(!v || !v.resolved || !v.provider) {
-                //console.log("... problem with " + c.id);
+                console.log("problem with " + c.id + " (" + hashid + ")");
+                console.log(v);
                 return null;
               }
               workflow.links.push({
@@ -464,7 +419,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           for(var j=0; j<c.outputs.length; j++) {
             var op = c.outputs[j];
             for(var k=0; k<op.variables.length; k++) {
-              var hashid = op.variables[k].standard_name;
+              var hashid = op.variables[k].canonical_name;
               var v = this.varhash[hashid];
               if(v.id in varlinks) {
                 continue;
@@ -478,6 +433,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             }
           }
         }
+        console.log(workflow);
 
         workflow.model_graph = this.createModelGraph(workflow);
         workflow.wings_workflow = this.createWingsWorkflow(workflow, clib);
@@ -523,7 +479,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           links: []
         }
         var varid_hash = {};
-        var stdname_hash = {};
+        var cname_hash = {};
         for(var i=0; i<wflow.variables.length; i++) {
           var v = wflow.variables[i];
           if(!v.resolved)
@@ -531,9 +487,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           var vcat = v.category ? v.category : v.provider.item.category;
           var nv = {
             id: v.id, name: v.name, category: vcat,
-            standard_name: v.standard_name, position: v.position
+            standard_name: v.standard_name,
+            canonical_name: v.canonical_name,
+            position: v.position
           }
-          stdname_hash[nv.standard_name] = nv;
+          cname_hash[nv.canonical_name] = nv;
           varid_hash[nv.id] = nv;
           graph.variables.push(nv);
         }
@@ -552,7 +510,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             for(var j=0; j<c.inputs.length; j++) {
               var ip = c.inputs[j];
               for(var k=0; k<ip.variables.length; k++) {
-                var fromvar = stdname_hash[ip.variables[k].standard_name];
+                var fromvar = cname_hash[ip.variables[k].canonical_name];
                 graph.links.push({from: fromvar.id, to: v.id});
                 if(!fromvar.category)
                   fromvar.category = c.category;
@@ -566,8 +524,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             for(var j=0; j<c.outputs.length; j++) {
               var op = c.outputs[j];
               for(var k=0; k<op.variables.length; k++) {
-                var vname = op.variables[k].standard_name;
-                var tovar = stdname_hash[vname];
+                var vname = op.variables[k].canonical_name;
+                var tovar = cname_hash[vname];
                 graph.links.push({from: v.id, to: tovar.id});
                 if(!tovar.category)
                   tovar.category = c.category;
@@ -593,12 +551,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
         var tpl = wingsw.template;
         var varid_hash = {};
-        var stdname_hash = {};
+        var cname_hash = {};
         for(var i=0; i<wflow.variables.length; i++) {
           var v = wflow.variables[i];
           if(!v.resolved)
             continue;
-          stdname_hash[v.standard_name] = v;
+          cname_hash[v.canonical_name] = v;
           varid_hash[v.id] = v;
           tpl.Variables[v.id] = {
             id: v.id,
@@ -626,7 +584,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           for(var j=0; j<c.inputs.length; j++) {
             var ip = c.inputs[j];
             for(var k=0; k<ip.variables.length; k++) {
-              var roleid = ip.variables[k].standard_name; // Standard name
+              var roleid = ip.variables[k].canonical_name; // Standard name
               var portid = "inport_" + roleid;
               node.inputPorts[portid] = {
                 id: portid,
@@ -640,7 +598,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           for(var j=0; j<c.outputs.length; j++) {
             var op = c.outputs[j];
             for(var k=0; k<op.variables.length; k++) {
-              var roleid = op.variables[k].standard_name; // Standard name
+              var roleid = op.variables[k].canonical_name; // Standard name
               var portid = "outport_" + roleid;
               node.outputPorts[portid] = {
                 id: portid,
@@ -657,35 +615,35 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           var l = wflow.links[i];
           var v = varid_hash[l.variable];
           if(l.type == "data") {
-            var lid = l.to+"_"+v.standard_name;
+            var lid = l.to+"_"+v.canonical_name;
             var link = {
               id: lid,
               toNode: {id: l.to},
-              toPort: {id: "inport_" + v.standard_name},
+              toPort: {id: "inport_" + v.canonical_name},
               variable: {id: v.id}
             }
             tpl.Variables[v.id].category = tpl.Nodes[l.to].category;
             tpl.Links[lid] = link;
           }
           else if(l.type == "output") {
-            var lid = l.from+"_"+v.standard_name;
+            var lid = l.from+"_"+v.canonical_name;
             var link = {
               id: lid,
               fromNode: {id: l.from},
-              fromPort: {id: "outport_" + v.standard_name},
+              fromPort: {id: "outport_" + v.canonical_name},
               variable: {id: v.id}
             }
             tpl.Variables[v.id].category = tpl.Nodes[l.from].category;
             tpl.Links[lid] = link;
           }
           else if(l.type == "model") {
-            var lid = l.from+"_"+l.to+"_"+v.standard_name;
+            var lid = l.from+"_"+l.to+"_"+v.canonical_name;
             var link = {
               id: lid,
               fromNode: {id: l.from},
-              fromPort: {id: "outport_" + v.standard_name},
+              fromPort: {id: "outport_" + v.canonical_name},
               toNode: {id: l.to},
-              toPort: {id: "inport_" + v.standard_name},
+              toPort: {id: "inport_" + v.canonical_name},
               variable: {id: v.id}
             }
             tpl.Variables[v.id].category = tpl.Nodes[l.from].category;
@@ -883,13 +841,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             if(frommeta != tometa) {
               for(var j=0; j<clib.workflow_fragments.length; j++) {
                 var wfrag = clib.workflow_fragments[j];
-                if(wfrag.variable == v.standard_name) {
+                if(wfrag.variable == v.canonical_name) {
                   var wfrommeta = JSON.stringify(wfrag.from.metadata);
                   var wtometa = JSON.stringify(wfrag.to.metadata);
                   if(frommeta == wfrommeta && tometa == wtometa) {
                     // Found a Conversion worklfow match
                     /*
-                    console.log("Adding conversion workflow " + wfrag.name + " for "+v.standard_name
+                    console.log("Adding conversion workflow " + wfrag.name + " for "+v.canonical_name
                     +" from "+frommeta+" to "+tometa);
                     */
                     var wtplstr = JSON.stringify(wfrag.workflow.template);
@@ -947,7 +905,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             tpl.Links[lid] = link;
             // Since we are combining 2 variables into 1 here as they are compatible
             // Delete one of them
-            delete tpl.Variables[to.file_uri];
+            if(to.file_uri != from.file_uri)
+              delete tpl.Variables[to.file_uri];
           }
 
           if(from) {
@@ -960,6 +919,54 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             for(var j=0; j<filevars[to.file_uri]; j++) {
               var vid = filevars[to.file_uri][j];
               vars_done[vid] = true;
+            }
+          }
+        }
+
+        // Create Input and Output links for unclaimed ports
+        for(var nid in tpl.Nodes) {
+          var n = tpl.Nodes[nid];
+          for(var portid in n.inputPorts) {
+            var p = n.inputPorts[portid];
+            var fname = p.role.roleid;
+            var lid = n.id+"_"+fname;
+            var fid = tns + fname;
+            var portid = fid + "_inport";
+            // Check for links to port
+            if(!this.hasLinksToPort(tpl, n.id, portid)) {
+              tpl.Variables[fid] = {
+                id: fid,
+                name: fname,
+                type: 1,
+                category: n.category
+              }
+              tpl.Links[lid] = {
+                id: lid,
+                toNode: {id: n.id},
+                toPort: {id: portid},
+                variable: {id: fid}
+              };
+            }
+          }
+          for(var portid in n.outputPorts) {
+            var p = n.outputPorts[portid];
+            var fname = p.role.roleid;
+            var lid = n.id+"_"+fname;
+            var fid = tns + fname;
+            var portid = fid + "_outport";
+            if(!this.hasLinksFromPort(tpl, n.id, portid)) {
+              tpl.Variables[fid] = {
+                id: fid,
+                name: fname,
+                type: 1,
+                category: n.category
+              }
+              tpl.Links[lid] = {
+                id: lid,
+                fromNode: {id: n.id},
+                fromPort: {id: portid},
+                variable: {id: fid}
+              };
             }
           }
         }
@@ -986,6 +993,26 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           }
         }
         return wingsw;
+      }
+
+      hasLinksToPort(tpl, nid, pid) {
+        for(var lid in tpl.Links) {
+          var l = tpl.Links[lid];
+          if(l.toNode && l.toNode.id == nid &&
+              l.toPort && l.toPort.id == pid)
+            return true;
+        }
+        return false;
+      }
+
+      hasLinksFromPort(tpl, nid, pid) {
+        for(var lid in tpl.Links) {
+          var l = tpl.Links[lid];
+          if(l.fromNode && l.fromNode.id == nid &&
+              l.fromPort && l.fromPort.id == pid)
+            return true;
+        }
+        return false;
       }
     }
 

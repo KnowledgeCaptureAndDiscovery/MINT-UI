@@ -1,113 +1,102 @@
 [{
-    "name": "climate_projection",
-    "title": "Climate",
-    "category": "climate_projection",
+    "name": "land_use",
+    "title": "Land use",
+    "category": "climate",
     "cags": [
       {
-        "id": "storyboard_cag",
-        "name": "Storyboard CAG",
-        "json": "files/regions/south_sudan/cags/climate_projection.json",
+        "id": "storyboard_isi",
+        "name": "Storyboard ISI",
+        "json": "files/regions/south_sudan/cags/storyboard_isi.json",
         "scenarios": [
           {
-            "id": "normal",
+            "id": "baseline",
             "name": "Baseline",
-            "description": "This is a Baseline",
-            "data": [
-              {
-                "variable": "atmosphere_water__precipitation_leq-volume_flux",
-                "dataset": "dataset1"
-              }
-            ]
+            "description": "This is the Baseline",
+            "data": {
+              "mint_config": "config_storyboard.txt"
+            }
           },
           {
-            "id": "elnino",
-            "name": "El Nino Event",
-            "description": "This scenario refers to an el-nino event",
-            "data": [
-              {
-                "variable": "atmosphere_water__precipitation_leq-volume_flux",
-                "dataset": "dataset_elnino"
-              }
-            ]
+            "id": "plus_10_percent_rain",
+            "name": "+10% Rain",
+            "description": "Increased rain by 10%",
+            "data": {
+              "mint_config": "config_storyboard.txt"
+            }
+          },
+          {
+            "id": "minus_10_percent_rain",
+            "name": "-10% Rain",
+            "description": "Reduced rain by 10%",
+            "data": {
+              "mint_config": "config_storyboard.txt"
+            }
           }
         ]
       }
     ]
   },
   {
-    "name": "food_security_projection",
-    "title": "Food Security",
-    "category": "food_security_projection",
+    "name": "food_insecurity",
+    "title": "Food Insecurity",
+    "category": "food_security",
     "cags": [
-      {
-        "id": "storyboard_cag",
-        "name": "Storyboard CAG",
-        "json": "files/regions/south_sudan/cags/food_security_projection.json",
-        "scenarios": [
-          {
-            "id": "normal",
-            "name": "Baseline",
-            "description": "This is a Baseline",
-            "data": [
-              {
-                "variable": "atmosphere_water__precipitation_leq-volume_flux",
-                "dataset": "dataset1"
-              }
-            ]
-          },
-          {
-            "id": "elnino",
-            "name": "El Nino Event",
-            "description": "This scenario refers to an el-nino event",
-            "data": [
-              {
-                "variable": "atmosphere_water__precipitation_leq-volume_flux",
-                "dataset": "dataset_elnino"
-              }
-            ]
-          }
-        ]
-      },
       {
         "id": "delphi_cag",
         "name": "Delphi CAG",
         "json": "files/regions/south_sudan/cags/delphi_cag.json",
         "scenarios": [
           {
-            "id": "normal",
+            "id": "baseline",
             "name": "Baseline",
-            "description": "This is a Baseline",
-            "data": [
-              {
-                "variable": "atmosphere_water__precipitation_leq-volume_flux",
-                "dataset": "dataset1"
-              }
-            ]
+            "description": "This is the Baseline",
+            "data": {
+              "mint_config": "config_delphi.txt"
+            }
           }
         ]
       }
     ]
   },
   {
-    "name": "social_projection",
-    "title": "Social Instability",
-    "category": "social_projection",
+    "name": "population",
+    "title": "Population",
+    "category": "social",
     "cags": [
       {
-        "id": "storyboard_cag",
-        "name": "Storyboard CAG",
-        "json": "files/regions/south_sudan/cags/food_security_projection.json",
+        "id": "kimetrica_cag",
+        "name": "Kimetrica CAG",
+        "json": "files/regions/south_sudan/cags/kimetrica_cag.json",
         "scenarios": [
           {
-            "id": "normal",
+            "id": "baseline",
             "name": "Baseline",
-            "description": "This is a Baseline",
-            "data": [
-              {
-                "variable": "atmosphere_water__precipitation_leq-volume_flux",
-                "dataset": "dataset1"
-              }
-            ]
+            "description": "This is the Baseline",
+            "data": {
+              "mint_config": "config_kimetrica.txt"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "household_expenditures",
+    "title": "Household Expenditures",
+    "category": "economy",
+    "cags": [
+      {
+        "id": "expenditures_cag",
+        "name": "Household Expenditures CAG",
+        "json": "files/regions/south_sudan/cags/expenditures_cag.json",
+        "scenarios": [
+          {
+            "id": "baseline",
+            "name": "Baseline",
+            "description": "This is the Baseline",
+            "data": {
+              "mint_config": "config_expenditures.txt"
+            }
           }
         ]
       }

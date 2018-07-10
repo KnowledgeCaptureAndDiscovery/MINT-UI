@@ -111,7 +111,7 @@
       </template>
       <div class="grow">&nbsp;</div>
       <template is="dom-if" if="[[!_workflowDefined(selectedWorkflow)]]">
-        <paper-button>Model Graphs</paper-button>
+        <paper-button>Model choices</paper-button>
       </template>
       <template is="dom-if" if="[[_showingWorkflows(selectedWorkflow, showWorkflows)]]">
         <paper-button raised on-click="runWorkflow">Run Workflow</paper-button>

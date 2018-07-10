@@ -1,0 +1,32 @@
+{
+  "mint_run_config": {
+    "id": "mint_run_config",
+    "name": "Mint Config file",
+    "category": "None",
+    "values": ["mint-run.config"]
+  },
+  "mint_cycles_config": {
+    "id": "mint_cycles_config",
+    "name": "Mint Cycles Config file",
+    "category": "None",
+    "values": ["mint_cycles-baseline.config", "mint_cycles-10_percent_inc.config"]
+  },
+  "pihm_aggr_files": {
+    "id": "pihm_aggr_files",
+    "name": "PIHM aggregated files",
+    "category": "None",
+    "values": ["PIHM-data-find"]
+  },
+  "ldas_inputQuery": {
+    "id": "ldas_inputQuery",
+    "name": "Input Query to fetch data from LDAS",
+    "category": "climate",
+    "values": ["PIHM-data-find"]
+  },
+  "fldas2pihm_r": {
+    "id": "fldas2pihm_r",
+    "name": "FLDAS to PIHM conversion R script",
+    "category": "hydrology",
+    "values": ["FLDAS-to-PIHM.R"]
+  }
+}

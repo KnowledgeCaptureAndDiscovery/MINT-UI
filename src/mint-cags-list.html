@@ -76,29 +76,41 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         border: 1px solid var(--app-primary-color);
         border-radius: 4px;
         width: 100%;
-        background-size: 200px auto;
+        background-size: 100% auto;
         background-position: 0px 24px;
         margin: 5px;
       }
       .inner {
         background: rgba(255,255,255,0.2);
         height: 100%;
-        padding: 10px;
+        padding: 20px;
         font-weight: bold;
       }
       .textinner {
-        background: rgba(255,255,255,0.9);
-        height: 100%;
+        background: rgba(255,255,255,0.85);
+        height: calc(100% - 10px);
+        width: calc(100% - 10px);
+        min-height: 100px;
         border-radius: 4px;
+        padding: 5px;
+        display: flex;
+        align-items: center;
       }
-      .box.climate_projection {
-        background-image: url("../images/categories/climate_projection.jpg");
+      .textinner a {
+        color: var(--app-accent-color);
+        text-decoration: none;
       }
-      .box.food_security_projection {
-        background-image: url("../images/categories/food_security_projection.jpg");
+      .box.climate {
+        background-image: url("../images/categories/climate.jpg");
       }
-      .box.social_projection {
-        background-image: url("../images/categories/social_projection.jpg");
+      .box.food_security {
+        background-image: url("../images/categories/food_security.jpg");
+      }
+      .box.social {
+        background-image: url("../images/categories/social.jpg");
+      }
+      .box.economy {
+        background-image: url("../images/categories/economy.jpg");
       }
       .box h2 {
         font-size: 1.25em;
@@ -107,19 +119,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         background-color: var(--app-accent-color);
         color: white;
       }
-      .box h3 {
-        font-size: 1.1em;
-        border-bottom: 1px solid var(--app-accent-color);
-        color: var(--app-accent-color);
-        margin: 0px;
-        padding-left: 5px;
-      }
       .box ul {
         margin: 2px;
         padding-left: 20px;
       }
       .box ul li {
         padding: 3px 0px;
+        font-size: 1.1em;
       }
       .box img {
         width: 200px;
@@ -188,21 +194,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     <div class="content">
       <template is="dom-repeat" items="[[_getListItems(region.categories)]]" as="cat">
-        <div class$="box [[cat.name]]">
+        <div class$="box [[cat.category]]">
           <h2>[[cat.title]]</h2>
           <div class="inner">
             <div class="textinner">
-              <template is="dom-repeat" items="[[cat.cags]]" as="cag">
-                <h3>[[cag.name]]</h3>
-                <ul>
-                  <template is="dom-repeat" items="[[cag.scenarios]]" as="scenario">
-                    <li>
-                      <a href="cags/detail/[[region.name]]/[[cat.name]]/[[cag.id]]/[[scenario.id]]">
-                      [[scenario.name]]</a>
-                    </li>
-                  </template>
-                </ul>
-              </template>
+              <ul>
+                <template is="dom-repeat" items="[[cat.cags]]" as="cag">
+                  <li>
+                    <a href="cags/detail/[[region.name]]/[[cat.name]]/[[cag.id]]">[[cag.name]]</a>
+                  </li>
+                </template>
+              </ul>
             </div>
           </div>
         </div>
