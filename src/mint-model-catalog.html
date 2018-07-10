@@ -668,7 +668,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         var tns = pfx + "/workflows/" + tname + ".owl#";
         var tid = tns + tname;
 
-        var clibns = pfx + "/models/library.owl#";
+        var clibns = pfx + "/components/library.owl#";
         var purl = clib.server + usfx;
         var pdir = clib.storage + usfx;
 
@@ -687,7 +687,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             metadata: {},
             rules: {},
             props: {
-              "lib.concrete.url": pfx + "/models/library.owl",
+              "lib.concrete.url": pfx + "/components/library.owl",
               "lib.domain.execution.url": pfx + "/executions/library.owl",
               "lib.domain.code.storage": pdir + "/code/library",
               "domain.workflows.dir.url": pfx + "/workflows",
@@ -697,17 +697,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               "domain.executions.dir.url": pfx + "/executions",
               "lib.domain.data.url": pfx + "/data/library.owl",
               "ont.domain.data.url": pfx + "/data/ontology.owl",
-              "lib.abstract.url": pfx + "/models/abstract.owl",
+              "lib.abstract.url": pfx + "/components/abstract.owl",
               "lib.provenance.url": clib.server + "/export/common/provenance/library.owl",
               "ont.data.url": ontpfx + "/data.owl",
               "lib.domain.data.storage": pdir + "/data",
               "lib.domain.workflow.url": pfx + "/workflows/library.owl",
               "lib.resource.url": clib.server + "/export/common/resource/library.owl",
-              "ont.model.url": ontpfx + "/model.owl",
+              "ont.component.url": ontpfx + "/component.owl",
               "ont.workflow.url": ontpfx + "/workflow.owl",
               "ont.dir.url": ontpfx,
               "dot.path": dotpath,
-              "ont.domain.model.ns": clibns,
+              "ont.domain.component.ns": clibns,
               "ont.execution.url": ontpfx + "/execution.owl",
               "ont.resource.url": ontpfx + "/resource.owl"
             }
@@ -730,7 +730,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 id: clibns + c.name,
                 type: "uri"
               },
-              id: nodeid + "_model"
+              id: nodeid + "_component"
             }
           }
           for(var j=0; j<c.inputs.length; j++) {

@@ -63,10 +63,28 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         opacity: 1;
       }
 
+      paper-dialog {
+        width:400px;
+        max-width: 80%;
+        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+        background-color: white;
+        border: 2px solid var(--app-accent-color);
+        border-radius: 4px;
+      }
+
+      .heading {
+        margin:0px;
+        padding: 4px;
+        font-size:16px;
+        background-color: var(--app-accent-color);
+        @apply --layout-horizontal;
+        color:white;
+      }
+
       mint-map {
         height: 650px;
       }
-      
+
       /* Basic 2-toolbar outer box container for main UI elements */
       .outer {
         position: relative;

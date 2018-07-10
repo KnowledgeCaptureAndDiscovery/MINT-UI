@@ -4,8 +4,11 @@
 <link rel="import" href="../bower_components/paper-item/paper-item.html">
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-radio-group/paper-radio-group.html">
+<link rel="import" href="../bower_components/paper-radio-button/paper-radio-button.html">
 <link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../bower_components/iron-collapse/iron-collapse.html">
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
 
 <link rel="import" href="mint-icons.html">
 <link rel="import" href="d3-import.html">
@@ -44,22 +47,6 @@
           padding: 2px 0px;
         }
       }
-      paper-dialog {
-        width:400px;
-        max-width: 80%;
-        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-        background-color: white;
-        border: 2px solid var(--app-accent-color);
-        border-radius: 4px;
-      }
-      .heading {
-        margin:0px;
-        padding-top:4px;
-        font-size:18px;
-        margin-bottom:8px;
-        background-color: var(--app-accent-color);
-        color:white;
-      }
       paper-toggle-button {
         --paper-toggle-button-checked-button-color:  white;
         --paper-toggle-button-unchecked-button-color:  var(--app-accent-color);
@@ -70,8 +57,14 @@
         padding-left:6px;
         font-size: 13px;
       }
-      .toolbar paper-button, .toolbar paper-icon-button {
+      .toolbar paper-button,
+      .toolbar paper-icon-button {
         max-height: 36px;
+        color: white;
+      }
+      .heading paper-icon-button {
+        max-height: 20px;
+        padding: 0px;
         color: white;
       }
       paper-button.delete {
@@ -114,7 +107,7 @@
         <paper-button>Model choices</paper-button>
       </template>
       <template is="dom-if" if="[[_showingWorkflows(selectedWorkflow, showWorkflows)]]">
-        <paper-button raised on-click="runWorkflow">Run Workflow</paper-button>
+        <paper-button raised on-click="_chooseScenario">Run Workflow</paper-button>
       </template>
       <div class="grow">&nbsp;</div>
       <paper-icon-button icon="close" on-click="_resetWorkflows"></paper-icon-button>
@@ -157,8 +150,27 @@
 
     <!-- Workflow Run Status dialog -->
     <paper-dialog id="runwindow">
-      <div class="heading">Workflow Run</div>
+      <div class="heading">
+        <div>Workflow Run</div>
+        <div class="grow">&nbsp;</div>
+        <paper-icon-button icon="close" on-click="_closeRunWindow"></paper-icon-button>
+      </div>
       <div id="runstatus"></div>
+    </paper-dialog>
+
+    <!-- Scenario Choose Dialog -->
+    <paper-dialog id="scenario_chooser">
+      <div class="heading">
+        <div>Choose a Scenario</div>
+        <div class="grow">&nbsp;</div>
+        <paper-icon-button icon="close" on-click="_closeScenarioChooser"></paper-icon-button>
+      </div>
+      <paper-radio-group selected="{{selectedScenarioIndex}}">
+        <template is="dom-repeat" items="[[scenarios]]" as="scenario">
+          <paper-radio-button name="[[index]]">[[scenario.name]]</paper-radio-button>
+        </template>
+      </paper-radio-group>
+      <paper-button on-tap="_runScenario">Run Scenario</paper-button>
     </paper-dialog>
   </template>
 
@@ -192,6 +204,8 @@
             type: Array,
             notify: true
           },
+          selectedScenarioIndex: String,
+          scenarios: Array,
           showWorkflows: Boolean
         }
       }
@@ -257,7 +271,21 @@
         this.$.workflow.zoomOut();
       }
 
-      runWorkflow() {
+      _chooseScenario() {
+        this.$.scenario_chooser.open();
+      }
+
+      _closeScenarioChooser() {
+        this.$.scenario_chooser.close();
+      }
+
+      _runScenario() {
+        var scenario = this.scenarios[this.selectedScenarioIndex];
+        this._runWorkflow(scenario.data);
+        this.$.scenario_chooser.close();
+      }
+
+      _runWorkflow(inputs) {
         var tpl = this.selectedWorkflow.wings_workflow.template;
         var gtpl = this.$.workflow.template;
 
@@ -271,6 +299,13 @@
           tpl.Variables[vid].comment = "center:x="+coords.x+",y="+coords.y;
         }
 
+        var wflowns = getNamespace(tpl.id);
+        var dclibns = tpl.props["lib.domain.data.url"] + "#";
+        var bindings = {};
+        for(var invar in inputs) {
+          var invarid = wflowns + invar;
+          bindings[invarid] = [ dclibns + inputs[invar] ];
+        }
         this.$.runwindow.open();
 
         var me = this;
@@ -278,9 +313,26 @@
         me._addUnknownComponents(tpl, function() {
           // Save Template
           me._saveTemplate(tpl, function() {
-            me._openTemplateInWings(tpl);
+            // Get Expansions for template
+            me._getExpansions(tpl, bindings, function(expansions) {
+              if(expansions && expansions["success"]) {
+                var seed = expansions.data.seed;
+                var xtpl = expansions.data.templates[0];
+                me._executeWorkflow(xtpl, seed, function(runid) {
+                  Polymer.dom(me.$.runstatus).innerHTML = "Workflow sent for execution : " + runid;
+                });
+              }
+              else {
+                Polymer.dom(me.$.runstatus).innerHTML = "Workflow couldn't be run";
+              }
+            });
+            //me._openTemplateInWings(tpl);
           });
         });
+      }
+
+      _closeRunWindow() {
+        this.$.runwindow.close();
       }
 
       toggleView(d) {
@@ -423,7 +475,7 @@
         Polymer.dom(this.$.runstatus).innerHTML = "Adding component "+c.id;
 
         // fn();
-        this._postResource({
+        this._postResourceRaw({
           url: purl + "/components/type/addComponent",
           onLoad: function(e) {
             if(e.target.responseText == "OK")
@@ -441,7 +493,7 @@
         var data = "cid=" + encodeURIComponent(c.id);
         data += "&component_json=" + encodeURIComponent(JSON.stringify(c));
         // fn();
-        this._postResource({
+        this._postResourceRaw({
           url: purl + "/components/type/saveComponentJSON",
           onLoad: function(e) {
             if(e.target.responseText == "OK")
@@ -462,15 +514,64 @@
         var data = "template_id=" + encodeURIComponent(tpl.id);
         data += "&constraints_json=[]";
         data += "&json=" + encodeURIComponent(JSON.stringify(tpl));
-        Polymer.dom(this.$.runstatus).innerHTML = "Saving Template in Wings";
+        Polymer.dom(this.$.runstatus).innerHTML = "Saving workflow";
         // fn();
-        this._postResource({
+        this._postResourceRaw({
           url: purl + "/workflows/saveTemplateJSON",
           onLoad: function(e) {
             fn();
           },
           onError: function() {
             console.log("Cannot save");
+          }
+        }, data);
+      }
+
+      _getExpansions(tpl, bindings, fn) {
+        // Get url prefix for operations
+        var purl = this.server + "/users/" + this.userid + "/" + this.domain;
+        var data = {
+          templateId: tpl.id,
+          parameterBindings: {},
+          parameterTypes: {},
+          componentBindings: {},
+          dataBindings: bindings
+        };
+
+        Polymer.dom(this.$.runstatus).innerHTML = "Preparing workflow for execution";
+        this._postResourceJSON({
+          url: purl + "/plan/getExpansions",
+          onLoad: function(e) {
+            var expansions = JSON.parse(e.target.responseText);
+            fn(expansions);
+          },
+          onError: function() {
+            console.log("Cannot save");
+          }
+        }, data);
+      }
+
+      _executeWorkflow(xtpl, seed, fn) {
+        // Get url prefix for operations
+        var purl = this.server + "/users/" + this.userid + "/" + this.domain;
+        var data = {
+          template_id: seed.template.id,
+          json: JSON.stringify(xtpl.template),
+          constraints_json: JSON.stringify(xtpl.constraints),
+          seed_json: JSON.stringify(seed.template),
+          seed_constraints_json: JSON.stringify(seed.constraints)
+        };
+
+        Polymer.dom(this.$.runstatus).innerHTML = "Sending workflow for execution";
+        this._postResource({
+          url: purl + "/executions/runWorkflow",
+          onLoad: function(e) {
+            var runuri = e.target.responseText;
+            var runid = getLocalName(runuri);
+            fn(runid);
+          },
+          onError: function() {
+            console.log("Cannot execute");
           }
         }, data);
       }
@@ -492,6 +593,18 @@
       }
 
       _postResource(rq, data) {
+        var rawstr = "";
+        for(var key in data) {
+          if(rawstr)
+            rawstr += "&";
+          rawstr += key + "=";
+          if(data[key])
+            rawstr += encodeURIComponent(data[key]);
+        }
+        this._postResourceRaw(rq, rawstr);
+      }
+
+      _postResourceRaw(rq, data) {
         var xhr = new XMLHttpRequest();
         xhr.addEventListener('load', rq.onLoad.bind(this));
         xhr.addEventListener('error', rq.onError.bind(this));
@@ -499,6 +612,17 @@
         xhr.open('POST', rq.url, true);
         xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
         xhr.send(data);
+      }
+
+      _postResourceJSON(rq, data) {
+        var xhr = new XMLHttpRequest();
+        xhr.addEventListener('load', rq.onLoad.bind(this));
+        xhr.addEventListener('error', rq.onError.bind(this));
+        xhr.withCredentials = true;
+        xhr.open('POST', rq.url, true);
+        xhr.setRequestHeader("Content-type", "application/json");
+        var payload = JSON.stringify(data)
+        xhr.send(payload);
       }
 
     }

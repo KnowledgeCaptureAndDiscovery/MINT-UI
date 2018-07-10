@@ -195,7 +195,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         </div>
 
         <div class="rightnone" id="workflowdiv">
-          <mint-workflows id="workflows" workflows="{{workflows}}" selected-workflow="{{workflow}}" selected-graph="{{selectedWorkflowGraph}}" selected-items="{{selectedWorkflowItems}}" server="[[server]]" userid="[[userid]]" domain="[[domain]]"></mint-workflows>
+          <mint-workflows id="workflows"
+            workflows="{{workflows}}"
+            scenarios="[[scenarios]]"
+            selected-workflow="{{workflow}}"
+            selected-graph="{{selectedWorkflowGraph}}"
+            selected-items="{{selectedWorkflowItems}}"
+            server="[[server]]" userid="[[userid]]"
+            domain="[[domain]]"></mint-workflows>
         </div>
 
       </div>
@@ -215,7 +222,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       static get properties() {
         return {
           server: String,
-          userid: String,
+          userid: {
+            type: String,
+            observer: '_useridChanged'
+          },
           domain: String,
           regions: Array,
           region: Object,
@@ -228,10 +238,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             type: Object,
             computed: '_computeCag(visible, category, routeData.cag)'
           },
-          /*scenario: {
-            type: Object,
-            computed: '_computeScenario(visible, cag, scenarioRoute.path)'
-          },*/
+          scenarios: {
+            type: Array,
+            computed: '_getScenarios(cag)'
+          },
           route: Object,
           routeData: {
             type: Object,
@@ -269,6 +279,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         };
       }
 
+      _useridChanged(userid) {
+        console.log(userid);
+      }
       _isDefined(cag) {
         return cag != null;
       }
@@ -293,6 +306,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             return cag;
           }
         }
+      }
+
+      _getScenarios(cag) {
+        if(cag)
+          return cag.scenarios;
       }
 
       /*

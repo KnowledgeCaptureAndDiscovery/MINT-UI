@@ -13,7 +13,11 @@
             "name": "Baseline",
             "description": "This is the Baseline",
             "data": {
-              "mint_config": "config_storyboard.txt"
+              "mint_run_config": "mint_run.config",
+              "mint_cycles_config": "mint_cycles-baseline.config",
+              "pihm_aggr_files": "PIHM-data-find",
+              "fldas2pihm_r": "FLDAS-to-PIHM.R",
+              "ldas_inputQuery": "LDAS-data-find"
             }
           },
           {
@@ -21,7 +25,11 @@
             "name": "+10% Rain",
             "description": "Increased rain by 10%",
             "data": {
-              "mint_config": "config_storyboard.txt"
+              "mint_run_config": "mint_run.config",
+              "mint_cycles_config": "mint_cycles-10_percent_inc.config",
+              "pihm_aggr_files": "PIHM-data-find",
+              "fldas2pihm_r": "FLDAS-to-PIHM.R",
+              "ldas_inputQuery": "LDAS-data-find"
             }
           },
           {
@@ -29,7 +37,11 @@
             "name": "-10% Rain",
             "description": "Reduced rain by 10%",
             "data": {
-              "mint_config": "config_storyboard.txt"
+              "mint_run_config": "mint_run.config",
+              "mint_cycles_config": "mint_cycles-10_percent_dec.config",
+              "pihm_aggr_files": "PIHM-data-find",
+              "fldas2pihm_r": "FLDAS-to-PIHM.R",
+              "ldas_inputQuery": "LDAS-data-find"
             }
           }
         ]

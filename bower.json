@@ -23,6 +23,8 @@
     "paper-icon-button": "polymerelements/paper-icon-button#^2.0.0",
     "paper-spinner": "polymerelements/paper-spinner#^2.0.0",
     "paper-button": "polymerelements/paper-button#^2.0.0",
+    "paper-radio-button": "polymerelements/paper-radio-button#^2.0.0",
+    "paper-radio-group": "polymerelements/paper-radio-group#^2.0.0",
     "paper-dialog": "polymerelements/paper-dialog#^2.0.0",
     "paper-dialog-scrollable": "polymerelements/paper-dialog-scrollable#^2.0.0",
     "paper-input": "polymerelements/paper-input#^2.0.0",
