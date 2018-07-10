@@ -96,8 +96,8 @@
 
       _getViewDataURL(item) {
         var url = "data/view/"+this.standardName+"/";
-        var json = {id:item.variable_id.value, md5:item.md5hash.value, ds:item.dataset.value};
-        url += btoa(JSON.stringify(json));
+        var json = {ds:item.dataset.value, id:item.variable_id.value, md5:item.md5hash.value};
+        url += btoa(JSON.stringify(json)).replace("/", "|");
         return url;
       }
 

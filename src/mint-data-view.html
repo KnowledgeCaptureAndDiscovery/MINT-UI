@@ -100,7 +100,7 @@
         var me = this;
         if(standardName &&
             jsonHash && this.jsonHash != jsonHash) {
-          var item = JSON.parse(atob(jsonHash));
+          var item = JSON.parse(atob(jsonHash.replace("|", "/")));
           // console.log(item);
           this.set("standardName", standardName);
           this.set("datasetName", item.ds);
