@@ -402,6 +402,6 @@ VGraphEvents.prototype.editVariableInformation = function(item) {
     return;
 
   var ed = this.graph.editor;
-  ed.set('ed_item', Object.assign({}, vardata));
+  ed.set('edItem', Object.assign({}, vardata));
   ed.variable_editor.open();
 };

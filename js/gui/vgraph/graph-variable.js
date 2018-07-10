@@ -4,7 +4,7 @@ function VGraphVariable(graph, v, config) {
 
   this.id = v.id
   this.text = v.name
-  this.alternate_text = v.standard_name;
+  this.alternate_text = v.standard_name || v.canonical_name;
   this.config = config;
 
   this.binding = null;
@@ -144,8 +144,8 @@ VGraphVariable.prototype.drawText = function() {
   if(!text) {
     text = "None"
   }
-  if(text.length > 25) {
-    text = text.substr(0,25) + "...";
+  if(text.length > 35) {
+    text = text.substr(0,35) + "...";
   }
   var lines = text.split(/\n/);
   for (var i = 0; i < lines.length; i++) {

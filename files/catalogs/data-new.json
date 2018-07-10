@@ -11,7 +11,7 @@
     "category": "None",
     "values": ["mint_cycles-baseline.config", "mint_cycles-10_percent_inc.config"]
   },
-  "pihm_aggr_files": {
+  "soil__residual_porosity": {
     "id": "pihm_aggr_files",
     "name": "PIHM aggregated files",
     "category": "None",

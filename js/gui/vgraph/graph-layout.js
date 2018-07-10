@@ -153,8 +153,8 @@ VGraphLayout.prototype.cleanID = function(id) {
 
 VGraphLayout.prototype.cleanText = function(text, dim) {
   text = text.replace(/\n/g, '\\n');
-  if(text.length > 25) {
-    text = text.substr(0,25) + "...";
+  if(text.length > 35) {
+    text = text.substr(0,35) + "...";
   }
   return text;
 }

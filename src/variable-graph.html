@@ -125,9 +125,9 @@
     <!-- Edit/Add Variable Dialog -->
     <paper-dialog modal id="variable_editor" on-iron-overlay-closed="_editVariable">
       <div class='heading'>Edit Graph Node</div>
-      <paper-input label="Graph Node Name" value="{{edItem.name}}"></paper-input>
-      <paper-input label="Standard Name" value="{{edItem.standard_name}}"></paper-input>
-      <paper-dropdown-menu-light no-animations label="Category">
+      <paper-input label="Name" value="{{edItem.name}}"></paper-input>
+      <paper-input label="Canonical Name" value="{{edItem.canonical_name}}"></paper-input>
+      <!--paper-dropdown-menu-light no-animations label="Category">
         <paper-listbox slot="dropdown-content" attr-for-selected="value" selected="{{edItem.category}}">
           <paper-item value="">None</paper-item>
           <paper-item value="climate">Climate</paper-item>
@@ -135,7 +135,7 @@
           <paper-item value="agronomy">Agronomy</paper-item>
           <paper-item value="economics">Economics</paper-item>
         </paper-listbox>
-      </paper-dropdown-menu-light>
+      </paper-dropdown-menu-light-->
       <div class="buttons">
         <paper-button on-click="_deleteVariable" class="delete">Delete</paper-button>
         <div class="grow">&nbsp;</div>
@@ -278,6 +278,7 @@
           // Check if existing edited
           for (var i=0; i<this.data.variables.length; i++) {
             if(this.edItem) {
+              console.log(this.edItem);
               if(this.data.variables[i].id == this.edItem.id) {
                 this.set("data.variables."+i, this.edItem);
                 return;

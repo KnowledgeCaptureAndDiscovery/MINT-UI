@@ -90,7 +90,17 @@
     "category":"hydrology",
     "inputs":[
       {
-        "id":"pihm_aggr_files"
+        "id":"pihm_aggr_files",
+        "variables": [
+          {
+            "id":"PIHM_THETAR",
+            "name":"ThetaR",
+            "standard_name":"soil__residual_porosity",
+            "metadata":{
+              "units":"m3/m3"
+            }
+          }
+        ]
       },
       {
         "id":"mint_run_config"
@@ -114,19 +124,19 @@
         "id":"pihm_aggregatedOutput",
         "variables":[
           {
-            "id":"PIHM_THETAR",
-            "name":"ThetaR",
-            "standard_name":"soil__residual_porosity",
+            "id":"PIHM_INF_RATE",
+            "name":"infiltration_rate",
+            "standard_name": "land_surface_water__infiltration_rate",
             "metadata":{
-              "units":"m3/m3"
+              "units":"m/d"
             }
           },
           {
-            "id":"PIHM_INFD",
-            "name":"infD",
-            "standard_name": "land_surface_water__infiltration_rate",
+            "id":"PIHM_EVAP",
+            "name":"evaporation_from_ground_surface",
+            "standard_name": "land_surface_water__evaporation_rate",
             "metadata":{
-              "units":"m"
+              "units":"m/d"
             }
           }
         ]
@@ -186,12 +196,10 @@
         ]
       },
       {
-        "id":"fldas2pihm_r",
-        "variables": []
+        "id":"fldas2pihm_r"
       },
       {
-        "id":"pihm_aggr_files",
-        "variables": []
+        "id":"pihm_aggr_files"
       }
     ],
     "outputs":[
@@ -216,30 +224,28 @@
     "category":"none",
     "inputs":[
       {
-        "id":"mint_config",
-        "variables": []
+        "id":"mint_run_config"
       },
       {
-        "id":"cycles_config",
-        "variables": []
+        "id":"mint_cycles_config"
       },
       {
         "id":"pihm_aggregatedOutput",
         "variables":[
           {
-            "id":"PIHM_THETAR",
-            "name":"ThetaR",
-            "standard_name":"soil__residual_porosity",
+            "id":"PIHM_INF_RATE",
+            "name":"infiltration_rate",
+            "standard_name": "land_surface_water__infiltration_rate",
             "metadata":{
-              "units":"m3/m3"
+              "units":"m/d"
             }
           },
           {
-            "id":"PIHM_INFD",
-            "name":"infD",
-            "standard_name": "land_surface_water__infiltration_rate",
+            "id":"PIHM_EVAP",
+            "name":"evaporation_from_ground_surface",
+            "standard_name": "land_surface_water__evaporation_rate",
             "metadata":{
-              "units":"m"
+              "units":"m/d"
             }
           }
         ]

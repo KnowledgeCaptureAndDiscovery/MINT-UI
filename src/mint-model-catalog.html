@@ -205,16 +205,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         var solution_queue = [new Solution(variables)];
         while(solution_queue.length) {
           var solution = solution_queue.shift();
-          console.log("Expanding Solution---")
+          // console.log("Expanding Solution---")
           var varqueue = solution.variables.slice(0);
           while(varqueue.length) {
             var v = varqueue.shift();
-            console.log("Checking variable " + v.name);
+            // console.log("Checking variable " + v.name);
             var cname = v.canonical_name;
             var stdname = v.standard_name;
             // Skip if variable already resolved
             if(v.resolved) {
-              console.log(v.name + " already resolved. Continue.");
+              // console.log(v.name + " already resolved. Continue.");
               continue;
             }
 
@@ -226,14 +226,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 type: "data",
                 item: data_providers[stdname]
               }
-              console.log(v.name + " has a data provider. Variable resolved. Continue.");
+              // console.log(v.name + " has a data provider. Variable resolved. Continue.");
               continue;
             }
 
             // Check model provider
             if(cname in comp_providers) {
               var comps = comp_providers[cname];
-              console.log(v.name + " has "+ comps.length+" model providers");
+              // console.log(v.name + " has "+ comps.length+" model providers");
 
               // If more than one model, create extra solutions
               // from 2 onwards
@@ -271,7 +271,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               };
             }
           }
-          console.log(solution);
+          // console.log(solution);
           // Create workflow for solution
           var workflow = solution.createWorkflow(graph, this);
           if(workflow)
@@ -351,8 +351,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             };
           }
         }
-        console.log(" - Adding "+c.id+" created "+newvars.length+" new variables");
-        console.log(newvars);
+        // console.log(" - Adding "+c.id+" created "+newvars.length+" new variables");
+        // console.log(newvars);
         for(var i=0; i<newvars.length; i++) {
           var hashid = newvars[i].canonical_name;
           this.varhash[hashid] = newvars[i];
@@ -366,7 +366,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         var vid = 'v_' + Math.random().toString(36).substr(2, 9);
         var provenance = {};
         provenance[c.id] = new VariableProvenance(c.id, f.id, v.metadata, isinput);
-        console.log(v);
+        // console.log(v);
         return {
           id:vid,
           standard_name: v.standard_name,
@@ -398,8 +398,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               var hashid = ip.variables[k].canonical_name;
               var v = this.varhash[hashid];
               if(!v || !v.resolved || !v.provider) {
-                console.log("problem with " + c.id + " (" + hashid + ")");
-                console.log(v);
+                // console.log("problem with " + c.id + " (" + hashid + ")");
+                // console.log(v);
                 return null;
               }
               workflow.links.push({
@@ -433,7 +433,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             }
           }
         }
-        console.log(workflow);
+        // console.log(workflow);
 
         workflow.model_graph = this.createModelGraph(workflow);
         workflow.wings_workflow = this.createWingsWorkflow(workflow, clib);
