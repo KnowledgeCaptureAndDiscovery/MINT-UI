@@ -96,7 +96,7 @@
 
     <app-route
         route="[[route]]"
-        pattern="/:region/:category/:cag/:scenario/:runid"
+        pattern="/:region/:category/:cag/:runid"
         data="{{routeData}}"></app-route>
 
       <!-- Variable Graph -->
@@ -113,7 +113,7 @@
             url="[[_getRunDetailsURL(routeData.runid)]]"></mint-ajax>
           -->
           <variable-graph id="cag" visible="[[visible]]"
-            data="[[graphData]]" scenario="[[scenario]]" no-toolbar
+            data="[[graphData]]" no-toolbar
             auto-load></variable-graph>
         </div>
         <div class="right" id="mapdiv">
@@ -157,7 +157,6 @@
             value: false,
             observer: '_visibleChanged'
           },
-          scenario: Object,
           runid: String,
           route: Object,
           routeData: Object
@@ -189,12 +188,7 @@
               for(var j=0; j<category.cags.length; j++) {
                 var cag = category.cags[j];
                 if(cag.id == routeData.cag) {
-                  for(var k=0; k<cag.scenarios.length; k++) {
-                    var scenario = cag.scenarios[k];
-                    if(scenario.id == routeData.scenario) {
-                      this.scenario = scenario;
-                    }
-                  }
+                  console.log(cag.json);
                   return cag.json;
                 }
               }

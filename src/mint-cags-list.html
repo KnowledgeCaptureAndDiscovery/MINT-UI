@@ -14,7 +14,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/google-map/google-map.html">
 <link rel="import" href="google-map-data-layer.html">
 <link rel="import" href="mint-common-styles.html">
-<link rel="import" href="mint-image.html">
+<link rel="import" href="mint-button.html">
 <link rel="import" href="mint-cag-data.html">
 
 <dom-module id="mint-cags-list">
@@ -23,29 +23,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     <style include="mint-common-styles">
 
-      .hero-image {
-        position: relative;
-        height: 280px;
-        overflow: hidden;
-        /*margin-bottom: 32px;*/
-      }
-
-      .hero-image {
-        --mint-image-img: {
-          position: absolute;
-          top: 0;
-          bottom: 0;
-          left: -9999px;
-          right: -9999px;
-          max-width: none;
-        };
-      }
-
       .grid {
         @apply --layout-horizontal;
         @apply --layout-wrap;
         @apply --layout-justified;
-        margin: 0 10px 32px 10px;
+        -webkit-flex-basis: 50%;
+        flex-basis: 50%;
+        max-width: 100%;
       }
 
       .grid > a {
@@ -69,36 +53,26 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
       .content {
         @apply --layout-horizontal;
+        margin-bottom: 10px;
       }
       .box {
         @apply --layout-vertical;
+
         background-color: #FEFEFE;
-        border: 1px solid var(--app-primary-color);
+        border: 1px solid var(--app-accent-color);
         border-radius: 4px;
-        width: 100%;
         background-size: 100% auto;
         background-position: 0px 24px;
+
         margin: 5px;
-      }
-      .inner {
-        background: rgba(255,255,255,0.2);
-        height: 100%;
-        padding: 20px;
-        font-weight: bold;
-      }
-      .textinner {
-        background: rgba(255,255,255,0.85);
-        height: calc(100% - 10px);
-        width: calc(100% - 10px);
-        min-height: 100px;
-        border-radius: 4px;
-        padding: 5px;
-        display: flex;
-        align-items: center;
-      }
-      .textinner a {
-        color: var(--app-accent-color);
+        margin-left: 0px;
+        min-height: 190px;
+
+        display: block;
         text-decoration: none;
+        text-align: center;
+        position: relative;
+        width: 49%;
       }
       .box.climate {
         background-image: url("../images/categories/climate.jpg");
@@ -107,7 +81,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         background-image: url("../images/categories/food_security.jpg");
       }
       .box.social {
-        background-image: url("../images/categories/social.jpg");
+        background-image: url("../images/categories/population.jpg");
       }
       .box.economy {
         background-image: url("../images/categories/economy.jpg");
@@ -119,25 +93,27 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         background-color: var(--app-accent-color);
         color: white;
       }
-      .box ul {
-        margin: 2px;
-        padding-left: 20px;
+      .box .inner {
+        background: rgba(255,255,255,0.5);
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
       }
-      .box ul li {
-        padding: 3px 0px;
-        font-size: 1.1em;
+      .box mint-button {
+        opacity: 0.6;
       }
-      .box img {
-        width: 200px;
-        height: 100px;
+      .box mint-button:hover {
+        opacity: 1;
       }
+
       @media (max-width: 767px) {
-        .hero-image {
-          display: none;
-        }
         .description {
           margin: 0px;
           vertical-align: top;
+        }
+        .box {
+          margin-left: 5px;
         }
         .map, #map {
           width: 100%;
@@ -192,20 +168,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       </div>
     </div>
 
-    <div class="content">
+    <div class="grid">
       <template is="dom-repeat" items="[[_getListItems(region.categories)]]" as="cat">
         <div class$="box [[cat.category]]">
           <h2>[[cat.title]]</h2>
           <div class="inner">
-            <div class="textinner">
-              <ul>
-                <template is="dom-repeat" items="[[cat.cags]]" as="cag">
-                  <li>
-                    <a href="cags/detail/[[region.name]]/[[cat.name]]/[[cag.id]]">[[cag.name]]</a>
-                  </li>
-                </template>
-              </ul>
-            </div>
+            <template is="dom-repeat" items="[[cat.cags]]" as="cag">
+              <mint-button>
+                <a href$="cags/detail/[[region.name]]/[[cat.name]]/[[cag.id]]">[[cag.name]]</a>
+              </mint-button>
+            </template>
           </div>
         </div>
       </template>

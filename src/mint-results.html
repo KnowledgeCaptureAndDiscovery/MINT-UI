@@ -51,10 +51,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           type: String,
           reflectToAttribute: true
         },
-        visible: Boolean,
         route: Object,
-        routeData: Object
-      };
+        routeData: Object,
+        visible: {
+          type: Boolean,
+          observer: '_visibleChanged'
+        }
+      }
+    }
+
+    _visibleChanged(visible) {
+      if (visible) {
+        this.dispatchEvent(new CustomEvent('change-section', {
+          bubbles: true, composed: true, detail: {title: 'Results'}}));
+      }
     }
 
     _loadedGraph(data) {

@@ -9,6 +9,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 -->
 
 <link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../bower_components/vaadin-grid/vaadin-grid.html">
+<link rel="import" href="../bower_components/vaadin-grid/vaadin-grid-sorter.html">
+<link rel="import" href="../bower_components/vaadin-grid/vaadin-grid-column.html">
+
 <link rel="import" href="mint-ajax.html">
 
 <dom-module id="mint-results-list">
@@ -47,13 +52,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           font-family: sans-serif;
           font-size: .8rem;
       }
-      th {
-          background-color: #696969;
-          color: #fff;
-      }
-      td, th {
-          border: 1px solid rgb(190, 190, 190);
-          padding: 10px;
+      vaadin-grid {
+        font-family: "Roboto", "Noto", sans-serif;
+        font-size: 13px;
       }
       @media (max-width: 767px) {
         h2 {
@@ -72,50 +73,62 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       </div>
     </template>
 
-    <center>
-      <!-- TODO: Fetch Runs from JSON -->
-      <table>
-        <tr>
-          <th>Region</th>
-          <th>Analysis</th>
-          <th>CAG</th>
-          <th>Scenario</th>
-          <th>Run</th>
-        </tr>
-        <tr>
-          <td rowspan="4">South Sudan</td>
-          <td rowspan="3">Food Security</td>
-          <td rowspan="3">Storyboard CAG</td>
-          <td rowspan="2">Normal Scenario</td>
-          <td><a href="results/detail/south_sudan/food_security_projection/storyboard_cag/normal/run_0b32ec8198">Run 0b32ec8198</a></td>
-        </tr>
-        <tr>
-          <td><a href="results/detail/south_sudan/food_security_projection/storyboard_cag/normal/run_27e9174e23">Run 27e9174e23</a></td>
-        </tr>
-        <tr>
-          <td>El-Nino Event</td>
-          <td><a href="results/detail/south_sudan/food_security_projection/storyboard_cag/elnino/run_18e9174f08">Run 18e9174f08</a></td>
-        </tr>
-        <tr>
-          <td>Climate</td>
-          <td>Storyboard CAG</td>
-          <td>Normal Scenario</td>
-          <td><a href="results/detail/south_sudan/climate_projection/storyboard_cag/normal/run_76ba62233e">Run 76ba62233e</a></td>
-        </tr>
-      </table>
-    </center>
+    <iron-ajax auto url="[[_getRunListURL()]]" handle-as="json" last-response="{{runs}}"></iron-ajax>
+
+    <vaadin-grid items="[[runs]]">
+      <vaadin-grid-column width="5em">
+        <template class="header">
+          <vaadin-grid-sorter path="region.id">Region</vaadin-grid-sorter>
+        </template>
+        <template>[[item.region.name]]</template>
+      </vaadin-grid-column>
+
+      <vaadin-grid-column width="5em">
+        <template class="header">
+          <vaadin-grid-sorter path="category.id">Category</vaadin-grid-sorter>
+        </template>
+        <template>[[item.category.name]]</template>
+      </vaadin-grid-column>
+
+      <vaadin-grid-column width="5em">
+        <template class="header">
+          <vaadin-grid-sorter path="cag.id">CAG</vaadin-grid-sorter>
+        </template>
+        <template>[[item.cag.name]]</template>
+      </vaadin-grid-column>
+
+      <vaadin-grid-column width="5em">
+        <template class="header">
+          <vaadin-grid-sorter path="scenario.id">Scenario</vaadin-grid-sorter>
+        </template>
+        <template>[[item.scenario.name]]</template>
+      </vaadin-grid-column>
+
+      <vaadin-grid-column width="15em" flex-grow="2">
+        <template class="header">
+          <vaadin-grid-sorter path="run.name">Run</vaadin-grid-sorter>
+        </template>
+        <template>
+          <a href="results/detail/[[item.region.id]]/[[item.category.id]]/[[item.cag.id]]/[[item.run.id]]"
+            >[[item.run.name]]</a>
+        </template>
+      </vaadin-grid-column>
+
+    </vaadin-grid>
 
   </template>
 
   <script>
 
-    Polymer({
-      is: 'mint-results-list',
+  class MintResultsList extends Polymer.Element {
+    static get is() { return 'mint-results-list'; }
 
-      properties: {
+    static get properties() {
+      return {
         server: String,
         userid: String,
         domain: String,
+        runs: Array,
         visible: {
           type: Boolean,
           value: false
@@ -131,128 +144,133 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           computed: '_computeLoggedInStatus(userid)'
         },
         runList: Array
-      },
+      };
+    }
 
-      observers: [
+    static get observers() {
+      return [
         //'_fetchResults(server, userid, domain, visible)',
         //'_checkVisibility(visible)'
-      ],
+      ];
+    }
 
-      _computeLoggedInStatus: function(userid) {
-        return userid != null;
-      },
+    _computeLoggedInStatus(userid) {
+      return userid != null;
+    }
 
-      ready: function() {
-        /*
-        this._setupListeners();
-        Polymer.RenderStatus.afterNextRender(this, function() {
-          this._setupRenderers();
+    ready() {
+      super.ready();
+      /*
+      this._setupListeners();
+      Polymer.RenderStatus.afterNextRender(this, function() {
+        this._setupRenderers();
+      });
+      */
+    }
+
+    _getRunListURL() {
+      return "files/runs/list.json";
+    }
+
+    _sortList(list) {
+      if(list != null) {
+        list.sort(function(a, b) {
+          return a.runtimeInfo.startTime < b.runtimeInfo.startTime ? 1 : -1;
         });
-        */
-      },
-
-      _computeLoggedInStatus: function(userid) {
-        return userid != null;
-      },
-
-      _sortList: function(list) {
-        if(list != null) {
-          list.sort(function(a, b) {
-            return a.runtimeInfo.startTime < b.runtimeInfo.startTime ? 1 : -1;
-          });
-          return list;
-        }
-      },
-
-      _checkVisibility: function(visible) {
-        if(visible) {
-          this.selectedrunid = null;
-          this.$.results.selection.clear();
-        }
-      },
-
-      _fetchResults: function(server, userid, domain, visible) {
-        if(server && userid && domain && visible) {
-        }
-        else {
-          this.runList = [];
-        }
-      },
-
-      _getRequestUrl: function(server, userid, domain) {
-        return server + "/users/" + userid +  "/" + domain + "/";
-      },
-
-      _progressRenderer: function(cell) {
-        var d = cell.row.data;
-        var r = d.runtimeInfo;
-        if (r.status == "SUCCESS")
-          d.percent_done = 100;
-        var w1 = 150;
-        var w2 = Math.round(w1 * (d.percent_done + d.percent_failed + d.percent_running) / 100);
-        var w3 = Math.round(w1 * (d.percent_done + d.percent_running) / 100);
-        var w4 = Math.round(w1 * d.percent_done / 100);
-        var html = "<div style='width:"+w1+"px;height:8px;background-color:#EEE;border-radius:5px'>";
-      	html += "<div style='width:"+w2+"px;height:8px;background-color:#F66;border-radius:5px'>";
-      	html += "<div style='width:"+w3+"px;height:8x;background-color:#999;border-radius:5px'>";
-      	html += "<div style='width:"+w4+"px;height:8px;background-color:#6E6;border-radius:5px'>";
-      	html += "&nbsp;</div></div></div></div>";
-        cell.element.innerHTML = html;
-      },
-
-      _timeRenderer: function(cell) {
-        if(cell.data)
-          cell.element.innerHTML = new Date(cell.data*1000).toISOString().slice(0,19).replace('T', ' ');
-      },
-
-      _titleRenderer: function(cell) {
-        cell.element.innerHTML = '<b>' + cell.data.replace(/^.*#/, '') + '</b>';
-      },
-
-      _statusRenderer: function(cell) {
-        cell.element.innerHTML = '';
-        var child = document.createElement('iron-icon');
-        if(cell.data == 'SUCCESS') {
-          child.setAttribute('icon', 'check');
-          child.setAttribute('style', 'color:green');
-        } else if(cell.data == 'FAILURE') {
-          child.setAttribute('icon', 'close');
-          child.setAttribute('style', 'color:red');
-        } else {
-          child.setAttribute('icon', 'hourglass-empty');
-          child.setAttribute('style', 'color:grey');
-        }
-        cell.element.appendChild(child);
-      },
-
-      _setupRenderers: function() {
-        var grid = this.$.results;
-        grid.columns[1].renderer = this._statusRenderer;
-        grid.columns[2].renderer = this._titleRenderer;
-        grid.columns[3].renderer = this._timeRenderer;
-        grid.columns[4].renderer = this._timeRenderer;
-        grid.columns[5].renderer = this._progressRenderer;
-      },
-
-      _setupReloadTimer: function() {
-        var me = this;
-        window.setTimeout(function() {
-          if(me.userid && me.visible) {
-            //console.log("Refreshing");
-            me.$.runlistAjax.refresh();
-            me._setupReloadTimer();
-          }
-        }, 30000);
-      },
-
-      _isDefined: function(item) {
-        return item != null;
-      },
-
-      _setupListeners: function() {
+        return list;
       }
+    }
 
-    });
+    _checkVisibility(visible) {
+      if(visible) {
+        this.selectedrunid = null;
+        this.$.results.selection.clear();
+      }
+    }
+
+    _fetchResults(server, userid, domain, visible) {
+      if(server && userid && domain && visible) {
+      }
+      else {
+        this.runList = [];
+      }
+    }
+
+    _getRequestUrl(server, userid, domain) {
+      return server + "/users/" + userid +  "/" + domain + "/";
+    }
+
+    _progressRenderer(cell) {
+      var d = cell.row.data;
+      var r = d.runtimeInfo;
+      if (r.status == "SUCCESS")
+        d.percent_done = 100;
+      var w1 = 150;
+      var w2 = Math.round(w1 * (d.percent_done + d.percent_failed + d.percent_running) / 100);
+      var w3 = Math.round(w1 * (d.percent_done + d.percent_running) / 100);
+      var w4 = Math.round(w1 * d.percent_done / 100);
+      var html = "<div style='width:"+w1+"px;height:8px;background-color:#EEE;border-radius:5px'>";
+    	html += "<div style='width:"+w2+"px;height:8px;background-color:#F66;border-radius:5px'>";
+    	html += "<div style='width:"+w3+"px;height:8x;background-color:#999;border-radius:5px'>";
+    	html += "<div style='width:"+w4+"px;height:8px;background-color:#6E6;border-radius:5px'>";
+    	html += "&nbsp;</div></div></div></div>";
+      cell.element.innerHTML = html;
+    }
+
+    _timeRenderer(cell) {
+      if(cell.data)
+        cell.element.innerHTML = new Date(cell.data*1000).toISOString().slice(0,19).replace('T', ' ');
+    }
+
+    _titleRenderer(cell) {
+      cell.element.innerHTML = '<b>' + cell.data.replace(/^.*#/, '') + '</b>';
+    }
+
+    _statusRenderer(cell) {
+      cell.element.innerHTML = '';
+      var child = document.createElement('iron-icon');
+      if(cell.data == 'SUCCESS') {
+        child.setAttribute('icon', 'check');
+        child.setAttribute('style', 'color:green');
+      } else if(cell.data == 'FAILURE') {
+        child.setAttribute('icon', 'close');
+        child.setAttribute('style', 'color:red');
+      } else {
+        child.setAttribute('icon', 'hourglass-empty');
+        child.setAttribute('style', 'color:grey');
+      }
+      cell.element.appendChild(child);
+    }
+
+    _setupRenderers() {
+      var grid = this.$.results;
+      grid.columns[1].renderer = this._statusRenderer;
+      grid.columns[2].renderer = this._titleRenderer;
+      grid.columns[3].renderer = this._timeRenderer;
+      grid.columns[4].renderer = this._timeRenderer;
+      grid.columns[5].renderer = this._progressRenderer;
+    }
+
+    _setupReloadTimer() {
+      var me = this;
+      window.setTimeout(function() {
+        if(me.userid && me.visible) {
+          //console.log("Refreshing");
+          me.$.runlistAjax.refresh();
+          me._setupReloadTimer();
+        }
+      }, 30000);
+    }
+
+    _isDefined(item) {
+      return item != null;
+    }
+
+    _setupListeners() {
+    }
+  }
+
+  customElements.define(MintResultsList.is, MintResultsList);
 
   </script>
 

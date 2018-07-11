@@ -35,6 +35,7 @@
     "iron-input": "polymerelements/iron-input#^2.0.0",
     "iron-collapse": "polymerelements/iron-collapse#^2.0.0",
     "google-map": "^2.0.0",
+    "vaadin-grid": "vaadin/vaadin-grid",
     "mint-map": "https://github.com/limbov8/Mint-Map.git",
     "mint-chart": "https://github.com/limbov8/mint-chart.git",
     "mint-time": "https://github.com/limbov8/mint-time.git"

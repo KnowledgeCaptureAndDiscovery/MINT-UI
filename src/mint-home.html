@@ -9,14 +9,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 -->
 
 <link rel="import" href="../bower_components/polymer/polymer.html">
-<link rel="import" href="mint-button.html">
+<link rel="import" href="mint-common-styles.html">
 <link rel="import" href="mint-image.html">
 
 <dom-module id="mint-home">
 
   <template>
 
-    <style include="mint-button mint-common-styles">
+    <style include="mint-common-styles">
 
       .item {
         display: block;
@@ -74,7 +74,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </div>
     <div class="detail" has-content>
       <h1>Welcome to MINT</h1>
-<p>USC Viterbi's Information Sciences Institute researchers are leveraging artificial intelligence to create an ambitious new computer modeling and predictive analysis tool thanks to a new $13 million Defense Research Projects Award (DARPA) award.</p><p>Principal investigator<a href="https://viterbi.usc.edu/directory/faculty/Gil/Yolanda"> Yolanda Gil</a>, an ISI research director and USC Viterbi computer science professor, and a team of scientists and researchers are developing a tool to better understand the evolving relationship between humans and nature and its impact on the planet.</p><p>The four-year project, called MINT for Model INTegration, is part of DARPA's <a href="https://www.darpa.mil/program/world-modelers">World Modelers program</a>.</p><p>Using artificial intelligence (AI) techniques, the system will combine existing models from various disciplines-including hydrology, agriculture, economics and social sciences-and run simulations to predict the consequences of actions or policies in specific geographic regions.</p><p>For instance, what could be the social and economic impacts of dam construction on fisheries and crop production over time?</p><p>The project's co-principal investigators are ISI researchers and USC Viterbi faculty members <a href="https://viterbi.usc.edu/directory/faculty/Deelman/Ewa">Ewa Deelman</a>, a research professor of computer science; <a href="https://viterbi.usc.edu/directory/faculty/Ferreira-da-Silva/Rafael">Rafael Ferreira da Silva</a>, a computer science research assistant professor; and<a href="https://viterbi.usc.edu/directory/faculty/Knoblock/Craig"> Craig Knoblock</a>, a computer science research professor.</p><h2 class="mceTemp">The science of prediction</h2><p>While big data collection is becoming an increasingly automated process, complex world models are currently still pieced together by hand. This is a particularly challenging task, since many problems require the integration of models from different fields with diverse modeling approaches.</p><p>In fact, analyzing just one scenario in this way can take up to two years. Using automation and artificial intelligence, Gil and her team hope to bring that down to a couple of days.</p><p>The team includes researchers from Virginia Tech, the Pennsylvania State University, the University of Minnesota and the University of Colorado.</p><p>Building on group's extensive prior work on model integration both from disciplinary and computational perspectives, the researchers have proposed a comprehensive approach, which includes cross-disciplinary modeling, model integration, workflow composition and execution, data extraction and data integration.</p><p>"We use AI to process and describe the data and information in a very precise way," said Gil, who leads ISI's Interactive Knowledge Capture Group.</p><p>"We develop ontologies to describe specific terms and knowledge graphs to help us relate those terms to others. Then, we apply machine learning algorithms to refine the data and workflow tools to track the data flow through the software. The output is the prediction, for example, water availability in a specific region."</p><p>Modeling experts will provide test scenarios, as well as data sources and models, including data extracted from remote Earth observation. The team plans to open-source the MINT software to create a community of users that will continue to use and develop the software over time.</p><p>"Ultimately, by developing this sophisticated modeling environment, MINT aims to significantly reduce the time needed to develop new integrated models," said Gil. "We hope to generate a better understanding of how human and natural processes impact one another—that's the holy grail."</p>
+      <p>Major societal and environmental challenges require forecasting how natural processes
+        and human activities affect one another. There are many areas of the globe where climate
+        affects water resources and therefore food availability, with major economic and social
+        implications. Today, such analyses require significant effort to integrate highly
+        heterogeneous models from separate disciplines, including geosciences, agriculture,
+        economics, and social sciences. Model integration requires resolving semantic,
+        spatio-temporal, and execution mismatches, which are largely done by hand today
+        and may take more than two years. The Model INTegration (MINT) project will develop
+        a modeling environment which will significantly reduce the time needed to develop
+        new integrated models, while ensuring their utility and accuracy</p>
     </div>
 
   </template>

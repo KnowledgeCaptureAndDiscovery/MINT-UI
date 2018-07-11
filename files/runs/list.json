@@ -1,0 +1,68 @@
+[
+  {
+    "region": {
+      "id": "south_sudan",
+      "name": "South Sudan"
+    },
+    "category": {
+      "id": "land_use",
+      "name": "Land Use"
+    },
+    "cag": {
+      "id": "storyboard_isi",
+      "name": "Storyboard ISI"
+    },
+    "scenario": {
+      "id": "baseline",
+      "name": "Baseline"
+    },
+    "run": {
+      "id": "storyboard_isi_c-2f53e08f-1072-4307-b2c3-17edb8546b1a",
+      "name": "storyboard_isi_c-2f53e08f-1072-4307-b2c3-17edb8546b1a"
+    }
+  },
+  {
+    "region": {
+      "id": "south_sudan",
+      "name": "South Sudan"
+    },
+    "category": {
+      "id": "land_use",
+      "name": "Land Use"
+    },
+    "cag": {
+      "id": "storyboard_isi",
+      "name": "Storyboard ISI"
+    },
+    "scenario": {
+      "id": "+5% Rain",
+      "name": "+5% Rain"
+    },
+    "run": {
+      "id": "storyboard_isi_c-3f53e08f-1072-4307-b2c3-17edb8546b1a",
+      "name": "storyboard_isi_c-3f53e08f-1072-4307-b2c3-17edb8546b1a"
+    }
+  },
+  {
+    "region": {
+      "id": "south_sudan",
+      "name": "South Sudan"
+    },
+    "category": {
+      "id": "land_use",
+      "name": "Land Use"
+    },
+    "cag": {
+      "id": "storyboard_isi",
+      "name": "Storyboard ISI"
+    },
+    "scenario": {
+      "id": "-5% Rain",
+      "name": "-5% Rain"
+    },
+    "run": {
+      "id": "storyboard_isi_c-4f53e08f-1072-4307-b2c3-17edb8546b1a",
+      "name": "storyboard_isi_c-4f53e08f-1072-4307-b2c3-17edb8546b1a.owl"
+    }
+  }
+]

@@ -28,5 +28,11 @@
     "name": "FLDAS to PIHM conversion R script",
     "category": "hydrology",
     "values": ["FLDAS-to-PIHM.R"]
+  },
+  "crop__nominal_per-yield_price": {
+    "id": "crop_price",
+    "name": "MINT econ data",
+    "category": "economics",
+    "values": ["MINTecondata.csv"]
   }
 }

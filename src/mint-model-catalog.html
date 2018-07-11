@@ -622,7 +622,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               toPort: {id: "inport_" + v.canonical_name},
               variable: {id: v.id}
             }
-            tpl.Variables[v.id].category = tpl.Nodes[l.to].category;
+            var cat = tpl.Nodes[l.to].category;
+            if(cat)
+              tpl.Variables[v.id].category = cat;
+
             tpl.Links[lid] = link;
           }
           else if(l.type == "output") {
@@ -633,7 +636,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               fromPort: {id: "outport_" + v.canonical_name},
               variable: {id: v.id}
             }
-            tpl.Variables[v.id].category = tpl.Nodes[l.from].category;
+            var cat = tpl.Nodes[l.from].category;
+            if(!tpl.Variables[v.id].category && cat)
+              tpl.Variables[v.id].category = cat;
+
             tpl.Links[lid] = link;
           }
           else if(l.type == "model") {
@@ -646,7 +652,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               toPort: {id: "inport_" + v.canonical_name},
               variable: {id: v.id}
             }
-            tpl.Variables[v.id].category = tpl.Nodes[l.from].category;
+            var cat = tpl.Nodes[l.from].category;
+            if(!tpl.Variables[v.id].category && cat)
+              tpl.Variables[v.id].category = cat;
+            else {
+              cat = tpl.Nodes[l.to].category;
+              if(!tpl.Variables[v.id].category && cat)
+                tpl.Variables[v.id].category = cat;
+            }
+
             tpl.Links[lid] = link;
           }
         }
@@ -818,7 +832,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               toPort: {id: to.file_uri + "_inport"},
               variable: {id: to.file_uri}
             };
-            tpl.Variables[to.file_uri].category = tpl.Nodes[l.to_uri].category;
+            var cat = tpl.Nodes[l.to_uri].category;
+            if(!tpl.Variables[to.file_uri].category && cat)
+              tpl.Variables[to.file_uri].category = cat;
+
             tpl.Links[lid] = link;
           }
           else if(l.type == "output") {
@@ -829,7 +846,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               fromPort: {id: from.file_uri + "_outport"},
               variable: {id: from.file_uri}
             };
-            tpl.Variables[from.file_uri].category = tpl.Nodes[l.from_uri].category;
+            var cat = tpl.Nodes[l.from_uri].category;
+            if(!tpl.Variables[from.file_uri].category && cat)
+              tpl.Variables[from.file_uri].category = cat;
+
             tpl.Links[lid] = link;
           }
           else if(l.type == "model") {
@@ -901,7 +921,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               toPort: {id: to.file_uri + "_inport"},
               variable: {id: from.file_uri}
             }
-            tpl.Variables[from.file_uri].category = tpl.Nodes[l.from_uri].category;
+
+            var cat = tpl.Nodes[l.from_uri].category;
+            if(!tpl.Variables[from.file_uri].category && cat)
+              tpl.Variables[from.file_uri].category = cat;
+            else {
+              var cat = tpl.Nodes[l.to_uri].category;
+              if(!tpl.Variables[to.file_uri].category && cat)
+                tpl.Variables[to.file_uri].category = cat;
+            }
+
             tpl.Links[lid] = link;
             // Since we are combining 2 variables into 1 here as they are compatible
             // Delete one of them

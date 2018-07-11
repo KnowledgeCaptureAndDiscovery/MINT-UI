@@ -102,14 +102,25 @@
       <template is="dom-if" if="[[_workflowDefined(selectedWorkflow)]]">
         <paper-icon-button icon="arrow-back" on-click="_backToList"></paper-icon-button>
       </template>
+
       <div class="grow">&nbsp;</div>
+
+      <template is="dom-if" if="[[_workflowDefined(selectedWorkflow)]]">
+        <template is="dom-if" if="[[!showWorkflows]]">
+          <paper-button>Model Graph</paper-button>
+        </template>
+      </template>
+
       <template is="dom-if" if="[[!_workflowDefined(selectedWorkflow)]]">
         <paper-button>Model choices</paper-button>
       </template>
+
       <template is="dom-if" if="[[_showingWorkflows(selectedWorkflow, showWorkflows)]]">
         <paper-button raised on-click="_chooseScenario">Run Workflow</paper-button>
       </template>
+
       <div class="grow">&nbsp;</div>
+
       <paper-icon-button icon="close" on-click="_resetWorkflows"></paper-icon-button>
     </div>
 
@@ -242,8 +253,16 @@
       }
 
       _getWorkflowNodes(workflow) {
-        if(workflow)
-          return Object.values(workflow.model_graph.template.Nodes);
+        if(workflow) {
+          var wnodes = [];
+          var nodes = workflow.model_graph.template.Nodes;
+          for(var nid in nodes) {
+            var n = nodes[nid];
+            if(n.category && n.category != "none")
+              wnodes.push(n);
+          }
+          return wnodes;
+        }
       }
 
       _workflowDefined(w) {
@@ -272,7 +291,11 @@
       }
 
       _chooseScenario() {
-        this.$.scenario_chooser.open();
+        if(!this.userid) {
+          alert("You need to be logged in to run workflows");
+        }
+        else
+          this.$.scenario_chooser.open();
       }
 
       _closeScenarioChooser() {

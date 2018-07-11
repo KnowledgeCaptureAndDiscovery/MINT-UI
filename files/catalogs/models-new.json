@@ -48,10 +48,10 @@
             }
           },
           {
-            "id":"Cycles_snow_sub",
-            "name":"SNOW SUB",
-            "description":"Sublimation from snow cover",
-            "standard_name":"land_surface_snow__volume-per-area_sublimation_rate",
+            "id":"Cycles_soil_evap",
+            "name":"SOIL EVAP",
+            "description":"Evaporation from the soil surface",
+            "standard_name":"soil_surface_water__volume-per-area_evaporation_rate",
             "metadata":{
               "units":"mm/day"
             }
@@ -63,7 +63,6 @@
   {
     "id":"ldasDataDownload",
     "name":"ldasDataDownload",
-    "category":"climate",
     "inputs":[
       {
         "id":"mint_run_config"
@@ -146,7 +145,6 @@
   {
     "id":"ldas2cycles",
     "name":"ldas2cycles",
-    "category":"none",
     "inputs":[
       {
         "id":"mint_run_config"
@@ -181,7 +179,6 @@
   {
     "id":"ldas2pihm",
     "name":"ldas2pihm",
-    "category":"none",
     "inputs":[
       {
         "id":"mint_run_config"
@@ -221,7 +218,6 @@
   {
     "id":"pihm2cycles",
     "name":"pihm2cycles",
-    "category":"none",
     "inputs":[
       {
         "id":"mint_run_config"
@@ -272,7 +268,6 @@
   {
     "id":"cycles2crop",
     "name":"cycles2crop",
-    "category":"none",
     "inputs":[
       {
         "id":"cycles_aggregatedOutput",
@@ -287,10 +282,10 @@
             }
           },
           {
-            "id":"Cycles_snow_sub",
-            "name":"SNOW SUB",
-            "description":"Sublimation from snow cover",
-            "standard_name":"land_surface_snow__volume-per-area_sublimation_rate",
+            "id":"Cycles_soil_evap",
+            "name":"SOIL EVAP",
+            "description":"Evaporation from the soil surface",
+            "standard_name":"soil_surface_water__volume-per-area_evaporation_rate",
             "metadata":{
               "units":"mm/day"
             }
@@ -315,7 +310,7 @@
   },
   {
     "id":"economic_land_quality_cfg_simple",
-    "name":"ECONOMIC_LAND_QUALITY",
+    "name":"ELQ",
     "category":"economics",
     "inputs":[
       {
@@ -327,6 +322,18 @@
             "description":"Crop Yield",
             "canonical_name":"crop__yield",
             "standard_name":"crop_biomass_residue__harvested_forage_yield"
+          }
+        ]
+      },
+      {
+        "id":"econ_price_input",
+        "variables":[
+          {
+            "id":"ECON_price",
+            "name":"CROPPRICE",
+            "description":"Crop PRICE",
+            "canonical_name":"crop__price",
+            "standard_name":"crop__nominal_per-yield_price"
           }
         ]
       }
@@ -353,6 +360,49 @@
             "standard_name":"land__usage_prediction",
             "metadata": {
               "units": "kha"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id":"topoflow_cfg_simple",
+    "name":"TOPOFLOW",
+    "category":"hydrology",
+    "inputs":[
+      {
+        "id":"topo_aggr_files"
+      },
+      {
+        "id":"mint_run_config"
+      },
+      {
+        "id":"topo_rain",
+        "variables":[
+          {
+            "id":"Topo_P",
+            "name":"P",
+            "canonical_name":"atmosphere_water__precipitation_volume_flux",
+            "standard_name":"atmosphere_water__precipitation_leq-volume_flux",
+            "metadata":{
+              "units":"mm/h"
+            }
+          }
+        ]
+      }
+    ],
+    "outputs":[
+      {
+        "id":"topo_aggregatedOutput",
+        "variables":[
+          {
+            "id":"Topo_qs",
+            "name":"Saturated soil water content",
+            "canonical_name":"soil_water__volume_fraction",
+            "standard_name": "soil_water__saturated_volume_fraction",
+            "metadata":{
+              "units":"m3/m4"
             }
           }
         ]

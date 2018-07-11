@@ -18,10 +18,10 @@
       }
     },
     {
-      "id": "concept2",
-      "name": "infiltration",
-      "canonical_name": "soil_water__volume_fraction",
-      "standard_names": [
+      "id":"concept2",
+      "name":"soil moisture",
+      "canonical_name":"soil_water__volume_fraction",
+      "standard_names":[
         "soil_column_water__volume_fraction",
         "soil_top_water__volume_fraction",
         "soil_column_water__initial_volume_fraction",

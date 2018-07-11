@@ -5,7 +5,7 @@
     "cags": [
       {
         "id": "storyboard_isi",
-        "name": "Storyboard ISI",
+        "name": "Storyboard MINT",
         "json": "files/regions/south_sudan/cags/storyboard_isi.json",
         "scenarios": [
           {
@@ -21,24 +21,24 @@
             }
           },
           {
-            "id": "plus_10_percent_rain",
-            "name": "+10% Rain",
-            "description": "Increased rain by 10%",
+            "id": "plus_5_percent_rain",
+            "name": "+5% Rain",
+            "description": "Increased rain by 5%",
             "data": {
-              "mint_run_config": "mint_run.config",
-              "mint_cycles_config": "mint_cycles-10_percent_inc.config",
+              "mint_run_config": "mint_run_5_percent_inc.config",
+              "mint_cycles_config": "mint_cycles-baseline.config",
               "pihm_aggr_files": "PIHM-data-find",
               "fldas2pihm_r": "FLDAS-to-PIHM.R",
               "ldas_inputQuery": "LDAS-data-find"
             }
           },
           {
-            "id": "minus_10_percent_rain",
-            "name": "-10% Rain",
-            "description": "Reduced rain by 10%",
+            "id": "minus_5_percent_rain",
+            "name": "-5% Rain",
+            "description": "Reduced rain by 5%",
             "data": {
-              "mint_run_config": "mint_run.config",
-              "mint_cycles_config": "mint_cycles-10_percent_dec.config",
+              "mint_run_config": "mint_run_5_percent_dec.config",
+              "mint_cycles_config": "mint_cycles-baseline.config",
               "pihm_aggr_files": "PIHM-data-find",
               "fldas2pihm_r": "FLDAS-to-PIHM.R",
               "ldas_inputQuery": "LDAS-data-find"
@@ -55,7 +55,7 @@
     "cags": [
       {
         "id": "delphi_cag",
-        "name": "Delphi CAG",
+        "name": "Storyboard Delphi",
         "json": "files/regions/south_sudan/cags/delphi_cag.json",
         "scenarios": [
           {
@@ -77,7 +77,7 @@
     "cags": [
       {
         "id": "kimetrica_cag",
-        "name": "Kimetrica CAG",
+        "name": "Storyboard Kimetrica",
         "json": "files/regions/south_sudan/cags/kimetrica_cag.json",
         "scenarios": [
           {
@@ -99,7 +99,7 @@
     "cags": [
       {
         "id": "expenditures_cag",
-        "name": "Household Expenditures CAG",
+        "name": "Storyboard Household Expenditures",
         "json": "files/regions/south_sudan/cags/expenditures_cag.json",
         "scenarios": [
           {

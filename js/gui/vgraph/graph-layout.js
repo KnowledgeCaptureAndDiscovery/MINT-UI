@@ -71,6 +71,7 @@ VGraphLayout.prototype.layout = function(graph, animate, loader) {
     var l = this.graph.links[lid];
     var linkid = this.cleanID(l.fromVariable.id)
       + " -> " + this.cleanID(l.toVariable.id);
+
     if (!donelinks[linkid]) {
       dotstr += nl + tab + linkid;
       donelinks[linkid] = true;
@@ -140,7 +141,7 @@ VGraphLayout.prototype.layout = function(graph, animate, loader) {
     VGraphLayout.layoutWorker.removeEventListener("message", curfn);
   VGraphLayout.layoutWorker.listeners[myid] = fn;
   VGraphLayout.layoutWorker.addEventListener("message", fn);
-  VGraphLayout.layoutWorker.postMessage([myid, dotstr, "neato"]);
+  VGraphLayout.layoutWorker.postMessage([myid, dotstr, "fdp"]);
 };
 
 VGraphLayout.prototype.cleanID = function(id) {
