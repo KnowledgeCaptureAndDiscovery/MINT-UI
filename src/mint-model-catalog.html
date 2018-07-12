@@ -478,13 +478,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           variables: [],
           links: []
         }
+        var gvars = wflow.model_graph.template.Variables;
+
         var varid_hash = {};
         var cname_hash = {};
         for(var i=0; i<wflow.variables.length; i++) {
           var v = wflow.variables[i];
           if(!v.resolved)
             continue;
-          var vcat = v.category ? v.category : v.provider.item.category;
+          var gvar = gvars[v.id];
+          var vcat = gvar.category;
           var nv = {
             id: v.id, name: v.name, category: vcat,
             standard_name: v.standard_name,

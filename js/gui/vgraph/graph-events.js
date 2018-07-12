@@ -388,7 +388,7 @@ VGraphEvents.prototype.enableCanvasEvents = function() {
 
 VGraphEvents.prototype.addNewVariable = function(vardata) {
   var ed = this.graph.editor;
-  ed.set('ed_item', vardata);
+  ed.set('edItem', vardata);
   ed.variable_editor.open();
 };
 

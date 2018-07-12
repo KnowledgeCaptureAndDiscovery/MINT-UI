@@ -22,8 +22,8 @@ function VGraphVariableConfig(category, newitem) {
   // Configuration
   // TODO: Get from config file
   this.xpad = 8;
-  this.ypad = 10;
-  this.fontsize = 13;
+  this.ypad = 6;
+  this.fontsize = 14;
   this.font = "Tahoma";
   this.bgcolor = "rgba(125,125,125,1)";
   this.textcolor = "rgba(245,245,245,1)";

@@ -16,40 +16,42 @@ function GraphItemConfig() {
 	this.stackcolor = this.bgcolor;
 	this.inactiveopacity = 0.4;
 	this.autofillopacity = 0.5;
+	this.bgopacity = 1;
 };
 
 GraphItemConfig.prototype.setCategory = function(category) {
   this.category = category;
   if(this.category=="climate") {
-    this.bgcolor = "rgba(144,177,219,1)";
+    this.bgcolor = "rgba(144,177,219," + this.bgopacity + ")";
 		this.textcolor = "white";
   }
   else if(this.category=="hydrology") {
-    this.bgcolor = "rgba(70,116,190,1)";
+    this.bgcolor = "rgba(70,116,190," + this.bgopacity + ")";
     this.textcolor = "white";
   }
   else if(this.category=="agronomy") {
-    this.bgcolor = "rgba(85,129,57,1)";
+    this.bgcolor = "rgba(85,129,57," + this.bgopacity + ")";
     this.textcolor = "white";
   }
   else if(this.category=="economics") {
-    this.bgcolor = "rgba(190,96,51,1)";
+    this.bgcolor = "rgba(190,96,51," + this.bgopacity + ")";
     this.textcolor = "white";
   }
 	else {
 		this.fontsize = 10;
-		this.bgcolor = "rgba(200,200,200,1)";
+		this.xpad = 8;
+		this.strokewidth = 0.7;
+		this.bgcolor = "rgba(200,200,200," + this.bgopacity + ")";
 		this.textcolor = "rgba(72,42,3,1)";
 	}
 };
 
 function GraphNodeConfig(category) {
 	GraphItemConfig.call(this);
-	this.xpad = 8;
+	this.xpad = 20;
 	this.bgcolor = "rgba(255,204,153,1)";
 	this.stackcolor = this.bgcolor;
-	this.strokewidth = 2;
-	this.strokecolor = "darkorange";
+	this.strokewidth = 1.5;
 	this.xshift = 8;
 	this.setCategory(category);
 };
@@ -58,7 +60,8 @@ GraphNodeConfig.prototype.constructor = GraphNodeConfig;
 
 function GraphVariableConfig(category) {
 	GraphItemConfig.call(this);
-	this.bgcolor = "rgba(0,51,102,1)";
+	this.bgopacity = 0.7;
+	this.bgcolor = "rgba(0,51,102," + this.bgopacity + ")";
 	this.textcolor = "rgba(220,220,255,1)";
 	//this.strokecolor = this.bgcolor;
 	this.fontweight = "normal";

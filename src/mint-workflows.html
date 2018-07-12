@@ -177,6 +177,7 @@
         <paper-icon-button icon="close" on-click="_closeScenarioChooser"></paper-icon-button>
       </div>
       <paper-radio-group selected="{{selectedScenarioIndex}}">
+        Sub Region: [[subRegion]] <br/>
         <template is="dom-repeat" items="[[scenarios]]" as="scenario">
           <paper-radio-button name="[[index]]">[[scenario.name]]</paper-radio-button>
         </template>
@@ -217,6 +218,7 @@
           },
           selectedScenarioIndex: String,
           scenarios: Array,
+          subRegion: String,
           showWorkflows: Boolean
         }
       }

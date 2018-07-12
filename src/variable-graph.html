@@ -270,7 +270,6 @@
           // Check if existing edited
           for (var i=0; i<this.data.variables.length; i++) {
             if(this.edItem) {
-              console.log(this.edItem);
               if(this.data.variables[i].id == this.edItem.id) {
                 this.set("data.variables."+i, this.edItem);
                 return;
@@ -278,7 +277,8 @@
             }
           }
           // New Variable
-          this.graph.editor.push("data.variables", this.edItem);
+          if(this.edItem)
+            this.graph.editor.push("data.variables", this.edItem);
         }
       }
 
@@ -303,7 +303,7 @@
             // Update
             this.graph.variables[v.id].setText(v.name);
             this.graph.variables[v.id].alternate_text = v.standard_name;
-            this.graph.variables[v.id].config.setCategory(v.category);
+            //this.graph.variables[v.id].config.setCategory(v.category);
             this.graph.variables[v.id].draw();
           }
         }

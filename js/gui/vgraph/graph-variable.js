@@ -59,15 +59,23 @@ VGraphVariable.prototype.configure = function() {
 };
 
 VGraphVariable.prototype.createBackgroundItem = function(parent) {
-  return parent.insert('ellipse');
+  return parent.insert('rect');
 };
 
 VGraphVariable.prototype.drawBackgroundItem = function(bgitem, bounds) {
   bgitem
+    .attr("x", bounds.x)
+    .attr("y", bounds.y)
+    .attr("rx", this.config.radius)
+    .attr("ry", this.config.radius)
+    .attr("width", bounds.width)
+    .attr("height", bounds.height);
+  /*
+  bgitem
     .attr("cx", bounds.x + bounds.width/2.0)
     .attr("cy", bounds.y + bounds.height/2.0)
     .attr("rx", bounds.width/2.0)
-    .attr("ry", bounds.height/2.0);
+    .attr("ry", bounds.height/2.0);*/
 };
 
 //** OVERRIDE in Subclases **
