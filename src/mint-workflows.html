@@ -343,8 +343,9 @@
               if(expansions && expansions["success"]) {
                 var seed = expansions.data.seed;
                 var xtpl = expansions.data.templates[0];
-                me._executeWorkflow(xtpl, seed, function(runid) {
-                  Polymer.dom(me.$.runstatus).innerHTML = "Workflow sent for execution : " + runid;
+                me._executeWorkflow(xtpl, seed, function(viewuri) {
+                  Polymer.dom(me.$.runstatus).innerHTML = "Workflow sent for execution. <br />" +
+                    "<a target='_blank' href='" + viewuri + "'>View Run</a>"
                 });
               }
               else {
@@ -592,8 +593,8 @@
           url: purl + "/executions/runWorkflow",
           onLoad: function(e) {
             var runuri = e.target.responseText;
-            var runid = getLocalName(runuri);
-            fn(runid);
+            var run_view_uri = purl + "/executions?run_id=" + encodeURIComponent(runuri);
+            fn(run_view_uri);
           },
           onError: function() {
             console.log("Cannot execute");

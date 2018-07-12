@@ -52,7 +52,7 @@ function GraphNodeConfig(category) {
 	this.bgcolor = "rgba(255,204,153,1)";
 	this.stackcolor = this.bgcolor;
 	this.strokewidth = 1.5;
-	this.xshift = 8;
+	this.xshift = 10;
 	this.setCategory(category);
 };
 GraphNodeConfig.prototype = Object.create(GraphItemConfig.prototype);

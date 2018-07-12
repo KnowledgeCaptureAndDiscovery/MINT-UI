@@ -414,5 +414,69 @@
         ]
       }
     ]
+  },
+  {
+    "id":"dssat_cfg_simple",
+    "name":"DSSAT",
+    "category":"agronomy",
+    "inputs":[
+      {
+        "id":"mint_cycles_config"
+      },
+      {
+        "id":"dssat_weather",
+        "variables":[
+          {
+            "id":"dssat_pp",
+            "name":"PP",
+            "description":"Precipitation in mm",
+            "standard_name":"atmosphere_water__time_integral_of_precipitation_volume_flux",
+            "metadata":{
+              "units":"mm"
+            }
+          }
+        ]
+      },
+      {
+        "id":"dssat_reinit",
+        "variables":[
+          {
+            "id":"DSSAT_SMC_L1",
+            "name":"SMC_L1",
+            "description":"Soil moisture content in layer 1",
+            "canonical_name":"soil_water__volume_fraction",
+            "standard_name":"soil_top_water__volume_fraction",
+            "metadata":{
+              "units":"m3/m4"
+            }
+          }
+        ]
+      }
+    ],
+    "outputs":[
+      {
+        "id":"dssat_aggregatedOutput",
+        "variables":[
+          {
+            "id":"DSSAT_forage_yield",
+            "name":"FORAGE YIELD",
+            "description":"Forage yield or removed residue biomass at harvest",
+            "standard_name":"crop_biomass_residue__harvested_forage_yield",
+            "metadata":{
+              "units":"Mg/ha"
+            }
+          },
+          {
+            "id":"DSSAT_soil_evap",
+            "name":"SOIL EVAP",
+            "description":"Evaporation from the soil surface",
+            "standard_name":"soil_surface_water__volume-per-area_evaporation_rate",
+            "metadata":{
+              "units":"mm/day"
+            }
+          }
+        ]
+      }
+    ]
   }
 ]

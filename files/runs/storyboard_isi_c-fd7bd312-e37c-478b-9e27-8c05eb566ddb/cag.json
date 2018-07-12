@@ -15,7 +15,7 @@
     {
       "id": "v_bc10h0k11",
       "name": "soil residual porosity",
-      "category": "None",
+      "category": "hydrology",
       "standard_name": "soil__residual_porosity",
       "canonical_name": "soil__residual_porosity",
       "position": {

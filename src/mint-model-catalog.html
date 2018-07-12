@@ -930,7 +930,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               tpl.Variables[from.file_uri].category = cat;
             else {
               var cat = tpl.Nodes[l.to_uri].category;
-              if(!tpl.Variables[to.file_uri].category && cat)
+              if(tpl.Variables[to.file_uri] && !tpl.Variables[to.file_uri].category && cat)
                 tpl.Variables[to.file_uri].category = cat;
             }
 
