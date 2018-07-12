@@ -4,7 +4,7 @@ function VGraphVariable(graph, v, config) {
 
   this.id = v.id
   this.text = v.name
-  this.alternate_text = v.standard_name || v.canonical_name;
+  this.alternate_text = v.canonical_name || v.standard_name;
   this.config = config;
 
   this.binding = null;

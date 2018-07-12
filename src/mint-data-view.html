@@ -22,6 +22,8 @@
         pattern="/:standardName/:jsonHash"
         data="{{routeData}}"></app-route>
 
+    <h4>Some of these visualations are representative and not
+      real visualisations of this dataset</h4>
     <div class="visualisation">
       <div class="toolbar">
         <paper-button>MAP: [[datasetName]]</paper-button>
@@ -42,7 +44,7 @@
       </div>
       <div class="outer">
         <template is="dom-if" if="[[visible]]">
-          <mint-chart variables$="[[variables]]"></mint-chart>
+          <mint-chart config$="[[configCombine]]"></mint-chart>
         </template>
       </div>
       <div class="toolbar bottom">
@@ -56,7 +58,7 @@
       </div>
       <div class="outer">
         <template is="dom-if" if="[[visible]]">
-          <mint-time variables="[[variables]]"></mint-time>
+          <mint-time></mint-time>
         </template>
       </div>
       <div class="toolbar bottom">
@@ -75,42 +77,41 @@
         return {
           route: Object,
           dataCatalog: Object,
-          standardName: String,
           datasetName: String,
-          variableId: String,
           fileLocation: String,
-          md5Hash: String,
           dataList: Array,
           routeData: Object,
           variables: {
             type: Array,
             notify: true
           },
-          visible: Boolean
+          visible: Boolean,
+          configCombine: {
+            type: Object,
+            notify:true,
+            readOnly:false,
+            value:{name: "", type:"combine", data:""}
+          }
         };
       }
 
       static get observers() {
         return [
-          '_routeDataChanged(routeData.standardName, routeData.jsonHash)'
+          '_routeDataChanged(visible, routeData.standardName, routeData.jsonHash)'
         ];
       }
 
-      _routeDataChanged(standardName, jsonHash) {
+      _routeDataChanged(visible, standardName, jsonHash) {
         var me = this;
-        if(standardName &&
+        if(visible && standardName &&
             jsonHash && this.jsonHash != jsonHash) {
           var item = JSON.parse(atob(jsonHash.replace("|", "/")));
-          // console.log(item);
-          this.set("standardName", standardName);
           this.set("datasetName", item.ds);
-          this.set("variableId", item.id);
-          this.set("md5Hash", item.md5);
           var variable = {
-            name: me.standardName,
-            stdname: me.standardName,
-            md5: me.md5Hash,
-            uri: me.variableId
+            name: standardName,
+            stdname: standardName,
+            md5: item.md5,
+            uri: item.id
           };
           me.set("variables", [variable]);
         }

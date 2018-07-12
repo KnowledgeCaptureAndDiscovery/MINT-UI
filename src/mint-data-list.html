@@ -3,6 +3,7 @@
 <link rel="import" href="../bower_components/app-route/app-route.html">
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
 <link rel="import" href="mint-ajax.html">
+<link rel="import" href="loading-screen.html">
 <link rel="import" href="variable-graph.html">
 <link rel="import" href="mint-common-styles.html">
 
@@ -31,12 +32,12 @@
       <paper-button>DATASETS: [[standardName]]</paper-button>
     </div>
     <div class="outer">
-      <loading-screen id="datalistloader"></loading-screen>
-      <template is="dom-if" if="[[_isEmpty(filesList)]]">
+      <loading-screen loading="[[loading]]"></loading-screen>
+      <template is="dom-if" if="[[_isEmpty(filesList, loading)]]">
         <br/>
         <center>NO DATASETS FOUND</center>
       </template>
-      <template is="dom-if" if="[[!_isEmpty(filesList)]]">
+      <template is="dom-if" if="[[!_isEmpty(filesList, loading)]]">
         <ul>
           <template is="dom-repeat" items="[[filesList]]">
             <li><a href="[[_getViewDataURL(item)]]">[[item.dataset.value]]</li>
@@ -67,6 +68,10 @@
           },
           routeData: Object,
           route: Object,
+          loading: {
+            type: Boolean,
+            value: true
+          },
           visible: Boolean
         };
       }
@@ -87,9 +92,9 @@
 
       _searchData() {
         var me = this;
-        me.$.datalistloader.loading = true;
+        me.set("loading", true);
         this.dataCatalog.getVariableData(this.standardName, function(list) {
-          me.$.datalistloader.loading = false;
+          me.set("loading", false);
           me.set("filesList", list);
         });
       }
@@ -101,8 +106,8 @@
         return url;
       }
 
-      _isEmpty(list) {
-        return list.length == 0;
+      _isEmpty(list, loading) {
+        return !loading && list.length == 0;
       }
     }
 

@@ -76,35 +76,28 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <iron-ajax auto url="[[_getRunListURL()]]" handle-as="json" last-response="{{runs}}"></iron-ajax>
 
     <vaadin-grid items="[[runs]]">
-      <vaadin-grid-column width="5em">
+      <vaadin-grid-column>
         <template class="header">
           <vaadin-grid-sorter path="region.id">Region</vaadin-grid-sorter>
         </template>
         <template>[[item.region.name]]</template>
       </vaadin-grid-column>
 
-      <vaadin-grid-column width="5em">
+      <vaadin-grid-column>
         <template class="header">
           <vaadin-grid-sorter path="category.id">Category</vaadin-grid-sorter>
         </template>
         <template>[[item.category.name]]</template>
       </vaadin-grid-column>
 
-      <vaadin-grid-column width="5em">
+      <vaadin-grid-column>
         <template class="header">
           <vaadin-grid-sorter path="cag.id">CAG</vaadin-grid-sorter>
         </template>
         <template>[[item.cag.name]]</template>
       </vaadin-grid-column>
 
-      <vaadin-grid-column width="5em">
-        <template class="header">
-          <vaadin-grid-sorter path="scenario.id">Scenario</vaadin-grid-sorter>
-        </template>
-        <template>[[item.scenario.name]]</template>
-      </vaadin-grid-column>
-
-      <vaadin-grid-column width="15em" flex-grow="2">
+      <vaadin-grid-column flex-grow="2">
         <template class="header">
           <vaadin-grid-sorter path="run.name">Run</vaadin-grid-sorter>
         </template>
@@ -148,125 +141,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     }
 
     static get observers() {
-      return [
-        //'_fetchResults(server, userid, domain, visible)',
-        //'_checkVisibility(visible)'
-      ];
+      return [];
     }
 
     _computeLoggedInStatus(userid) {
       return userid != null;
     }
 
-    ready() {
-      super.ready();
-      /*
-      this._setupListeners();
-      Polymer.RenderStatus.afterNextRender(this, function() {
-        this._setupRenderers();
-      });
-      */
-    }
-
     _getRunListURL() {
       return "files/runs/list.json";
-    }
-
-    _sortList(list) {
-      if(list != null) {
-        list.sort(function(a, b) {
-          return a.runtimeInfo.startTime < b.runtimeInfo.startTime ? 1 : -1;
-        });
-        return list;
-      }
-    }
-
-    _checkVisibility(visible) {
-      if(visible) {
-        this.selectedrunid = null;
-        this.$.results.selection.clear();
-      }
-    }
-
-    _fetchResults(server, userid, domain, visible) {
-      if(server && userid && domain && visible) {
-      }
-      else {
-        this.runList = [];
-      }
-    }
-
-    _getRequestUrl(server, userid, domain) {
-      return server + "/users/" + userid +  "/" + domain + "/";
-    }
-
-    _progressRenderer(cell) {
-      var d = cell.row.data;
-      var r = d.runtimeInfo;
-      if (r.status == "SUCCESS")
-        d.percent_done = 100;
-      var w1 = 150;
-      var w2 = Math.round(w1 * (d.percent_done + d.percent_failed + d.percent_running) / 100);
-      var w3 = Math.round(w1 * (d.percent_done + d.percent_running) / 100);
-      var w4 = Math.round(w1 * d.percent_done / 100);
-      var html = "<div style='width:"+w1+"px;height:8px;background-color:#EEE;border-radius:5px'>";
-    	html += "<div style='width:"+w2+"px;height:8px;background-color:#F66;border-radius:5px'>";
-    	html += "<div style='width:"+w3+"px;height:8x;background-color:#999;border-radius:5px'>";
-    	html += "<div style='width:"+w4+"px;height:8px;background-color:#6E6;border-radius:5px'>";
-    	html += "&nbsp;</div></div></div></div>";
-      cell.element.innerHTML = html;
-    }
-
-    _timeRenderer(cell) {
-      if(cell.data)
-        cell.element.innerHTML = new Date(cell.data*1000).toISOString().slice(0,19).replace('T', ' ');
-    }
-
-    _titleRenderer(cell) {
-      cell.element.innerHTML = '<b>' + cell.data.replace(/^.*#/, '') + '</b>';
-    }
-
-    _statusRenderer(cell) {
-      cell.element.innerHTML = '';
-      var child = document.createElement('iron-icon');
-      if(cell.data == 'SUCCESS') {
-        child.setAttribute('icon', 'check');
-        child.setAttribute('style', 'color:green');
-      } else if(cell.data == 'FAILURE') {
-        child.setAttribute('icon', 'close');
-        child.setAttribute('style', 'color:red');
-      } else {
-        child.setAttribute('icon', 'hourglass-empty');
-        child.setAttribute('style', 'color:grey');
-      }
-      cell.element.appendChild(child);
-    }
-
-    _setupRenderers() {
-      var grid = this.$.results;
-      grid.columns[1].renderer = this._statusRenderer;
-      grid.columns[2].renderer = this._titleRenderer;
-      grid.columns[3].renderer = this._timeRenderer;
-      grid.columns[4].renderer = this._timeRenderer;
-      grid.columns[5].renderer = this._progressRenderer;
-    }
-
-    _setupReloadTimer() {
-      var me = this;
-      window.setTimeout(function() {
-        if(me.userid && me.visible) {
-          //console.log("Refreshing");
-          me.$.runlistAjax.refresh();
-          me._setupReloadTimer();
-        }
-      }, 30000);
-    }
-
-    _isDefined(item) {
-      return item != null;
-    }
-
-    _setupListeners() {
     }
   }
 

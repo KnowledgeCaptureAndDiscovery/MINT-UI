@@ -2,9 +2,15 @@
 <link rel="import" href="../bower_components/app-route/app-route.html">
 <link rel="import" href="../bower_components/app-route/app-route.html">
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/iron-pages/iron-pages.html">
+<link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../bower_components/paper-input/paper-textarea.html">
 
 <link rel="import" href="../bower_components/mint-map/mint-map.html">
+<link rel="import" href="../bower_components/mint-chart/mint-chart.html">
+
 <link rel="import" href="mint-ajax.html">
+<link rel="import" href="loading-screen.html">
 <link rel="import" href="variable-graph.html">
 <link rel="import" href="mint-common-styles.html">
 
@@ -65,6 +71,15 @@
         min-width:32px;
       }
 
+      iron-pages {
+        width: 100%;
+        height: 100%;
+      }
+
+      pre {
+        padding: 5px;
+      }
+
       @media (max-width: 767px) {
         .left, .right {
           width: 100%;
@@ -103,10 +118,10 @@
       <div class="content">
         <div class="left" id="graphdiv">
           <template is="dom-if" if="[[visible]]">
-            <mint-ajax result="{{cagList}}" auto
-              url="[[_createCagListURL(routeData)]]"></mint-ajax>
             <mint-ajax result="{{graphData}}" auto
-              url="[[_createGraphURL(cagList, routeData)]]"></mint-ajax>
+              url="[[_getCagURL(routeData.runid)]]"></mint-ajax>
+            <mint-ajax result="{{bindingData}}" auto
+              url="[[_getBindingsURL(routeData.runid)]]"></mint-ajax>
           </template>
           <!-- TODO: Get Run Details >
           <mint-ajax result="{{runDetails}}" auto
@@ -119,11 +134,43 @@
         <div class="right" id="mapdiv">
           <!-- Top toolbar -->
           <div class="toolbar">
-            <paper-button>MAP</paper-button>
+            <paper-button>[[variableName]]&nbsp;</paper-button>
           </div>
           <div class="outer">
             <template is="dom-if" if="[[visible]]">
-              <mint-map id="mintmap"></mint-map>
+              <template is="dom-if" if="[[_hasDataset(dataUrl)]]">
+                <center style="padding:5px">
+                  <a target="_blank"
+                    href="[[dataUrl]]">DOWNLOAD Dataset</a>
+                </center>
+              </template>
+
+              <iron-pages role="main" selected="[[visType]]" attr-for-selected="name" selected-attribute="visible">
+                <!-- Different views of result data -->
+                <div name="none">
+                  <br/>
+                  <center>NO VISUALIZATIONS</center>
+                </div>
+
+                <div name="text">
+                  <iron-ajax auto url="[[dataUrl]]"
+                    handle-as="text" loading="{{loading}}"
+                    last-response="{{dataPreview}}"
+                    headers='{"Range": "bytes=0-2000"}'></iron-ajax>
+                  <loading-screen loading="[[loading]]"></loading-screen>
+                  <pre>
+                    [[dataPreview]]
+                    ....
+                  </pre>
+                </div>
+
+                <mint-map name="map" id="map"
+                  variables="[[mapVariables]]"></mint-map>
+
+                <mint-chart name="chart"
+                  config$="[[chartConfig]]"></mint-chart>
+
+              </iron-pages>
             </template>
           </div>
           <div class="toolbar bottom">
@@ -144,64 +191,97 @@
           server: String,
           userid: String,
           domain: String,
-          graphData: {
-            type: Object,
-            observer: '_loadedGraph'
+
+          graphData: Object,
+          bindingData: Object,
+
+          visible: Boolean,
+          dataUrl: String,
+          visType: {
+            type: String,
+            value: "none"
           },
-          variables: {
-            type: Array,
-            notify: true
-          },
-          visible: {
-            type: Boolean,
-            value: false,
-            observer: '_visibleChanged'
-          },
+          dataPreview: String,
+          mapVariables: Array,
+          chartConfig: Object,
+
           runid: String,
           route: Object,
-          routeData: Object
+          routeData: Object,
+          variableName: String
         }
       }
 
-      _loadedGraph(data) {
-        /*console.log("Graph data loaded");
-        console.log(data);*/
-        // TODO: Setup Click listeners
-        // On click
-        // - Get Data associated with variable from runDetails
-        // - Make query to Data Catalog to get dataset id + md5hash
-        // - If available, then ask Map to visualise the variable
+      static get observers() {
+        return [
+          '_setHandlers(visible, graphData, bindingData)'
+        ];
       }
 
-      _createCagListURL(routeData) {
-        if(routeData.region) {
-          return "files/regions/" + routeData.region + "/list.json";
-        }
-        return null;
-      }
+      _setHandlers(visible, graphData, bindingData) {
+        if(visible && graphData && bindingData) {
+          // Maybe set click handlers here ?
+          if(this.$.cag) {
+            var me = this;
+            var events = this.$.cag.graph.events;
+            events.dispatch.on("select", function(items) {
+              me.set("visType", "none");
+              me.set("dataUrl", null);
+              for(var itemid in items) {
+                var item = items[itemid];
+                var cname = item.alternate_text;
+                me.set("variableName", item.text);
 
-      _createGraphURL(caglist, routeData) {
-        if(caglist && routeData.category && routeData.cag) {
-          for(var i=0; i<caglist.length; i++) {
-            var category = caglist[i];
-            if(category.name == routeData.category) {
-              for(var j=0; j<category.cags.length; j++) {
-                var cag = category.cags[j];
-                if(cag.id == routeData.cag) {
-                  console.log(cag.json);
-                  return cag.json;
+                if(cname in bindingData) {
+                  var binding = bindingData[cname];
+                  me.set("dataUrl", binding.dataset);
+                  if(binding.visualise) {
+                    var type = binding.visualise.type;
+                    var config = binding.visualise.config;
+                    if(type == "map") {
+                      me.set("visType", "map");
+                      me.set("mapVariables", [config]);
+                      if(window._mintMap)
+                        window._mintMap.onresize();
+                    }
+                    else if(type == "chart") {
+                      me.set("visType", "chart");
+                      me.set("chartConfig", config);
+                    }
+                    else if(type == "text") {
+                      me.set("visType", "text");
+                    }
+                  }
                 }
               }
-            }
+            });
           }
+        }
+      }
+
+      _downloadData() {
+        if(this.dataUrl)
+          window.open(this.dataUrl);
+      }
+
+      _hasDataset(url) {
+        if(url)
+          return true;
+        return false;
+      }
+
+      _getCagURL(runid) {
+        if(runid) {
+          return "files/runs/" + runid + "/cag.json";
         }
         return null;
       }
 
-      _visibleChanged(visible) {
-        if(visible) {
-          // Maybe set click handlers here ?
+      _getBindingsURL(runid) {
+        if(runid) {
+          return "files/runs/" + runid + "/data.json";
         }
+        return null;
       }
     }
 

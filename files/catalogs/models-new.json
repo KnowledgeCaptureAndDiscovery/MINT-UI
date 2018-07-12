@@ -5,6 +5,9 @@
     "category":"agronomy",
     "inputs":[
       {
+        "id":"mint_cycles_config"
+      },
+      {
         "id":"cycles_weather",
         "variables":[
           {
@@ -148,6 +151,9 @@
     "inputs":[
       {
         "id":"mint_run_config"
+      },
+      {
+        "id":"mint_cycles_config"
       },
       {
         "id":"ldas_weather_data",

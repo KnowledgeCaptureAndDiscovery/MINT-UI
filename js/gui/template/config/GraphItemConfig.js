@@ -48,7 +48,8 @@ function GraphNodeConfig(category) {
 	this.xpad = 8;
 	this.bgcolor = "rgba(255,204,153,1)";
 	this.stackcolor = this.bgcolor;
-	this.strokewidth = 0.7;
+	this.strokewidth = 2;
+	this.strokecolor = "darkorange";
 	this.xshift = 8;
 	this.setCategory(category);
 };
