@@ -5,6 +5,8 @@
     "src/mint-data.html",
     "src/mint-results.html",
     "src/mint-cags.html",
+    "src/mint-home.html",
+    "src/mint-models.html",
     "src/lazy-resources.html"
   ],
   "sources": [

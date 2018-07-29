@@ -8,7 +8,7 @@
     "query":"PREFIX+inst%3A+%3Chttps%3A%2F%2Fw3id.org%2Fmint%2Finstance%23%3E%0APREFIX+commons%3A+%3Chttps%3A%2F%2Fw3id.org%2Fmint%2Fcommons%23%3E%0APREFIX+model%3A+%3Chttps%3A%2F%2Fw3id.org%2Fmint%2FmodelCatalog%23%3E%0ASELECT++DISTINCT+%3Fv+%3Fname+%3Fgsn%0AWHERE+%7B%0A++inst%3APIHM+model%3AhasConfiguration+%3Fc.%0A++%3Fc+model%3AhasInput+%3Fi.%0A++%3Fi+commons%3AhasPresentation+%3Fv.%0A++%3Fv+commons%3AhasShortName+%3Fname.%0A++OPTIONAL%7B%3Fv+commons%3AhasStandardVariable+%3Fgsn%7D%0A%7D"
   },
   {
-    "description": "What models generate precipitation, specifically: atmosphere_water__precipitation_volume_flux ?",
+    "description": "What models use precipitation, specifically: atmosphere_water__precipitation_volume_flux ?",
     "query":"PREFIX+inst%3A+%3Chttps%3A%2F%2Fw3id.org%2Fmint%2Finstance%23%3E%0APREFIX+commons%3A+%3Chttps%3A%2F%2Fw3id.org%2Fmint%2Fcommons%23%3E%0APREFIX+model%3A+%3Chttps%3A%2F%2Fw3id.org%2Fmint%2FmodelCatalog%23%3E%0ASELECT++DISTINCT+%3Fmodel%0AWHERE+%7B%0A++%3Fmodel+model%3AhasConfiguration+%3Fc.%0A++%3Fc+model%3AhasInput+%3Fi.%0A++%3Fi+commons%3AhasPresentation+%3Fv.%0A++%3Fv+commons%3AhasStandardVariable+%22atmosphere_water__precipitation_volume_flux%22%0A%7D"
   },
   {

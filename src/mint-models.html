@@ -17,7 +17,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
 
 <link rel="import" href="mint-common-styles.html">
-<link rel="import" href="loading-screen.html">
 
 <dom-module id="mint-models">
 
@@ -95,9 +94,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           in a watershed with the goal of accurately predicting how various hydrologic variables will evolve
           in time in response to climatic forcings.
         </div>
-        <div class="uri">
+        <!--div class="uri">
           MINT URI: <a target="_blank" href="https://w3id.org/mint/instance#TOPOFLOW">https://w3id.org/mint/instance#TOPOFLOW</a>
-        </div>
+        </div-->
       </div>
 
       <div class="model_description">
@@ -107,9 +106,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
            is a multiprocess, multi-scale hydrologic model
           where the major processes are fully coupled using the semi-discrete finite volume method.
         </div>
-        <div class="uri">
+        <!--div class="uri">
           MINT URI: <a target="_blank" href="https://w3id.org/mint/instance#PIHM">https://w3id.org/mint/instance#PIHM</a>
-        </div>
+        </div-->
       </div>
 
       <div class="model_description">
@@ -121,9 +120,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           simulates the productivity and the water, carbon, and nitrogen balance of soil-crop systems
           subject to climate conditions and a large array of management constraints.
         </div>
-        <div class="uri">
+        <!--div class="uri">
           MINT URI: <a target="_blank" href="https://w3id.org/mint/instance#CYCLES">https://w3id.org/mint/instance#CYCLES</a>
-        </div>
+        </div-->
       </div>
 
       <div class="model_description">
@@ -134,9 +133,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           simulation models for over 40 crops. The models simulate growth, development, and yield as a
           function of the soil-plant-atmosphere dynamics.
         </div>
-        <div class="uri">
+        <!--div class="uri">
           MINT URI: <a target="_blank" href="https://w3id.org/mint/instance#DSSAT">https://w3id.org/mint/instance#DSSAT</a>
-        </div>
+        </div-->
       </div>
 
       <div class="model_description">
@@ -146,10 +145,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           This land-use model allocates land of heterogeneous quality between single agricultural crops and
           timber production.
         </div>
-        <div class="uri">
+        <!--div class="uri">
           MINT URI: <a target="_blank" href="https://w3id.org/mint/instance#ECONOMIC_LAND_QUALITY"
             >https://w3id.org/mint/instance#ECONOMIC_LAND_QUALITY</a>
-        </div>
+        </div-->
       </div>
     </div>
     <div class="toolbar bottom">
@@ -165,7 +164,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <paper-icon-button icon="close" on-click="_closeQueryDialog"></paper-icon-button>
       </div>
       <div class="body">
-        <loading-screen loading="[[loading]]"></loading-screen>
         <vaadin-grid items="[[results.results.bindings]]">
           <template is="dom-repeat" items="[[results.head.vars]]" as="column">
             <vaadin-grid-column>
@@ -207,7 +205,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           query: String,
           queries: Array,
           results: Object,
-          loading: Boolean,
           namespaces: {
             type: Object,
             value: {}
@@ -227,7 +224,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       _runQuery(e) {
-        this.set("loading", true);
+        this.set("results", {});
+
         this.$.queryDialog.open();
 
         var query = e.model.item.query;
@@ -240,7 +238,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           onLoad: function(e) {
             var response = JSON.parse(e.target.responseText);
             me.set("results", response);
-            me.set("loading", false);
           },
           onError: function() {
             console.log("Cannot run query");
