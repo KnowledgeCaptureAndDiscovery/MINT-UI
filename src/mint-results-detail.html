@@ -214,13 +214,18 @@
 
       static get observers() {
         return [
-          '_setHandlers(visible, graphData, bindingData)'
+          '_setHandlers(visible, graphData, bindingData)',
+          '_visibleChanged(visible)'
         ];
+      }
+
+      _visibleChanged(visible) {
+        this.set("visType", "none");
+        this.set("dataUrl", null);
       }
 
       _setHandlers(visible, graphData, bindingData) {
         if(visible && graphData && bindingData) {
-          // Maybe set click handlers here ?
           if(this.$.cag) {
             var me = this;
             var events = this.$.cag.graph.events;

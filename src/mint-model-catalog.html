@@ -10,6 +10,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 
+<script src="../js/common.js"></script>
+<script src="../js/catalogs/model-catalog.js"></script>
+
 <dom-module id="mint-model-catalog">
 
   <script>
@@ -58,10 +61,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         var me = this
         //console.log('fetching categories');
         this._getResource({
+          //url: 'files/catalogs/model-catalog-expanded.json',
           url: 'files/catalogs/models-new.json',
           onLoad(e) {
-            me.set('models', JSON.parse(e.target.responseText));
-            //console.log(me.models);
+            var json = JSON.parse(e.target.responseText);
+            me.set('models', json);
+            // var catalog = new ModelCatalog(json);
+            // me.set('models', catalog.models);
+            // console.log(me.models);
           },
           onError(e) {
           }
