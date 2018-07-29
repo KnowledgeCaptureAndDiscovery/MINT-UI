@@ -17,6 +17,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
 
 <link rel="import" href="mint-common-styles.html">
+<link rel="import" href="loading-screen.html">
 
 <dom-module id="mint-models">
 
@@ -70,6 +71,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       vaadin-grid {
         font-family: "Roboto", "Noto", sans-serif;
         font-size: 12px;
+      }
+      div.body {
+        margin: 5px;
+        padding: 5px;
+        width: calc(100% - 20px);
+        overflow: scroll;
       }
     </style>
 
@@ -157,14 +164,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <div class="grow">&nbsp;</div>
         <paper-icon-button icon="close" on-click="_closeQueryDialog"></paper-icon-button>
       </div>
-      <vaadin-grid items="[[results.results.bindings]]">
-        <template is="dom-repeat" items="[[results.head.vars]]" as="column">
-          <vaadin-grid-column>
-            <template class="header">[[column]]</template>
-            <template>[[_getValue(item, column)]]</template>
-          </vaadin-grid-column>
-        </template>
-      </vaadin-grid>
+      <div class="body">
+        <loading-screen loading="[[loading]]"></loading-screen>
+        <vaadin-grid items="[[results.results.bindings]]">
+          <template is="dom-repeat" items="[[results.head.vars]]" as="column">
+            <vaadin-grid-column>
+              <template class="header">[[column]]</template>
+              <template>[[_getValue(item, column)]]</template>
+            </vaadin-grid-column>
+          </template>
+        </vaadin-grid>
+        <a target="_blank" href="[[_createQueryURL(query)]]">Edit Query and Run in Fuseki</a>
+      </div>
     </paper-dialog>
 
     <div class="toolbar">
@@ -193,8 +204,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       static get properties() {
         return {
+          query: String,
           queries: Array,
           results: Object,
+          loading: Boolean,
           namespaces: {
             type: Object,
             value: {}
@@ -214,9 +227,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       _runQuery(e) {
+        this.set("loading", true);
         this.$.queryDialog.open();
 
         var query = e.model.item.query;
+        this.set("query", query);
         this._setNamespaces(query);
 
         var me = this;
@@ -225,6 +240,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           onLoad: function(e) {
             var response = JSON.parse(e.target.responseText);
             me.set("results", response);
+            me.set("loading", false);
           },
           onError: function() {
             console.log("Cannot run query");
@@ -236,17 +252,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.$.queryDialog.close();
       }
 
+      _createQueryURL(query) {
+        return "http://ontosoft.isi.edu:3030/dataset.html?query=" + query;
+      }
+
       _setNamespaces(query) {
         query = this._prettifyQuery(query);
         var lines = query.split(/\n/);
         var prefix_regex = /^PREFIX\s+(\S+):\s+\<(.+)\>/;
+        var namespaces = {};
         for(var i=0; i<lines.length; i++) {
           var line = lines[i];
           var match = prefix_regex.exec(line);
           if(match != null) {
-            this.namespaces[match[1]] = match[2];
+            namespaces[match[1]] = match[2];
           }
         }
+        this.set("namespaces", namespaces);
       }
 
       _getValue(item, column) {
