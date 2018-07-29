@@ -1,0 +1,286 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../bower_components/vaadin-grid/vaadin-grid.html">
+<link rel="import" href="../bower_components/vaadin-grid/vaadin-grid-column.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+
+<link rel="import" href="mint-common-styles.html">
+
+<dom-module id="mint-models">
+
+  <template>
+
+    <style include="mint-common-styles">
+      .model_description , .query {
+        margin: 10px;
+        padding: 10px;
+        border-radius: 4px;
+        border: 1px solid #EEE;
+      }
+      .model_description h2 {
+        margin: 5px 0px;
+        font-size: 14px;
+      }
+      .model_description .description {
+        margin: 5px 0px;
+      }
+      .model_description .uri,
+      .model_description .uri a {
+        font-size: 10px;
+        color: #AAA;
+      }
+      .query pre {
+        position: relative;
+        max-width: 800px;
+        padding: 30px 15px;
+        background: #f7f7f7;
+        word-break: break-all;
+        word-wrap: break-word;
+        white-space: pre;
+        font-size: 12px;
+        color: #666666;
+        padding: 5px;
+        margin: 10px;
+        font-family: monospace, serif;
+        border-left: 3px solid #7b7b7b;
+      }
+      div.grow {
+        flex-grow:2;
+      }
+      paper-dialog {
+        min-width: 80%;
+      }
+      .heading paper-icon-button {
+        max-height: 20px;
+        padding: 0px;
+        color: white;
+      }
+      vaadin-grid {
+        font-family: "Roboto", "Noto", sans-serif;
+        font-size: 12px;
+      }
+    </style>
+
+    <iron-ajax auto url="files/catalogs/model-queries.json" handle-as="json" last-response="{{queries}}"></iron-ajax>
+
+    <!-- Top toolbar -->
+    <div class="toolbar">
+      <paper-button>MODEL DESCRIPTIONS</paper-button>
+    </div>
+    <div class="outer">
+      <div class="model_description">
+        <h2><a target="_blank" href="https://github.com/peckhams/topoflow">TOPOFLOW</a></h2>
+        <div class="description">
+          <a target="_blank" href="https://github.com/peckhams/topoflow">TopoFlow</a> is a powerful, spatially-distributed
+          hydrologic model for various physical processes
+          in a watershed with the goal of accurately predicting how various hydrologic variables will evolve
+          in time in response to climatic forcings.
+        </div>
+        <div class="uri">
+          MINT URI: <a target="_blank" href="https://w3id.org/mint/instance#TOPOFLOW">https://w3id.org/mint/instance#TOPOFLOW</a>
+        </div>
+      </div>
+
+      <div class="model_description">
+        <h2><a target="_blank" href="http://www.pihm.psu.edu">PIHM</a></h2>
+        <div class="description">
+          <a target="_blank" href="http://www.pihm.psu.edu">The Penn State Integrated Hydrologic Model (PIHM)</a>
+           is a multiprocess, multi-scale hydrologic model
+          where the major processes are fully coupled using the semi-discrete finite volume method.
+        </div>
+        <div class="uri">
+          MINT URI: <a target="_blank" href="https://w3id.org/mint/instance#PIHM">https://w3id.org/mint/instance#PIHM</a>
+        </div>
+      </div>
+
+      <div class="model_description">
+        <h2>
+          <a target="_blank" href="https://plantscience.psu.edu/research/labs/kemanian/models-and-tools/cycles">CYCLES</a>
+        </h2>
+        <div class="description">
+          <a target="_blank" href="https://plantscience.psu.edu/research/labs/kemanian/models-and-tools/cycles">Cycles</a>
+          simulates the productivity and the water, carbon, and nitrogen balance of soil-crop systems
+          subject to climate conditions and a large array of management constraints.
+        </div>
+        <div class="uri">
+          MINT URI: <a target="_blank" href="https://w3id.org/mint/instance#CYCLES">https://w3id.org/mint/instance#CYCLES</a>
+        </div>
+      </div>
+
+      <div class="model_description">
+        <h2><a target="_blank" href="https://dssat.net">DSSAT</a></h2>
+        <div class="description">
+          <a target="_blank" href="https://dssat.net">The Decision Support System for Agrotechnology Transfer (DSSAT)</a>
+          comprises dynamic crop growth
+          simulation models for over 40 crops. The models simulate growth, development, and yield as a
+          function of the soil-plant-atmosphere dynamics.
+        </div>
+        <div class="uri">
+          MINT URI: <a target="_blank" href="https://w3id.org/mint/instance#DSSAT">https://w3id.org/mint/instance#DSSAT</a>
+        </div>
+      </div>
+
+      <div class="model_description">
+        <h2>ELQ</h2>
+        <div class="description">
+          The Economic Land Quality (ELQ) model is designed to assess agriculture and forestry land-use change.
+          This land-use model allocates land of heterogeneous quality between single agricultural crops and
+          timber production.
+        </div>
+        <div class="uri">
+          MINT URI: <a target="_blank" href="https://w3id.org/mint/instance#ECONOMIC_LAND_QUALITY"
+            >https://w3id.org/mint/instance#ECONOMIC_LAND_QUALITY</a>
+        </div>
+      </div>
+    </div>
+    <div class="toolbar bottom">
+      <paper-button>&nbsp;</paper-button>
+    </div>
+
+    &nbsp;
+
+    <paper-dialog id="queryDialog">
+      <div class="heading">
+        <div>Query Results</div>
+        <div class="grow">&nbsp;</div>
+        <paper-icon-button icon="close" on-click="_closeQueryDialog"></paper-icon-button>
+      </div>
+      <vaadin-grid items="[[results.results.bindings]]">
+        <template is="dom-repeat" items="[[results.head.vars]]" as="column">
+          <vaadin-grid-column>
+            <template class="header">[[column]]</template>
+            <template>[[_getValue(item, column)]]</template>
+          </vaadin-grid-column>
+        </template>
+      </vaadin-grid>
+    </paper-dialog>
+
+    <div class="toolbar">
+      <paper-button>EXAMPLE QUERIES</paper-button>
+    </div>
+    <div class="outer">
+      <template is="dom-repeat" items="[[queries]]">
+        <div class="query">
+          <div class="description">
+            [[item.description]]
+          </div>
+          <pre class="sparql">[[_prettifyQuery(item.query)]]</pre>
+          <paper-button on-click="_runQuery">Run Query</paper-button>
+        </div>
+      </template>
+    </div>
+    <div class="toolbar bottom">
+      <paper-button>&nbsp;</paper-button>
+    </div>
+  </template>
+
+  <script>
+
+    class MintModels extends Polymer.Element {
+      static get is() { return 'mint-models'; }
+
+      static get properties() {
+        return {
+          queries: Array,
+          results: Object,
+          namespaces: {
+            type: Object,
+            value: {}
+          },
+          visible: {
+            type: Boolean,
+            observer: '_visibleChanged'
+          }
+        }
+      }
+
+      _visibleChanged(visible) {
+        if (visible) {
+          this.dispatchEvent(new CustomEvent('change-section', {
+            bubbles: true, composed: true, detail: {title: 'Models'}}));
+        }
+      }
+
+      _runQuery(e) {
+        this.$.queryDialog.open();
+
+        var query = e.model.item.query;
+        this._setNamespaces(query);
+
+        var me = this;
+        this._postQuery({
+          url: "http://ontosoft.isi.edu:3030/ds/query",
+          onLoad: function(e) {
+            var response = JSON.parse(e.target.responseText);
+            me.set("results", response);
+          },
+          onError: function() {
+            console.log("Cannot run query");
+          }
+        }, query);
+      }
+
+      _closeQueryDialog() {
+        this.$.queryDialog.close();
+      }
+
+      _setNamespaces(query) {
+        query = this._prettifyQuery(query);
+        var lines = query.split(/\n/);
+        var prefix_regex = /^PREFIX\s+(\S+):\s+\<(.+)\>/;
+        for(var i=0; i<lines.length; i++) {
+          var line = lines[i];
+          var match = prefix_regex.exec(line);
+          if(match != null) {
+            this.namespaces[match[1]] = match[2];
+          }
+        }
+      }
+
+      _getValue(item, column) {
+        if(item && item[column]) {
+          var value = item[column].value;
+          for(var pfx in this.namespaces) {
+            var uri = this.namespaces[pfx];
+            value = value.replace(new RegExp(uri, 'g'), pfx+":");
+          }
+          return value;
+        }
+        return "";
+      }
+
+      _prettifyQuery(querycoded) {
+        var query = decodeURIComponent(querycoded);
+        query = query.replace(/\+/mg, " ");
+        return query;
+      }
+
+      _postQuery(rq, query) {
+        var xhr = new XMLHttpRequest();
+        xhr.addEventListener('load', rq.onLoad.bind(this));
+        xhr.addEventListener('error', rq.onError.bind(this));
+        xhr.withCredentials = true;
+        xhr.open('POST', rq.url, true);
+        xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        xhr.setRequestHeader("Accept", "application/sparql-results+json,*/*;q=0.9");
+        xhr.send("format=json&query="+query);
+      }
+    }
+
+    customElements.define(MintModels.is, MintModels);
+
+  </script>
+
+</dom-module>

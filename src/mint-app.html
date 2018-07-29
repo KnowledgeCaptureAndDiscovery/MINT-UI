@@ -270,6 +270,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                   <mint-tab name="cags"><a href="cags/home">Analyses</a></mint-tab>
                   <mint-tab name="results"><a href="results/list">Results</a></mint-tab>
                   <mint-tab name="data"><a href="data/search">Data</a></mint-tab>
+                  <mint-tab name="models"><a href="models">Models</a></mint-tab>
                 </mint-tabs>
               </template>
             </dom-if>
@@ -285,6 +286,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               <a name="cags" href="cags/home">Analyses</a>
               <a name="results" href="results/list">Results</a>
               <a name="data" href="data/search">Data</a>
+              <a name="models" href="models">Models</a>
             </iron-selector>
           </app-drawer>
         </template>
@@ -316,6 +318,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <mint-data name="data" server="[[server]]" userid="[[userid]]" domain="[[domain]]"
             data-catalog="[[dataCatalog]]" route="{{pageSubRoute.data}}"></mint-data>
 
+          <!-- models view -->
+          <mint-models name="models" server="[[server]]" userid="[[userid]]" domain="[[domain]]"
+            model-catalog="[[modelCatalog]]" route="{{pageSubRoute.models}}"></mint-models>
         </iron-pages>
 
         <!-- a11y announcer -->
@@ -469,7 +474,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       _computeShouldShowTabs(page, smallScreen) {
-        return (page === 'home' || page === 'cags' || page === 'data' || page == 'results') && !smallScreen;
+        return !smallScreen;
       }
 
       _computeShouldRenderTabs(_shouldShowTabs, loadComplete) {

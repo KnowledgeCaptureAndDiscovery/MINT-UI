@@ -22,10 +22,11 @@
         this.set("dataCatalog", this);
       }
 
-      searchVariables(term, filterByAvailable, fn) {
+      searchVariables(term, filterByAvailable, fuzzySearch, fn) {
         var url = this.server + "/data_sets/search?query=" +
           encodeURIComponent(term) +
-          "&filter_by_available=" + filterByAvailable;
+          "&filter_by_available=" + filterByAvailable +
+          "&fuzzy_search=" + fuzzySearch;
         this._getResource({
           url: url,
           onLoad: function(e) {
