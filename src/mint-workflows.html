@@ -78,9 +78,6 @@
         display: inline;
         cursor: pointer;
       }
-      div.grow {
-        flex-grow:2;
-      }
 
       @media (max-width: 767px) {
         .toolbar {
@@ -106,7 +103,8 @@
 
       <template is="dom-if" if="[[_workflowDefined(selectedWorkflow)]]">
         <template is="dom-if" if="[[!showWorkflows]]">
-          <paper-button>Model Graph</paper-button>
+          <paper-button raised on-tap="_chooseModelGraph">Choose Model Graph</paper-button>
+          <!--paper-button>Model Graph</paper-button-->
         </template>
       </template>
 
@@ -196,9 +194,13 @@
       }
       static get properties() {
         return {
-          server: String,
+          mintServer: String,
+          wingsServer: String,
           userid: String,
-          domain: String,
+          wingsDomain: String,
+          questionid: String,
+          regionid: String,
+          taskid: String,
           workflows: {
             type: Array,
             notify: true
@@ -215,6 +217,7 @@
             type: Array,
             notify: true
           },
+          task: Object,
           selectedScenarioIndex: String,
           scenarios: Array,
           subRegion: String,
@@ -264,6 +267,82 @@
           }
           return wnodes;
         }
+      }
+
+      setTaskOutput(output) {
+        var me = this;
+        me.task.status = "DONE";
+        me.task.output = [output];
+        for(var actid in me.task.activities) {
+          if(actid.indexOf("ChooseModel") > 0) {
+            me.task.activities[actid].output = [output];
+          }
+        }
+        me._putResourceSimple({
+          url: me.task.id,
+          onLoad: function(e) {
+            var new_path = '/cags/list/' + getLocalName(me.regionid) + "/" + me.questionid + "/" + me.taskid;
+            window.history.pushState({}, null, new_path)
+            location.reload();
+          },
+          onError: function() {
+            console.log("Cannot update task");
+          }
+        }, me.task)
+      }
+
+      _putResourceSimple(rq, data) {
+        var xhr = new XMLHttpRequest();
+        xhr.addEventListener('load', rq.onLoad.bind(this));
+        xhr.addEventListener('error', rq.onError.bind(this));
+        //xhr.withCredentials = true;
+        xhr.open('PUT', rq.url);
+        xhr.setRequestHeader("Content-type", "application/json");
+        xhr.send(JSON.stringify(data));
+      }
+
+      _postResourceSimple(rq, data) {
+        var xhr = new XMLHttpRequest();
+        xhr.addEventListener('load', rq.onLoad.bind(this));
+        xhr.addEventListener('error', rq.onError.bind(this));
+        //xhr.withCredentials = true;
+        xhr.open('POST', rq.url);
+        xhr.setRequestHeader("Content-type", "application/json");
+        xhr.send(JSON.stringify(data));
+      }
+
+      _chooseModelGraph() {
+        var me = this;
+
+        /*
+        var tpl = this.selectedWorkflow.wings_workflow.template;
+        var gtpl = this.$.workflow.template;
+        // Add coordinates to Nodes and Variables
+        for(var nid in tpl.Nodes) {
+          var coords = gtpl.nodes[nid].getCoords();
+          tpl.Nodes[nid].comment = "center:x="+coords.x+",y="+coords.y;
+        }
+        for(var vid in tpl.Variables) {
+          var coords = gtpl.variables[vid].getCoords();
+          tpl.Variables[vid].comment = "center:x="+coords.x+",y="+coords.y;
+        }
+        this.selectedWorkflow.wings_workflow.template = tpl;
+        */
+
+        var data = {
+          model_graph: JSON.stringify(this.selectedWorkflow.model_graph),
+          wings_workflow: JSON.stringify(this.selectedWorkflow.wings_workflow)
+        }
+        me._postResourceSimple({
+          url: me.mintServer + "/users/" + me.userid + "/questions/" + me.questionid + "/workflows",
+          onLoad: function(e) {
+            var outputid = e.target.responseText;
+            me.setTaskOutput(outputid);
+          },
+          onError: function() {
+            console.log("Cannot add data");
+          }
+        }, data);
       }
 
       _workflowDefined(w) {

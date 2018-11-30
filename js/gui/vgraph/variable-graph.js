@@ -125,7 +125,7 @@ VGraph.prototype.addVariable = function(vardata, animate) {
 VGraph.prototype.addLink = function(linkdata) {
   var fromVariable = this.variables[linkdata.from];
   var toVariable = this.variables[linkdata.to];
-  var linkid = fromVariable.id + "_to_" + toVariable.id;
+  var linkid = getLocalName(fromVariable.id) + "_to_" + getLocalName(toVariable.id);
   var glink = this.links[linkid];
   if(!glink) {
     glink = new VGraphLink(this.graph, this.id, linkid, fromVariable, toVariable, this.graphItems, new VGraphLinkConfig(linkdata.new));
@@ -180,11 +180,14 @@ VGraph.prototype.setData = function(store) {
   // Create Links
   for (var i=0; i<store.links.length; i++) {
     var linkdata = store.links[i];
+
     var fromVariable = this.variables[linkdata.from];
     var toVariable = this.variables[linkdata.to];
-    var linkid = fromVariable.id + "_to_" + toVariable.id;
-    var glink = new VGraphLink(this.graph, this.id, linkid, fromVariable, toVariable, this.graphItems, new VGraphLinkConfig(linkdata.new));
-    this.links[linkid] = glink;
+    if(fromVariable && toVariable) {
+      var linkid = fromVariable.id + "_to_" + toVariable.id;
+      var glink = new VGraphLink(this.graph, this.id, linkid, fromVariable, toVariable, this.graphItems, new VGraphLinkConfig(linkdata.new));
+      this.links[linkid] = glink;
+    }
   }
 };
 

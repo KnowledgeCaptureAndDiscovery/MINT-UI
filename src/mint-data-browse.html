@@ -1,0 +1,145 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/mint-map/mint-map.html">
+<link rel="import" href="../bower_components/app-route/app-route.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
+
+<link rel="import" href="mint-ajax.html">
+<link rel="import" href="loading-screen.html">
+<link rel="import" href="variable-graph.html">
+<link rel="import" href="mint-common-styles.html">
+
+<dom-module id="mint-data-browse">
+  <template>
+    <style include="mint-common-styles">
+      .searchbox {
+        @apply --layout-horizontal;
+        width: 100%;
+      }
+      .searchbox paper-button {
+        font-size: 14px;
+      }
+      .searchbox paper-input {
+        width: 100%;
+      }
+    </style>
+
+    <template is="dom-if" if="[[visible]]">
+      <iron-ajax auto url="[[mintServer]]/common/regions/[[routeData.regionid]]" handle-as="json" last-response="{{region}}"></iron-ajax>
+      <iron-ajax auto url="[[_createGeoJsonURL(region)]]" handle-as="json" last-response="{{regionGeoJson}}"></iron-ajax>
+    </template>
+
+    <app-route
+        route="[[route]]"
+        pattern="/:regionid"
+        data="{{routeData}}"></app-route>
+
+    <!-- Top toolbar -->
+    <div class="toolbar">
+      <paper-button>DATASETS: [[regionid]]</paper-button>
+    </div>
+    <div class="outer">
+      <loading-screen loading="[[loading]]"></loading-screen>
+      <template is="dom-if" if="[[_isEmpty(filesList, loading)]]">
+        <br/>
+        <center>NO DATASETS FOUND</center>
+      </template>
+      <template is="dom-if" if="[[!_isEmpty(filesList, loading)]]">
+        <ul>
+          <template is="dom-repeat" items="[[filesList]]">
+            <li><a href="[[item.resource_data_url]]">[[item.dataset_name]]</li>
+            <!--li><a href="[[_getViewDataURL(item)]]">[[item.dataset.value]]</li-->
+          </template>
+        </ul>
+      </template>
+    </div>
+    <!-- Bottom toolbar -->
+    <div class="toolbar bottom">
+      <paper-button>&nbsp;</paper-button>
+    </div>
+
+  </template>
+
+  <script>
+
+    class MintDataBrowse extends Polymer.Element {
+      static get is() { return 'mint-data-browse'; }
+
+      static get properties() {
+        return {
+          dataCatalog: Object,
+          mintServer: String,
+          standardName: String,
+          regionid: String,
+          region: Object,
+          dataList: Array,
+          filesList: {
+            type: Array,
+            value: []
+          },
+          regionGeoJson: {
+            type: Object,
+            observer: '_getDataList'
+          },
+          routeData: Object,
+          route: Object,
+          loading: {
+            type: Boolean,
+            value: true
+          },
+          visible: Boolean
+        };
+      }
+
+      static get observers() {
+        return [
+          '_routeDataChanged(routeData.regionid)'
+        ];
+      }
+
+      _createGeoJsonURL(region) {
+        if(region) {
+          var url = region.boundaryVector;
+          return url;
+        }
+        return null;
+      }
+
+      _getDataList(regionGeoJson) {
+        var me = this;
+        return this.dataCatalog.findDatasetsForRegion(regionGeoJson, function(bindings) {
+          me.set("loading", false);
+          me.set("filesList", bindings);
+        });
+      }
+
+      _routeDataChanged(regionid) {
+        if(regionid && this.regionid != regionid) {
+          // console.log("Data changed to " + standardName);
+          //this.set("regionid", regionid);
+          //this._getDataList(regionid);
+        }
+      }
+
+      _searchData() {
+        var me = this;
+        me.set("loading", true);
+        this.dataCatalog.getVariableData(this.standardName, function(list) {
+          me.set("loading", false);
+          me.set("filesList", list);
+        });
+      }
+
+      _getViewDataURL(item) {
+        var url = "data/view/"+item.dataset_id;
+        return url;
+      }
+
+      _isEmpty(list, loading) {
+        return !loading && list.length == 0;
+      }
+    }
+
+    customElements.define(MintDataBrowse.is, MintDataBrowse);
+  </script>
+</dom-module>

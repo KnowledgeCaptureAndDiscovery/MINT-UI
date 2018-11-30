@@ -85,13 +85,21 @@
     <!-- Top Toolbar -->
     <div class="toolbar">
       <template is="dom-if" if="[[!noToolbar]]">
+        <template is="dom-if" if="[[editable]]">
+          <template is="dom-if" if="[[_isEdit(operation)]]">
+            <paper-button on-click="save">Save</paper-button>
+          </template>
+          <template is="dom-if" if="[[_isAnalysis(operation)]]">
+            <paper-button on-click="analyze">ANALYZE</paper-button>
+          </template>
+        </template>
         <!--
         <paper-button on-click="save">Save</paper-button>
         <paper-button on-click="layout">Layout</paper-button>
-        -->
         <template is="dom-if" if="[[editable]]">
           <paper-button on-click="analyze">ANALYZE</paper-button>
         </template>
+        -->
         <template is="dom-if" if="[[!editable]]">
           <paper-button>VARIABLES</paper-button>
         </template>
@@ -117,7 +125,7 @@
     <!-- Edit/Add Variable Dialog -->
     <paper-dialog modal id="variable_editor" on-iron-overlay-closed="_editVariable">
       <div class='heading'>Edit Graph Node</div>
-      <paper-input label="Name" value="{{edItem.name}}"></paper-input>
+      <paper-input label="Name" value="{{edItem.label}}"></paper-input>
       <paper-input label="Canonical Name" value="{{edItem.canonical_name}}"></paper-input>
       <!--paper-dropdown-menu-light no-animations label="Category">
         <paper-listbox slot="dropdown-content" attr-for-selected="value" selected="{{edItem.category}}">
@@ -156,6 +164,15 @@
 
       static get properties() {
         return {
+          mintServer: String,
+          userid: String,
+          region: Object,
+          question: Object,
+          questionid: String,
+          taskid: String,
+          graphid: String,
+          task: Object,
+          operation: String,
           data: {
             type: Object
           },
@@ -218,16 +235,81 @@
         this.graph.layout(animate, this.$.loader);
       }
 
+      _isEdit(operation) {
+        return operation == "edit";
+      }
+
+      _isAnalysis(operation) {
+        return operation == "analyze";
+      }
+
       resetSize() {
         if(this.graph)
           this.graph.resizePanel();
       }
 
+      setTaskOutput(output) {
+        var me = this;
+        me.task.status = "DONE";
+        me.task.output = [output];
+        for(var actid in me.task.activities) {
+          me.task.activities[actid].output = [output];
+        }
+        me._putResource({
+          url: me.task.id,
+          onLoad: function(e) {
+            var new_path = '/cags/list/' + getLocalName(me.region.id) + "/" + me.questionid + "/" + me.taskid;
+            window.history.pushState({}, null, new_path)
+            location.reload();
+          },
+          onError: function() {
+            console.log("Cannot update question");
+          }
+        }, me.task)
+      }
+
       save() {
         this.graph.savePositions();
-        this.graphJson = JSON.stringify(this.data, null, 2);
-        this.$.save_display.open();
-        //TODO: Save on server
+
+        var me = this;
+        if(this.data.id.indexOf("/common/graphs") > 0) {
+          me._postResource({
+            url: me.mintServer + "/users/" + me.userid + "/graphs",
+            onLoad: function(e) {
+              var id = e.target.responseText;
+              me.question.graph = id;
+              me._putResource({
+                url: me.mintServer + "/users/" + me.userid + "/questions/" + me.questionid,
+                onLoad: function(e) {
+                  var graphid = e.target.responseText;
+                  //console.log(graphid);
+                  me.setTaskOutput(graphid);
+                  //location.reload();
+                },
+                onError: function() {
+                  console.log("Cannot update question");
+                }
+              }, me.question);
+            },
+            onError: function() {
+              console.log("Cannot add graph");
+            }
+          }, me.data);
+        } else {
+          // Edit Graph call
+          me._putResource({
+            url: me.data.id,
+            onLoad: function(e) {
+              // Nothing to do
+              // me.setTaskOutput(me.data.id);
+            },
+            onError: function() {
+              console.log("Cannot edit graph");
+            }
+          }, me.data);
+        }
+        /*this.graphJson = JSON.stringify(this.data, null, 2);
+        this.$.save_display.open();*/
       }
 
       toggleView(d) {
@@ -240,8 +322,11 @@
       }
 
       _cagChanged(data) {
-        if(data && this.autoLoad)
+        if(data && this.autoLoad) {
           this.loadGraph();
+          if(this._isAnalysis(this.operation))
+            this.analyze();
+        }
       }
 
       loadGraph(loader) {
@@ -301,7 +386,7 @@
           }
           else if(v.id in this.graph.variables) {
             // Update
-            this.graph.variables[v.id].setText(v.name);
+            this.graph.variables[v.id].setText(v.label);
             this.graph.variables[v.id].alternate_text = v.standard_name;
             //this.graph.variables[v.id].config.setCategory(v.category);
             this.graph.variables[v.id].draw();
@@ -328,7 +413,7 @@
         if (changeRecord) {
           changeRecord.indexSplices.forEach(function(s) {
             s.removed.forEach(function(link) {
-              //console.log(link.name + ' was removed');
+              //console.log(link.label + ' was removed');
             });
             for (var i = 0; i < s.addedCount; i++) {
               var index = s.index + i;
@@ -337,6 +422,26 @@
             }
           }, this);
         }
+      }
+
+      _postResource(rq, data) {
+        var xhr = new XMLHttpRequest();
+        xhr.addEventListener('load', rq.onLoad.bind(this));
+        xhr.addEventListener('error', rq.onError.bind(this));
+        //xhr.withCredentials = true;
+        xhr.open('POST', rq.url);
+        xhr.setRequestHeader("Content-type", "application/json");
+        xhr.send(JSON.stringify(data));
+      }
+
+      _putResource(rq, data) {
+        var xhr = new XMLHttpRequest();
+        xhr.addEventListener('load', rq.onLoad.bind(this));
+        xhr.addEventListener('error', rq.onError.bind(this));
+        //xhr.withCredentials = true;
+        xhr.open('PUT', rq.url);
+        xhr.setRequestHeader("Content-type", "application/json");
+        xhr.send(JSON.stringify(data));
       }
     }
 

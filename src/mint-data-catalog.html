@@ -1,6 +1,9 @@
 <link rel="import" href="../bower_components/polymer/polymer-element.html">
 
 <dom-module id="mint-data-catalog">
+  <template>
+  </template>
+
   <script>
     class MintDataCatalog extends Polymer.Element {
       static get is() {
@@ -9,7 +12,12 @@
 
       static get properties() {
         return {
-          server: String,
+          region: Object,
+          server: {
+            type: String,
+            observer: '_getAuthToken'
+          },
+          authToken: String,
           dataCatalog: {
             type: Object,
             notify: true
@@ -22,11 +30,62 @@
         this.set("dataCatalog", this);
       }
 
+      _calculateBoundingBox(regionGeoJson) {
+        var xmin=99999, ymin=99999, xmax=-99999, ymax=-99999;
+        var coords = regionGeoJson.features[0].geometry.coordinates[0];
+        for(var i=0; i<coords.length; i++) {
+          var c = coords[i];
+          if(c[0] < xmin)
+            xmin = c[0];
+          if(c[1] < ymin)
+            ymin = c[1];
+          if(c[0] > xmax)
+            xmax = c[0];
+          if(c[1] > ymax)
+            ymax = c[1];
+        }
+        return [xmin-0.01, ymin-0.01, xmax+0.01, ymax+0.01];
+      }
+
+      _getAuthToken(server) {
+        if(!server)
+          return;
+        var url = server + "/get_session_token";
+
+        var me = this;
+        this._getResource({
+          url: url,
+          onLoad: function(e) {
+            var obj = JSON.parse(e.target.responseText);
+            me.authToken = obj["X-Api-Key"];
+          },
+          onError: function() {
+            console.log("Cannot get authorization token");
+          }
+        });
+      }
+
       searchVariables(term, filterByAvailable, fuzzySearch, fn) {
+        var url = this.server + "/datasets/align";
+        /*
         var url = this.server + "/data_sets/search?query=" +
           encodeURIComponent(term) +
           "&filter_by_available=" + filterByAvailable +
-          "&fuzzy_search=" + fuzzySearch;
+          "&fuzzy_search=" + fuzzySearch;*/
+
+        var searchobj = { keywords: [ term ] };
+
+        this._postResource({
+          url: url,
+          onLoad: function(e) {
+            var items = JSON.parse(e.target.responseText);
+            console.log(items);
+          },
+          onError: function() {
+            console.log("Cannot search for variables");
+          }
+        }, searchobj );
+        /*
         this._getResource({
           url: url,
           onLoad: function(e) {
@@ -37,7 +96,7 @@
           onError: function() {
             console.log("Cannot search for variables");
           }
-        });
+        });*/
       }
 
       getVariableData(standard_name, fn) {
@@ -111,12 +170,35 @@
         }
       }
 
+      findDatasetsForRegion(regionGeoJson, fn) {
+        var me = this;
+        if(!regionGeoJson || !me.authToken)
+          return;
+
+        var bbox = this._calculateBoundingBox(regionGeoJson);
+        var data = {
+          spatial_coverage__within: bbox
+        };
+        me._postResource({
+          url: me.server + "/datasets/find",
+          onLoad: function(e) {
+            var bdata = JSON.parse(e.target.responseText);
+            var bindings = bdata.resources;
+            fn(bindings);
+          },
+          onError: function() {
+            console.log("Cannot fetch datasets");
+          }
+        }, JSON.stringify(data));
+      }
+
       _getResource(rq) {
         var xhr = new XMLHttpRequest();
         xhr.addEventListener('load', rq.onLoad.bind(this));
         xhr.addEventListener('error', rq.onError.bind(this));
         //xhr.withCredentials = true;
         xhr.open('GET', rq.url);
+        xhr.setRequestHeader("X-Api-Key", this.authToken);
         xhr.send();
       }
 
@@ -127,6 +209,7 @@
         //xhr.withCredentials = true;
         xhr.open('POST', rq.url);
         xhr.setRequestHeader("Content-type", "application/json");
+        xhr.setRequestHeader("X-Api-Key", this.authToken);
         xhr.send(data);
       }
     }

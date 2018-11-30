@@ -1,0 +1,271 @@
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu-light.html">
+<link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+
+<link rel="import" href="mint-common-styles.html">
+
+<dom-module id="mint-question-creator">
+
+  <template>
+    <style>
+      paper-item {
+        min-height: 32px;
+        font-size: 13px;
+      }
+      .question_label {
+        padding-left: 25px;
+        width: calc(100% - 50px);
+        font-weight: bold;
+        font-size: 13px;
+        margin-top: 5px;
+      }
+      .incomplete {
+        color: maroon;
+      }
+      .complete {
+        color: green;
+      }
+      paper-dropdown-menu-light {
+        margin:0px;
+        display: block;
+        padding-left: 25px;
+        width: calc(100% - 50px);
+        font-size: 13px;
+        --paper-dropdown-menu-input: {
+          font-size: 13px;
+          border-bottom: 2px dashed #CCC;
+        }
+        --paper-dropdown-menu-label: {
+          font-size: 13px;
+        }
+      }
+    </style>
+
+    <template is="dom-if" if="[[_notNull(qtindex)]]">
+      <div class="question_label">
+          Question: <span class$="[[_getLabelClass(complete)]]">[[label]]</span>
+      </div>
+    </template>
+
+    <!-- Select question template -->
+    <paper-dropdown-menu-light no-animations hotizontal-align="left" label="Question Template">
+      <paper-listbox slot="dropdown-content" attr-for-selected="role" selected="{{qtindex}}">
+        <template is="dom-repeat" items="[[vocabulary.question_templates]]" as="template">
+          <paper-item role$="[[index]]">[[template.label]]</paper-item>
+        </template>
+      </paper-listbox>
+    </paper-dropdown-menu-light>
+
+    <template is="dom-if" if="[[_notNull(qtindex)]]">
+      <!-- Select event -->
+      <paper-dropdown-menu-light no-animations hotizontal-align="left" label="Select Event">
+        <paper-listbox slot="dropdown-content" attr-for-selected="value" selected="{{question_event}}">
+          <template is="dom-repeat" items="[[_getEvents(qtindex)]]">
+            <paper-item value="[[item]]">[[item.label]]</paper-item>
+          </template>
+        </paper-listbox>
+      </paper-dropdown-menu-light>
+
+      <!-- Select region -->
+      <paper-dropdown-menu-light no-animations hotizontal-align="left" label="Select Region">
+        <paper-listbox slot="dropdown-content" attr-for-selected="value" selected="{{question_region}}">
+          <template is="dom-repeat" items="[[_getRegions(qtindex)]]">
+            <paper-item value="[[item]]">[[item.label]]</paper-item>
+          </template>
+        </paper-listbox>
+      </paper-dropdown-menu-light>
+
+      <!-- Select intervention -->
+      <template is="dom-if" if="[[_hasIntervention(qtindex)]]">
+        <paper-dropdown-menu-light no-animations hotizontal-align="left" label="Select Intervention">
+          <paper-listbox slot="dropdown-content" attr-for-selected="value" selected="{{intervention}}">
+            <template is="dom-repeat" items="[[_getInterventions(qtindex)]]">
+              <paper-item value="[[item]]">[[item.label]]</paper-item>
+            </template>
+          </paper-listbox>
+        </paper-dropdown-menu-light>
+      </template>
+
+      <!-- Select year -->
+      <paper-dropdown-menu-light no-animations label="Select Year">
+        <paper-listbox slot="dropdown-content" hotizontal-align="left" attr-for-selected="value" selected="{{timePeriod}}">
+          <template is="dom-repeat" items="[[_getYears(qtindex)]]">
+            <paper-item value="[[item]]">[[item.label]]</paper-item>
+          </template>
+        </paper-listbox>
+      </paper-dropdown-menu-light>
+    </template>
+
+  </template>
+
+
+  <script>
+
+    class MintQuestionCreator extends Polymer.Element {
+
+      static get is() {
+        return 'mint-question-creator';
+      }
+
+      static get properties() {
+        return {
+          vocabulary: Object,
+          region: Object,
+          qtindex: Number,
+          complete: Boolean,
+          question: {
+            type: Object,
+            notify: true
+          },
+          label: {
+            type: String,
+            computed: '_computeLabel(qtindex, question_region, question_event, intervention, timePeriod)'
+          },
+          question_event: Object,
+          question_region: Object,
+          intervention: Object,
+          timePeriod: Object
+        };
+      }
+
+      _notNull(item) {
+        return item != null;
+      }
+
+      reset() {
+        this.qtindex = null;
+        this.complete = false;
+        this.label = null;
+        this.question = null;
+        this.question_event = null;
+        this.question_region = null;
+        this.intervention = null;
+        this.timePeriod = null;
+      }
+
+      _getEvents(qtindex) {
+        var events = this.vocabulary.question_templates[qtindex].events;
+        var ets = {}
+        for(var i=0; i<this.vocabulary.event_types.length; i++) {
+          var et = this.vocabulary.event_types[i];
+          ets[et.id] = et;
+        }
+        var fullevents = [];
+        for(var i=0; i<events.length; i++) {
+          fullevents.push(ets[events[i]]);
+        }
+        return fullevents;
+      }
+
+      _computeLabel(qtindex, question_region, question_event, intervention, timePeriod) {
+        if(qtindex) {
+           var origLabel = this.vocabulary.question_templates[qtindex].label;
+           var question_type = this.vocabulary.question_templates[qtindex].type;
+           var label = origLabel;
+           if(question_region) {
+             label = label.replace("<region>", question_region.label);
+           }
+           if(question_event) {
+             label = label.replace("<event>", question_event.label);
+           }
+           if(timePeriod) {
+             label = label.replace("<year>", timePeriod.label);
+           }
+           if(intervention) {
+             label = label.replace("<intervention>", intervention.label);
+           }
+           if( (label.indexOf("<region>") >= 0) ||
+                 (label.indexOf("<event>") >= 0) ||
+                 (label.indexOf("<year>") >= 0) ||
+                 (label.indexOf("<intervention>") >= 0) ) {
+              this.set("complete", false);
+              this.set("question", null);
+           }
+           else {
+             var question = {
+               "label" : label,
+               "type" : question_type,
+               "region" : question_region.id,
+               "graph" : question_event.graph,
+               "intervention" : (intervention ? intervention.id : null),
+               "timePeriod" : timePeriod.id
+             }
+             this.set("question", question);
+             this.set("complete", true);
+           }
+           return label;
+         }
+      }
+
+      _getLabelClass(complete) {
+        if(complete)
+          return "complete";
+        else {
+          return "incomplete";
+        }
+      }
+
+      _getAllRegionsMap(region, rgmap) {
+        rgmap[region.id] =  region;
+        if(region.subRegions) {
+          for(var i=0; i<region.subRegions.length; i++) {
+            var subRegion = region.subRegions[i];
+            rgmap = this._getAllRegionsMap(subRegion, rgmap);
+          }
+        }
+        return rgmap;
+      }
+
+      _getRegions(qtindex) {
+        var regions = this.vocabulary.question_templates[qtindex].regions;
+        var rgs = this._getAllRegionsMap(this.region, {});
+        var fullregions = [];
+        for(var i=0; i<regions.length; i++) {
+          fullregions.push(rgs[regions[i]]);
+        }
+        return fullregions;
+      }
+
+      _hasIntervention(qtindex) {
+        var label = this.vocabulary.question_templates[qtindex].label;
+        if(label.indexOf("<intervention>") >= 0)
+          return true;
+        return false;
+      }
+
+      _getInterventions(qtindex) {
+        var interventions = this.vocabulary.question_templates[qtindex].interventions;
+        var its = {}
+        for(var i=0; i<this.vocabulary.intervention_types.length; i++) {
+          var it = this.vocabulary.intervention_types[i];
+          its[it.id] = it;
+        }
+        var fullits = [];
+        for(var i=0; i<interventions.length; i++) {
+          fullits.push(its[interventions[i]]);
+        }
+        return fullits;
+      }
+
+      _getYears(qtindex) {
+        var years = this.vocabulary.question_templates[qtindex].years;
+        var fullyears = [];
+        for(var i=0; i<years.length; i++) {
+          fullyears.push({
+            id: {
+              fromDate: new Date(years[i] + "-01-01").getTime(),
+              toDate: new Date((years[i]+1) + "-01-01").getTime()
+            },
+            label: years[i]
+          });
+        }
+        return fullyears;
+      }
+    }
+
+    customElements.define(MintQuestionCreator.is, MintQuestionCreator);
+
+  </script>
+</dom-module>

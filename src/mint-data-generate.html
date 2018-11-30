@@ -1,0 +1,68 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/mint-map/mint-map.html">
+<link rel="import" href="../bower_components/app-route/app-route.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
+
+<link rel="import" href="mint-ajax.html">
+<link rel="import" href="loading-screen.html">
+<link rel="import" href="variable-graph.html">
+<link rel="import" href="mint-common-styles.html">
+
+<dom-module id="mint-data-generate">
+  <template>
+    <style include="mint-common-styles">
+      .searchbox {
+        @apply --layout-horizontal;
+        width: 100%;
+      }
+      .searchbox paper-button {
+        font-size: 14px;
+      }
+      .searchbox paper-input {
+        width: 100%;
+      }
+    </style>
+
+    <app-route
+        route="[[route]]"
+        pattern="/:regionid"
+        data="{{routeData}}"></app-route>
+
+    <!-- Top toolbar -->
+    <div class="toolbar">
+      <paper-button>Generate Datasets</paper-button>
+    </div>
+    <div class="outer">
+      <ul>
+        <li><a href="http://localhost:9090/wings-portal">Generate Data from Remote Sensing Workflows</li>
+        <li><a href="http://localhost:9090/wings-portal">Weather Generator</li>
+      </ul>
+    </div>
+    <!-- Bottom toolbar -->
+    <div class="toolbar bottom">
+      <paper-button>&nbsp;</paper-button>
+    </div>
+
+  </template>
+
+  <script>
+
+    class MintDataGenerate extends Polymer.Element {
+      static get is() { return 'mint-data-generate'; }
+
+      static get properties() {
+        return {
+          dataCatalog: Object,
+          mintServer: String,
+          routeData: Object,
+          route: Object,
+          regionid: String,
+          visible: Boolean
+        };
+      }
+    }
+
+    customElements.define(MintDataGenerate.is, MintDataGenerate);
+  </script>
+</dom-module>

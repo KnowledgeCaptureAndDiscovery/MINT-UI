@@ -1,0 +1,47 @@
+{
+   "result":"success",
+   "resources":[
+      {
+         "dataset_id":"9e3722ce-fa44-48e9-bc5b-a8315a0f82e3",
+         "dataset_name":"NASA Weather Data",
+         "resource_id":"34f04c0b-e84b-4b7c-a7d9-261ad65d7d33",
+         "resource_name":"lat0783long2734nasa.weather",
+         "resource_data_url":"http:\/\/workflow.isi.edu\/MINT\/MINT-Workflow\/v3\/NasaWeatherData_lat0783long2734.weather"
+      },
+      {
+        "dataset_id":"6565656-e84b-4b7c-a7d9-261ad65d7d33",
+        "dataset_name":"Crop Prices 2017",
+        "resource_id":"53232323-e84b-4b7c-a7d9-261ad65d7d33",
+        "resource_name":"Crop_Prices_2017.csv",
+        "resource_data_url":"http:\/\/workflow.isi.edu\/MINT\/MINT-Workflow\/v3\/Crop_Prices_No_Subsidy_2017.csv"
+      },
+      {
+        "dataset_id":"423423423-e84b-4b7c-a7d9-261ad65d7d33",
+        "dataset_name":"Prices No Subsidy 2017",
+        "resource_id":"9984363-e84b-4b7c-a7d9-261ad65d7d33",
+        "resource_name":"Fertilizer_Prices_No_Subsidy_2017.csv",
+        "resource_data_url":"http:\/\/workflow.isi.edu\/MINT\/MINT-Workflow\/v3\/Fertilizer_Prices_No_Subsidy_2017.csv"
+      },
+      {
+        "dataset_id":"8989343-fa44-48e9-bc5b-a8315a0f82e3",
+        "dataset_name":"Prices 5 percent Subsidy 2017",
+        "resource_id":"38743634-e84b-4b7c-a7d9-261ad65d7d33",
+        "resource_name":"Fertilizer_Prices_25_Percent_Subsidy_2017.csv",
+        "resource_data_url":"http:\/\/workflow.isi.edu\/MINT\/MINT-Workflow\/v3\/Fertilizer_Prices_25_Percent_Subsidy_2017.csv"
+      },
+      {
+        "dataset_id":"1243434-fa44-48e9-bc5b-a8315a0f82e3",
+        "dataset_name":"Prices 10 percent Subsidy 2017",
+        "resource_id":"23554455-e84b-4b7c-a7d9-261ad65d7d33",
+        "resource_name":"Fertilizer_Prices_50_Percent_Subsidy_2017.csv",
+        "resource_data_url":"http:\/\/workflow.isi.edu\/MINT\/MINT-Workflow\/v3\/Fertilizer_Prices_50_Percent_Subsidy_2017.csv"
+      },
+      {
+        "dataset_id":"87464732-fa44-48e9-bc5b-a8315a0f82e3",
+        "dataset_name":"Crop Elasticity file",
+        "resource_id":"92726166-e84b-4b7c-a7d9-261ad65d7d33",
+        "resource_name":"Crop_Elasticity_Pongo_2017.csv",
+        "resource_data_url":"http:\/\/workflow.isi.edu\/MINT\/MINT-Workflow\/v3\/Crop_Elasticity_Pongo_2017.csv"
+      }
+   ]
+}

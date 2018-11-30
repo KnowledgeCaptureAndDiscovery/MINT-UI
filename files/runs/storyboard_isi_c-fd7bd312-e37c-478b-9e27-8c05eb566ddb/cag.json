@@ -2,7 +2,7 @@
   "variables": [
     {
       "id": "v_5lc1bcfbe",
-      "name": "atmosphere water time integral of precipitation volume flux",
+      "label": "atmosphere water time integral of precipitation volume flux",
       "category": "agronomy",
       "standard_name": "atmosphere_water__time_integral_of_precipitation_volume_flux",
       "canonical_name": "atmosphere_water__time_integral_of_precipitation_volume_flux",
@@ -14,7 +14,7 @@
     },
     {
       "id": "v_bc10h0k11",
-      "name": "soil residual porosity",
+      "label": "soil residual porosity",
       "category": "hydrology",
       "standard_name": "soil__residual_porosity",
       "canonical_name": "soil__residual_porosity",
@@ -26,7 +26,7 @@
     },
     {
       "id": "v_64cd7foeg",
-      "name": "soil surface water volume-per-area evaporation rate",
+      "label": "soil surface water volume-per-area evaporation rate",
       "category": "agronomy",
       "standard_name": "soil_surface_water__volume-per-area_evaporation_rate",
       "canonical_name": "soil_surface_water__volume-per-area_evaporation_rate",
@@ -38,7 +38,7 @@
     },
     {
       "id": "v_ll74qyccj",
-      "name": "crop biomass residue harvested forage yield",
+      "label": "crop biomass residue harvested forage yield",
       "category": "agronomy",
       "standard_name": "crop_biomass_residue__harvested_forage_yield",
       "canonical_name": "crop_biomass_residue__harvested_forage_yield",
@@ -50,7 +50,7 @@
     },
     {
       "id": "v_1raxw6xrk",
-      "name": "crop production",
+      "label": "crop production",
       "category": "economics",
       "standard_name": "land_crop__volume-per-area_yield",
       "canonical_name": "crop__production",
@@ -62,7 +62,7 @@
     },
     {
       "id": "v_c2eo8ga4f",
-      "name": "crop price",
+      "label": "crop price",
       "category": "economics",
       "standard_name": "crop__nominal_per-yield_price",
       "canonical_name": "crop__price",
@@ -74,7 +74,7 @@
     },
     {
       "id": "v_1oual821r",
-      "name": "land surface water evaporation rate",
+      "label": "land surface water evaporation rate",
       "category": "hydrology",
       "standard_name": "land_surface_water__evaporation_rate",
       "canonical_name": "land_surface_water__evaporation_rate",
@@ -86,7 +86,7 @@
     },
     {
       "id": "v_cr2zo2ufr",
-      "name": "land surface water infiltration rate",
+      "label": "land surface water infiltration rate",
       "category": "hydrology",
       "standard_name": "land_surface_water__infiltration_rate",
       "canonical_name": "land_surface_water__infiltration_rate",
@@ -98,7 +98,7 @@
     },
     {
       "id": "v_0ulfv1fy7",
-      "name": "ldas weather data",
+      "label": "ldas weather data",
       "standard_name": "ldas_weather_data",
       "canonical_name": "ldas_weather_data",
       "position": {
@@ -109,7 +109,7 @@
     },
     {
       "id": "concept11",
-      "name": "crop/forest yield",
+      "label": "crop/forest yield",
       "category": "economics",
       "canonical_name": "crop__yield",
       "position": {
@@ -119,7 +119,7 @@
     },
     {
       "id": "concept10",
-      "name": "land use",
+      "label": "land use",
       "category": "economics",
       "canonical_name": "land__usage",
       "position": {
@@ -129,7 +129,7 @@
     },
     {
       "id": "concept2",
-      "name": "soil moisture",
+      "label": "soil moisture",
       "category": "agronomy",
       "canonical_name": "soil_water__volume_fraction",
       "position": {
@@ -139,7 +139,7 @@
     },
     {
       "id": "concept1",
-      "name": "precipitation",
+      "label": "precipitation",
       "category": "hydrology",
       "canonical_name": "atmosphere_water__precipitation_volume_flux",
       "position": {

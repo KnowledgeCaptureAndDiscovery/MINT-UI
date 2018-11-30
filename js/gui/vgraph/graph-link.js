@@ -27,7 +27,7 @@ VGraphLink.prototype.create = function() {
 
   this.item = this.parent.insert("g", "g").attr("id", this.id);
 
-  var arrowid = "url(" + baseUrl + "#arrow_" + this.graphid + ")";
+  var arrowid = "url(" + baseUrl + "#arrow_" + getLocalName(this.graphid) + ")";
   this.path = this.item.append("path")
     .attr("stroke", this.config.strokecolor)
     .attr("fill", "none")

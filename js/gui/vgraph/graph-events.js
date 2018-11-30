@@ -290,7 +290,7 @@ VGraphEvents.prototype.enableEventsForItem = function(gitem) {
 };
 
 VGraphEvents.prototype.generateID = function () {
-  return 'v_' + Math.random().toString(36).substr(2, 9);
+  return this.graph.id + '#v_' + Math.random().toString(36).substr(2, 9);
 };
 
 VGraphEvents.prototype.enableCanvasEvents = function() {
@@ -313,7 +313,7 @@ VGraphEvents.prototype.enableCanvasEvents = function() {
           var y = d3.event.y/me.graph.scale;
           var vardata = {
             "id": me.generateID(),
-            "name": "Variable",
+            "label": "Variable",
             "category": "",
             "position": {
               "x": x,

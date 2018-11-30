@@ -1,0 +1,49 @@
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
+
+<dom-module id="mint-vocabulary">
+  <template>
+    <iron-ajax auto url="[[server]]/common/regions" handle-as="json" last-response="{{regions}}"></iron-ajax>
+    <iron-ajax auto url="[[server]]/common/question_templates" handle-as="json" last-response="{{question_templates}}"></iron-ajax>
+    <iron-ajax auto url="[[server]]/common/task_types" handle-as="json" last-response="{{task_types}}"></iron-ajax>
+    <iron-ajax auto url="[[server]]/common/event_types" handle-as="json" last-response="{{event_types}}"></iron-ajax>
+    <iron-ajax auto url="[[server]]/common/intervention_types" handle-as="json" last-response="{{intervention_types}}"></iron-ajax>
+    <iron-ajax auto url="[[server]]/common/graphs" handle-as="json" last-response="{{graphs}}"></iron-ajax>
+  </template>
+
+  <script>
+
+    class MintVocabulary extends Polymer.Element {
+
+      static get is() {
+        return 'mint-vocabulary';
+      }
+
+      static get properties() {
+        return {
+          server: String,
+          vocabulary: {
+            type: Object,
+            notify: true
+          },
+          regions: Array,
+          task_types: Array,
+          event_types: Array,
+          question_templates: Array,
+          intervention_types: Array,
+          graphs: Array
+        };
+      }
+
+      constructor() {
+        super();
+        this.set("vocabulary", this);
+      }
+
+    }
+
+    customElements.define(MintVocabulary.is, MintVocabulary);
+
+  </script>
+
+</dom-module>

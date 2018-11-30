@@ -59,14 +59,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 </head>
 <body>
-  
+
   <script src="bower_components/webcomponentsjs/webcomponents-loader.js"></script>
   <link rel="import" href="src/mint-app.html">
 
   <mint-app unresolved
     base="/"
-    server="http://varuns-mbp.local:9090/wings-portal"
-    domain="mint"></mint-app>
+    mint-server="http://localhost:9090/mint-server"
+    wings-server="http://localhost:9090/wings-portal"
+    wings-domain="mint"></mint-app>
 
 </body>
 </html>

@@ -29,10 +29,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       <iron-pages role="main" selected="[[page]]" attr-for-selected="name" selected-attribute="visible">
         <!-- Results List -->
-        <mint-results-list name="list" server="[[server]]" userid="[[userid]]" domain="[[domain]]"
+        <mint-results-list name="list" mint-server="[[mintServer]]"
+          wings-server="[[wingsServer]]" userid="[[userid]]" wings-domain="[[wingsDomain]]"
           route="[[pageSubRoute.list]]" selectedrunid="{{selectedrunid}}"></mint-results-list>
         <!-- Results Detail -->
-        <mint-results-detail name="detail" server="[[server]]" userid="[[userid]]" domain="[[domain]]"
+        <mint-results-detail name="detail" mint-server="[[mintServer]]"
+          wings-server="[[wingsServer]]" userid="[[userid]]" wings-domain="[[wingsDomain]]"
           route="[[pageSubRoute.detail]]"></mint-results-detail>
       </iron-pages>
 `;
@@ -40,9 +42,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     static get properties() {
       return {
-        server: String,
+        mintServer: String,
+        wingsServer: String,
         userid: String,
-        domain: String,
+        wingsDomain: String,
         selectedrunid: {
           type: String,
           observer: '_selectedRunid'

@@ -10,6 +10,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <link rel="import" href="../bower_components/polymer/polymer.html">
 <link rel="import" href="../bower_components/app-route/app-route.html">
+<link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
 <link rel="import" href="../bower_components/iron-media-query/iron-media-query.html">
 <link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
 <link rel="import" href="mint-button.html">
@@ -151,31 +152,51 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <!--
       app-route provides the name of the region and the cag.
     -->
-    <app-route route="[[route]]" pattern="/:region/:category/:cag" data="{{routeData}}"></app-route>
+    <app-route route="[[route]]" pattern="/:regionid/:questionid/:taskid/:op" data="{{routeData}}"></app-route>
 
-    <mint-cag-data id="cagData" regions="[[regions]]"
+    <template is="dom-if" if="[[visible]]">
+      <template is="dom-if" if="[[routeData.questionid]]">
+        <iron-ajax auto url="[[mintServer]]/users/[[userid]]/questions/[[routeData.questionid]]"
+          handle-as="json" last-response="{{question}}"></iron-ajax>
+        <template is="dom-if" if="[[question]]">
+          <iron-ajax auto url="[[question.graph]]" handle-as="json" last-response="{{graph}}"></iron-ajax>
+        </template>
+        <iron-ajax auto url="[[mintServer]]/users/[[userid]]/questions/[[routeData.questionid]]/tasks/[[routeData.taskid]]"
+          handle-as="json" last-response="{{task}}"></iron-ajax>
+      </template>
+    </template>
+
+    <!--mint-cag-data id="cagData" regions="[[regions]]"
       region-name="[[routeData.region]]"
       region="{{region}}"
-      cag="{{cag}}"></mint-cag-data>
+      cag="{{cag}}"></mint-cag-data-->
 
     <iron-media-query query="max-width: 767px" query-matches="{{smallScreen}}"></iron-media-query>
 
     <div smooth="" has-content$="[[_isDefined(userid)]]">
-      <h2>[[region.title]] | [[cag.name]]</h2>
+      <h2>[[region.label]] | [[graph.label]]</h2>
     </div>
 
     <div smooth="">
       <!-- Variable Graph -->
       <div class="content">
         <div class="leftfull" id="graphdiv">
-          <mint-ajax result="{{graphData}}" auto="" url="[[cag.json]]"></mint-ajax>
+          <!--mint-ajax result="{{graphData}}" auto="" url="[[cag.json]]"></mint-ajax-->
 
           <iron-collapse id="main_graph" opened="" no-animation="">
             <variable-graph id="cag"
               visible="[[visible]]"
+              mint-server="[[mintServer]]"
+              userid="[[userid]]"
+              region="[[region]]"
+              questionid="[[routeData.questionid]]"
+              question="[[question]]"
+              taskid="[[routeData.taskid]]"
+              task="[[task]]"
+              operation="[[routeData.op]]"
               model-catalog="[[modelCatalog]]"
               data-catalog$="[[dataCatalog]]"
-              data="[[graphData]]"
+              data="[[graph]]"
               workflows="{{workflows}}"
               editable auto-load></variable-graph>
           </iron-collapse>
@@ -202,8 +223,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             selected-workflow="{{workflow}}"
             selected-graph="{{selectedWorkflowGraph}}"
             selected-items="{{selectedWorkflowItems}}"
-            server="[[server]]" userid="[[userid]]"
-            domain="[[domain]]"></mint-workflows>
+            mint-server="[[mintServer]]"
+            wings-server="[[wingsServer]]"
+            userid="[[userid]]"
+            task="[[task]]"
+            regionid="[[routeData.regionid]]"
+            questionid="[[routeData.questionid]]"
+            taskid="[[routeData.taskid]]"
+            wings-domain="[[wingsDomain]]"></mint-workflows>
         </div>
 
       </div>
@@ -222,12 +249,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       static get properties() {
         return {
-          server: String,
+          mintServer: String,
+          wingsServer: String,
           userid: {
             type: String,
             observer: '_useridChanged'
           },
-          domain: String,
+          wingsDomain: String,
+          regionid: String,
+          questionid: String,
+          taskid: String,
+          graph: Object,
+          task: Object,
+          operation: String,
+
           regions: Array,
           region: Object,
           workflow: Object,

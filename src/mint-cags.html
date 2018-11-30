@@ -20,6 +20,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="mint-cags-home.html">
 <link rel="import" href="mint-cags-list.html">
 <link rel="import" href="mint-cags-detail.html">
+<link rel="import" href="mint-cags-run.html">
 
 <dom-module id="mint-cags">
 
@@ -117,33 +118,50 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         ${super.template}
 
         <!-- mint-region-data provides the list of regions -->
-        <mint-region-data auto regions="{{regions}}"></mint-region-data>
+        <!--mint-region-data auto regions="{{regions}}"></mint-region-data-->
 
         <iron-pages role="main" selected="[[page]]" attr-for-selected="name" selected-attribute="visible">
           <!-- cags home  -->
-          <mint-cags-home name="home" regions="[[regions]]"
+          <mint-cags-home name="home" regions="[[vocabulary.regions]]"
             route="[[pageSubRoute.home]]"></mint-cags-home>
 
           <!-- list view of cags in a region -->
-          <mint-cags-list name="list" regions="[[regions]]"
+          <mint-cags-list name="list" vocabulary="[[vocabulary]]"
             region="{{region}}"
+            mint-server="[[mintServer]]" wings-server="[[wingsServer]]"
+            userid="[[userid]]" wings-domain="[[wingsDomain]]"
             route="[[pageSubRoute.list]]"></mint-cags-list>
 
           <!-- detail view of one cag -->
-          <mint-cags-detail name="detail" regions="[[regions]]" region="[[region]]"
-            server="[[server]]" userid="[[userid]]" domain="[[domain]]"
+          <mint-cags-detail name="detail" vocabulary="[[vocabulary]]"
+            region="[[region]]"
+            mint-server="[[mintServer]]" wings-server="[[wingsServer]]"
+            userid="[[userid]]" wings-domain="[[wingsDomain]]"
             model-catalog="[[modelCatalog]]"
             route="[[pageSubRoute.detail]]"></mint-cags-detail>
+
+          <mint-cags-run name="run" vocabulary="[[vocabulary]]"
+            region="[[region]]"
+            mint-server="[[mintServer]]" wings-server="[[wingsServer]]"
+            userid="[[userid]]" wings-domain="[[wingsDomain]]"
+            model-catalog="[[modelCatalog]]"
+            route="[[pageSubRoute.run]]"></mint-cags-home>
         </iron-pages>
 `;
       }
 
       static get properties() {
         return Object.assign({}, super.properties, {
-          server: String,
+          mintServer: String,
+          wingsServer: String,
           userid: String,
-          domain: String,
+          wingsDomain: String,
           modelCatalog: Object,
+          vocabulary: Object,
+          region: {
+            type: Object,
+            notify: true
+          },
           visible: {
             type: Boolean,
             observer: '_visibleChanged'
@@ -183,7 +201,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       _routePageChanged(page) {
         //console.log("mint-cags: " + page);
         this.page = page || 'home';
-        Polymer.AppLayout.scroll({ top: 0, behavior: 'silent' });
+        if(this.page != 'list')
+          Polymer.AppLayout.scroll({ top: 0, behavior: 'silent' });
       }
     }
 

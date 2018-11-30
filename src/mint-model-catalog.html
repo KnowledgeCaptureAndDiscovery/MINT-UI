@@ -23,9 +23,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       static get properties() {
         return {
-          server: String,
+          wingsServer:String,
+          mintServer: String,
           userid: String,
-          domain: String,
+          wingsDomain: String,
           modelCatalog: {
             type: Object,
             notify: true
@@ -210,37 +211,38 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         // Create solutions
         var solution_queue = [new Solution(variables)];
+
         while(solution_queue.length) {
           var solution = solution_queue.shift();
           // console.log("Expanding Solution---")
           var varqueue = solution.variables.slice(0);
           while(varqueue.length) {
             var v = varqueue.shift();
-            // console.log("Checking variable " + v.name);
+            // console.log("Checking variable " + v.label);
             var cname = v.canonical_name;
             var stdname = v.standard_name;
             // Skip if variable already resolved
             if(v.resolved) {
-              // console.log(v.name + " already resolved. Continue.");
+              // console.log(v.label + " already resolved. Continue.");
               continue;
             }
 
             // Check data provider
-            if(stdname in data_providers) {
+            if(cname in data_providers) {
               // Mark variable as resolved
               v.resolved = true;
               v.provider = {
                 type: "data",
-                item: data_providers[stdname]
+                item: data_providers[cname]
               }
-              // console.log(v.name + " has a data provider. Variable resolved. Continue.");
+              // console.log(v.label + " has a data provider. Variable resolved. Continue.");
               continue;
             }
 
             // Check model provider
             if(cname in comp_providers) {
               var comps = comp_providers[cname];
-              // console.log(v.name + " has "+ comps.length+" model providers");
+              // console.log(v.label + " has "+ comps.length+" model providers");
 
               // If more than one model, create extra solutions
               // from 2 onwards
@@ -373,13 +375,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         var vid = 'v_' + Math.random().toString(36).substr(2, 9);
         var provenance = {};
         provenance[c.id] = new VariableProvenance(c.id, f.id, v.metadata, isinput);
-        // console.log(v);
         return {
           id:vid,
           standard_name: v.standard_name,
           canonical_name: v.canonical_name,
           provenance: provenance,
-          name: v.canonical_name.replace(/_+/g, " "),
+          label: v.canonical_name.replace(/_+/g, " "),
           position: {x: 100, y: 100} // Should be set a bit more intelligently
         }
       }
@@ -405,8 +406,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               var hashid = ip.variables[k].canonical_name;
               var v = this.varhash[hashid];
               if(!v || !v.resolved || !v.provider) {
-                // console.log("problem with " + c.id + " (" + hashid + ")");
-                // console.log(v);
+                console.log("problem with " + c.id + " (" + hashid + ")");
+                console.log(v);
                 return null;
               }
               workflow.links.push({
@@ -481,7 +482,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           return null;
         var graph = {
           id: wflow.id,
-          name: wflow.id,
+          label: wflow.id,
           variables: [],
           links: []
         }
@@ -496,7 +497,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           var gvar = gvars[v.id];
           var vcat = gvar.category;
           var nv = {
-            id: v.id, name: v.name, category: vcat,
+            id: v.id, label: v.label, category: vcat,
             standard_name: v.standard_name,
             canonical_name: v.canonical_name,
             position: v.position
@@ -570,7 +571,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           varid_hash[v.id] = v;
           tpl.Variables[v.id] = {
             id: v.id,
-            name: v.name,
+            name: v.label,
             type: 1 //FIXME: use category here
           }
         }
@@ -579,13 +580,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           var nodeid = c.id;
           var node = {
             id: nodeid,
-            name: c.name,
+            name: c.label,
             inputPorts: {},
             outputPorts: {},
             category: c.category,
             componentVariable: {
               binding: {
-                id: c.name,
+                id: c.label,
                 type: "uri"
               },
               id: "model_" + c.id
@@ -682,18 +683,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           return null;
 
         // FIXME: This is currently hardcoded. Should be configurable
-        clib.storage = "/home/varun/.wings/storage";
+        clib.storage = "/Users/varun/.wings/storage";
         var dotpath = "/usr/bin/dot";
         var ontpfx = "http://www.wings-workflows.org/ontology";
 
-        var tname = wflow.name + "_" + Math.random().toString(36).substr(2, 9);
-        var usfx = "/users/" + clib.userid + "/" + clib.domain;
-        var pfx = clib.server + "/export" + usfx;
+        var tname = getLocalName(wflow.name) + "_" + Math.random().toString(36).substr(2, 9);
+        var usfx = "/users/" + clib.userid + "/" + clib.wingsDomain;
+        var pfx = clib.wingsServer + "/export" + usfx;
         var tns = pfx + "/workflows/" + tname + ".owl#";
         var tid = tns + tname;
 
         var clibns = pfx + "/components/library.owl#";
-        var purl = clib.server + usfx;
+        var purl = clib.wingsServer + usfx;
         var pdir = clib.storage + usfx;
 
         var wingsw = {
@@ -722,11 +723,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               "lib.domain.data.url": pfx + "/data/library.owl",
               "ont.domain.data.url": pfx + "/data/ontology.owl",
               "lib.abstract.url": pfx + "/components/abstract.owl",
-              "lib.provenance.url": clib.server + "/export/common/provenance/library.owl",
+              "lib.provenance.url": clib.wingsServer + "/export/common/provenance/library.owl",
               "ont.data.url": ontpfx + "/data.owl",
               "lib.domain.data.storage": pdir + "/data",
               "lib.domain.workflow.url": pfx + "/workflows/library.owl",
-              "lib.resource.url": clib.server + "/export/common/resource/library.owl",
+              "lib.resource.url": clib.wingsServer + "/export/common/resource/library.owl",
               "ont.component.url": ontpfx + "/component.owl",
               "ont.workflow.url": ontpfx + "/workflow.owl",
               "ont.dir.url": ontpfx,
@@ -742,16 +743,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         // Create Workflow Nodes & Ports
         for(var i=0; i<wflow.models.length; i++) {
           var c = wflow.models[i];
-          var nodeid = tns + c.id + "_node";
+          var nodeid = tns + getLocalName(c.id) + "_node";
           var node = {
             id: nodeid,
-            name: c.name,
+            name: c.label,
             inputPorts: {},
             outputPorts: {},
             category: c.category,
             componentVariable: {
               binding: {
-                id: clibns + c.name,
+                id: clibns + c.label,
                 type: "uri"
               },
               id: nodeid + "_component"
@@ -759,7 +760,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           }
           for(var j=0; j<c.inputs.length; j++) {
             var ip = c.inputs[j];
-            var roleid = ip.id;
+            var roleid = getLocalName(ip.id);
             var portid = tns + roleid + "_inport";
             node.inputPorts[portid] = {
               id: portid,
@@ -773,7 +774,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           }
           for(var j=0; j<c.outputs.length; j++) {
             var op = c.outputs[j];
-            var roleid = op.id;
+            var roleid = getLocalName(op.id);
             var portid = tns + roleid + "_outport";
             node.outputPorts[portid] = {
               id: portid,
@@ -787,6 +788,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           }
           tpl.Nodes[nodeid] = node;
         }
+        console.log(tpl.Nodes);
+
         // Workflow Variables
         var varid_hash = {};
         var filevars = {};
@@ -799,7 +802,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           var fid = null;
           // Create a mapping of file ids to variables it contains
           for(var cid in v.provenance) {
-            var fname = v.provenance[cid].file_id;
+            var fname = getLocalName(v.provenance[cid].file_id);
             var fid = tns + fname;
             if(!(fid in filevars))
               filevars[fid] = [];
@@ -814,6 +817,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             }
           }
         }
+        console.log(tpl.Variables);
 
         // Create Workflow Links
         var vars_done = {};
@@ -827,15 +831,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           var to = v.provenance[l.to];
 
           // Create fully qualified uris for use in wings template
-          l.from_uri = tns + l.from + "_node";
-          l.to_uri = tns + l.to + "_node";
+          l.from_uri = tns + getLocalName(l.from) + "_node";
+          l.to_uri = tns + getLocalName(l.to) + "_node";
           if(from)
-            from.file_uri = tns + from.file_id;
+            from.file_uri = tns + getLocalName(from.file_id);
           if(to)
-            to.file_uri = tns + to.file_id;
+            to.file_uri = tns + getLocalName(to.file_id);
 
           if(l.type == "data") {
-            var lid = l.to_uri+"_"+to.file_id;
+            var lid = l.to_uri+"_"+ getLocalName(to.file_id);
             var link = {
               id: lid,
               toNode: {id: l.to_uri},
@@ -849,7 +853,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             tpl.Links[lid] = link;
           }
           else if(l.type == "output") {
-            var lid = l.from_uri+"_"+from.file_id;
+            var lid = l.from_uri+"_"+ getLocalName(from.file_id);
             var link = {
               id: lid,
               fromNode: {id: l.from_uri},
@@ -961,6 +965,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             }
           }
         }
+        console.log(tpl.Links);
 
         // Create Input and Output links for unclaimed ports
         for(var nid in tpl.Nodes) {
@@ -1031,6 +1036,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             }
           }
         }
+        console.log(wingsw);
         return wingsw;
       }
 

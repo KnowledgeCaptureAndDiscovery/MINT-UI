@@ -3,7 +3,7 @@ function VGraphVariable(graph, v, config) {
   this.graph = graph;
 
   this.id = v.id
-  this.text = v.name
+  this.text = v.label
   this.alternate_text = v.canonical_name || v.standard_name;
   this.config = config;
 

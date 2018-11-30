@@ -48,8 +48,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         // Fetch the cags of the region. Note that the fetch is asynchronous,
         // which means `region.cags` may not be set initially (but that path
         // will be notified when the fetch completes).
-        var regionObj = this._getCagObject(regionName);
-        this._fetchCags(regionObj, 1);
+        var regionObj = this._getRegionObject(regionName);
         return regionObj;
       }
 
@@ -62,10 +61,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       }
 
-      _getCagObject(regionName) {
+      _getRegionObject(regionName) {
         for (var i = 0; i< this.regions.length; i++) {
           var c = this.regions[i];
-          if (c.name === regionName) {
+          if (c.id.endsWith("/" + regionName)) {
             return c;
           }
         }

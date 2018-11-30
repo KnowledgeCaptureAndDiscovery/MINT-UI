@@ -13,9 +13,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="mint-common-styles.html">
 <link rel="import" href="mint-base-router.html">
 
-<link rel="import" href="mint-data-search.html">
+<!--link rel="import" href="mint-data-search.html">
 <link rel="import" href="mint-data-list.html">
-<link rel="import" href="mint-data-view.html">
+<link rel="import" href="mint-data-view.html"-->
+<link rel="import" href="mint-data-browse.html">
+<link rel="import" href="mint-data-generate.html">
+<link rel="import" href="mint-data-select.html">
 
 <dom-module id="mint-data">
   <script>
@@ -119,24 +122,35 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         ${super.template}
 
         <iron-pages role="main" selected="[[page]]" attr-for-selected="name" selected-attribute="visible">
-          <!-- data search by variables -->
+          <!-- data search by variables >
           <mint-data-search name="search" data-catalog="[[dataCatalog]]"
-            route="[[pageSubRoute.search]]"></mint-data-search>
+            route="[[pageSubRoute.search]]"></mint-data-search-->
           <!-- list view of datasets for a variable -->
-          <mint-data-list name="list" data-catalog="[[dataCatalog]]"
-            route="[[pageSubRoute.list]]"></mint-data-list>
+          <!--mint-data-list name="list" data-catalog="[[dataCatalog]]"
+            route="[[pageSubRoute.list]]"></mint-data-list-->
+          <!-- browse datasets for a region -->
+          <mint-data-browse name="browse" data-catalog="[[dataCatalog]]"
+            mint-server="[[mintServer]]"
+            route="[[pageSubRoute.browse]]"></mint-data-browse>
           <!-- visualize datasets for a variable -->
-          <mint-data-view name="view" data-catalog="[[dataCatalog]]"
-            route="[[pageSubRoute.view]]"></mint-data-view>
+          <!--mint-data-view name="view" data-catalog="[[dataCatalog]]"
+            route="[[pageSubRoute.view]]"></mint-data-view-->
+          <!-- generate datasets for a region -->
+          <mint-data-generate name="generate" data-catalog="[[dataCatalog]]"
+            route="[[pageSubRoute.view]]"></mint-data-generate>
+          <mint-data-select name="select" data-catalog="[[dataCatalog]]"
+            mint-server="[[mintServer]]" userid="[[userid]]"
+            route="[[pageSubRoute.select]]"></mint-data-browse>
         </iron-pages>
 `;
       }
 
       static get properties() {
         return {
-          server: String,
+          mintServer: String,
+          wingsServer: String,
           userid: String,
-          domain: String,
+          wingsDomain: String,
           page: {
             type: String,
             reflectToAttribute: true

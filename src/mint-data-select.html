@@ -1,0 +1,308 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/mint-map/mint-map.html">
+<link rel="import" href="../bower_components/app-route/app-route.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../bower_components/paper-item/paper-item.html">
+
+<link rel="import" href="paper-dropdown-menu-multi.html">
+<link rel="import" href="mint-ajax.html">
+<link rel="import" href="loading-screen.html">
+<link rel="import" href="variable-graph.html">
+<link rel="import" href="mint-common-styles.html">
+
+<dom-module id="mint-data-select">
+  <template>
+    <style include="mint-common-styles">
+      .searchbox {
+        @apply --layout-horizontal;
+        width: 100%;
+      }
+      .searchbox paper-button {
+        font-size: 14px;
+      }
+      .searchbox paper-input {
+        width: 100%;
+      }
+      paper-item {
+        min-height: 32px;
+        font-size: 13px;
+      }
+      paper-dropdown-menu-multi {
+        margin:0px;
+        display: block;
+        padding-left: 25px;
+        width: calc(50% - 50px);
+      }
+      .cols {
+        display: flex;
+        flex-wrap:wrap;
+        flex-direction:row;
+        justify-content:flex-start;
+        align-items:stretch;
+      }
+      paper-button {
+        margin-left: 25px;
+      }
+
+      @media (max-width: 767px) {
+        paper-dropdown-menu-multi {
+          margin:0px;
+          display: block;
+          padding-left: 25px;
+          width: calc(100% - 50px);
+        }
+      }
+    </style>
+
+    <template is="dom-if" if="[[visible]]">
+
+      <template is="dom-if" if="[[routeData.questionid]]">
+        <iron-ajax auto url="[[mintServer]]/users/[[userid]]/questions/[[routeData.questionid]]"
+          handle-as="json" last-response="{{question}}"></iron-ajax>
+        <template is="dom-if" if="[[question]]">
+          <iron-ajax auto url="[[question.graph]]" handle-as="json" last-response="{{graph}}"></iron-ajax>
+        </template>
+        <iron-ajax auto url="[[mintServer]]/users/[[userid]]/questions/[[routeData.questionid]]/tasks/[[routeData.taskid]]"
+          handle-as="json" last-response="{{task}}"></iron-ajax>
+      </template>
+
+      <iron-ajax auto
+        url="/files/catalogs/data-example.json"
+        handle-as="json" last-response="{{dataList}}"></iron-ajax>
+      <iron-ajax auto
+        url="[[mintServer]]/users/[[userid]]/questions/[[routeData.questionid]]/data"
+        handle-as="json" last-response="{{dataSpecs}}"></iron-ajax>
+    </template>
+
+    <app-route
+        route="[[route]]"
+        pattern="/:regionid/:questionid/:taskid"
+        data="{{routeData}}"></app-route>
+
+    <!-- Top toolbar -->
+    <div class="toolbar">
+      <paper-button>DATASETS: [[regionid]]</paper-button>
+    </div>
+    <div class="outer">
+      <loading-screen loading="[[loading]]"></loading-screen>
+      <div class="cols">
+        <template is="dom-repeat" items="[[graph.variables]]">
+          <paper-dropdown-menu-multi
+            id="[[item.canonical_name]]"
+            label="[[item.label]]"
+            orig-value="[[_getDSValue(item)]]"
+            selections="[[filesList]]"></paper-dropdown-menu-multi>
+        </template>
+      </div>
+      <paper-button on-tap="_addDataSpecification">Select Datasets</paper-button>
+    </div>
+    <!-- Bottom toolbar -->
+    <div class="toolbar bottom">
+      <paper-button>&nbsp;</paper-button>
+    </div>
+
+  </template>
+
+  <script>
+
+    class MintDataSelect extends Polymer.Element {
+      static get is() { return 'mint-data-select'; }
+
+      static get properties() {
+        return {
+          dataCatalog: Object,
+          mintServer: String,
+          userid: String,
+          standardName: String,
+          dataSpecs: Array,
+          dataSpec: Object,
+          regionid: String,
+          region: Object,
+          task:Object,
+          qtindex: Array,
+          graph: Object,
+          dataList: Array,
+          filesList: {
+            type: Array,
+            value: []
+          },
+          regionGeoJson: {
+            type: Object,
+            observer: '_getDataList'
+          },
+          routeData: Object,
+          route: Object,
+          loading: {
+            type: Boolean,
+            value: true
+          },
+          visible: Boolean
+        };
+      }
+
+      static get observers() {
+        return [
+          '_routeDataChanged(routeData.regionid)',
+          '_createDataSpecsDetails(dataSpecs, dataList, graph)'
+        ];
+      }
+
+      setTaskOutput(output) {
+        var me = this;
+        me.task.status = "DONE";
+        me.task.output = [output];
+        for(var actid in me.task.activities) {
+          if(actid.indexOf("SelectDatasets") > 0) {
+            me.task.activities[actid].output = [output];
+          }
+        }
+        me._putResource({
+          url: me.task.id,
+          onLoad: function(e) {
+            var new_path = '/cags/list/' + getLocalName(me.routeData.regionid) + "/" +
+              me.routeData.questionid + "/" + me.routeData.taskid;
+            window.history.pushState({}, null, new_path)
+            location.reload();
+          },
+          onError: function() {
+            console.log("Cannot update task");
+          }
+        }, me.task)
+      }
+
+      _addDataSpecification() {
+        var me = this;
+        var map = {};
+        var existing = (me.dataSpecs && me.dataSpecs.length > 0);
+        this.shadowRoot.querySelectorAll('paper-dropdown-menu-multi').forEach(item =>{
+          map[item.id] = item.value;
+  			});
+        if(existing) {
+          var ds = me.dataSpecs[0];
+          ds.variableDatasetMap = map;
+          // PUT REQUEST
+          me._putResource({
+            url: me.dataSpecs[0].id,
+            onLoad: function(e) {
+              // Do nothing
+            },
+            onError: function() {
+              console.log("Cannot update data");
+            }
+          }, me.dataSpecs[0]);
+        }
+        else {
+          // POST REQUEST
+          me.dataSpecs[0] = {
+            variableDatasetMap: map
+          };
+          me._postResource({
+            url: me.mintServer + "/users/" + me.userid + "/questions/" + me.routeData.questionid + "/data",
+            onLoad: function(e) {
+              var outputid = e.target.responseText;
+              me.setTaskOutput(outputid);
+            },
+            onError: function() {
+              console.log("Cannot add data");
+            }
+          }, me.dataSpecs[0]);
+        }
+      }
+
+      _createGeoJsonURL(region) {
+        if(region) {
+          var url = region.boundaryVector;
+          return url;
+        }
+        return null;
+      }
+
+      _setFilesList(dataList) {
+        //console.log(dataList.resources);
+        this.set("loading", false);
+        this.set("filesList", dataList.resources);
+      }
+
+      _getDSValue(item) {
+        if(this.dataSpec)
+          return this.dataSpec.variableDatasetMap[item.canonical_name];
+        return [];
+      }
+
+      _getDataList(regionGeoJson) {
+        var me = this;
+        return this.dataCatalog.findDatasetsForRegion(regionGeoJson, function(bindings) {
+          me.set("loading", false);
+          me.set("filesList", bindings);
+        });
+      }
+
+      _createDataSpecsDetails(dataSpecs, dataList, graph) {
+        if(dataSpecs && dataList && graph) {
+          this.set("loading", false);
+          if(dataSpecs.length > 0) {
+            this.set("dataSpec", dataSpecs[0]);
+          }
+          var filesList = [];
+          for(var i=0; i<dataList.resources.length; i++) {
+            filesList.push({
+              id: dataList.resources[i].resource_id,
+              name: dataList.resources[i].resource_name
+            });
+          }
+          this.set("filesList", filesList);
+        }
+      }
+
+      _routeDataChanged(regionid) {
+        if(regionid && this.regionid != regionid) {
+          // console.log("Data changed to " + standardName);
+          //this.set("regionid", regionid);
+          //this._getDataList(regionid);
+        }
+      }
+
+      _searchData() {
+        var me = this;
+        me.set("loading", true);
+        this.dataCatalog.getVariableData(this.standardName, function(list) {
+          me.set("loading", false);
+          me.set("filesList", list);
+        });
+      }
+
+      _getViewDataURL(item) {
+        var url = "data/view/"+item.dataset_id;
+        return url;
+      }
+
+      _isEmpty(list, loading) {
+        return !loading && list.length == 0;
+      }
+
+      _postResource(rq, data) {
+        var xhr = new XMLHttpRequest();
+        xhr.addEventListener('load', rq.onLoad.bind(this));
+        xhr.addEventListener('error', rq.onError.bind(this));
+        //xhr.withCredentials = true;
+        xhr.open('POST', rq.url);
+        xhr.setRequestHeader("Content-type", "application/json");
+        xhr.send(JSON.stringify(data));
+      }
+
+      _putResource(rq, data) {
+        var xhr = new XMLHttpRequest();
+        xhr.addEventListener('load', rq.onLoad.bind(this));
+        xhr.addEventListener('error', rq.onError.bind(this));
+        //xhr.withCredentials = true;
+        xhr.open('PUT', rq.url);
+        xhr.setRequestHeader("Content-type", "application/json");
+        xhr.send(JSON.stringify(data));
+      }
+    }
+
+    customElements.define(MintDataSelect.is, MintDataSelect);
+  </script>
+</dom-module>
